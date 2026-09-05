@@ -129,14 +129,11 @@ This repo is set up for OpenCode's subagent model. Custom subagents live in
 
 ## Commands
 
-_(Fill in once Phase 0 scaffolding exists — placeholders below assume the
-Vite/Preact default.)_
-
 - Install: `npm install`
 - Dev server: `npm run dev`
 - Type check: `npm run typecheck`
 - Lint: `npm run lint`
 - Test: `npm run test`
 - Build: `npm run build`
-- Bundle size check: `npm run build -- --report` (or equivalent analyzer) —
+- Bundle size check: `npm run analyze` —
   run this whenever a new dependency is added, per the memory budget above.
