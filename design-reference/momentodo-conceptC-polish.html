@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Momentodo — Moments-first</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; }
+  body { font-family:'Inter',sans-serif; background:#E9E9E4; }
+
+  .shell { max-width: 460px; margin:0 auto; min-height:100vh; background:#EEF4EE; position:relative; box-shadow:0 0 40px rgba(0,0,0,.08); }
+
+  :root {
+    --bg:#EEF4EE; --surface:#FFFFFF; --ink:#1F3A2E; --ink-soft:#6C8578;
+    --c5:#FFD166; --c15:#06D6A0; --c30:#5AA9E6; --c60:#FF6F59; --line:#DCE8E0;
+    --radius-lg:16px; --radius-sm:10px; --shadow-card:none;
+    --motion-dur:150ms; --motion-ease:ease; --title-size:14px; --gap-grid:8px;
+  }
+
+  /* ---------- Blind switcher control bar ---------- */
+  .control-bar { position: sticky; top:0; z-index: 50; background:#1A1A1A; color:#fff; padding: 10px 12px; display:flex; align-items:center; gap:6px; max-width:460px; margin:0 auto; }
+  .control-bar .tabs { display:flex; gap:6px; flex:1; }
+  .control-bar button.tab { flex:1; background:#2C2C2C; color:#C9C9C9; border:none; border-radius:8px; padding:9px 4px; font-family:'Inter',sans-serif; font-size:13px; font-weight:600; cursor:pointer; }
+  .control-bar button.tab.active { background:#fff; color:#1A1A1A; }
+  .reveal-btn { background:none; border:1px solid #4A4A4A; color:#DADADA; border-radius:8px; padding:9px 10px; font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap; }
+  .reveal-btn:hover { border-color:#8A8A8A; }
+  .note-strip { background:#F4F0E6; color:#4A4536; font-size:12.5px; line-height:1.5; padding:10px 14px; border-bottom:1px solid #E3DCC8; display:none; max-width:460px; margin:0 auto; }
+  .note-strip.show { display:block; }
+
+  /* ============================================================
+     POLISH A — "Quiet Precision": desaturated, generous space, crisp
+     ============================================================ */
+  .shell.polish-a {
+    --c5:#F6D998; --c15:#8FDCC1; --c30:#A9C9EA; --c60:#F2AA9C;
+    --radius-lg:12px; --radius-sm:999px; --shadow-card: 0 1px 2px rgba(31,58,46,.05), 0 6px 16px rgba(31,58,46,.05);
+    --motion-dur:140ms; --motion-ease:ease-out; --title-size:13.5px; --gap-grid:10px;
+  }
+  .shell.polish-a .task, .shell.polish-a .add-row, .shell.polish-a .moments { padding-top:2px; padding-bottom:2px; }
+  .shell.polish-a .mcard .n { font-weight:600; }
+  .shell.polish-a .hero p, .shell.polish-a .section-label { letter-spacing:.15px; }
+
+  /* ============================================================
+     POLISH B — "Warm & Tactile": saturated, chunky, bouncy
+     ============================================================ */
+  .shell.polish-b {
+    --c5:#FFCA4D; --c15:#04C495; --c30:#4C9CE0; --c60:#FF5A3D;
+    --radius-lg:22px; --radius-sm:14px; --shadow-card: 0 8px 20px rgba(31,58,46,.08);
+    --motion-dur:280ms; --motion-ease:cubic-bezier(.34,1.56,.64,1); --title-size:14.5px; --gap-grid:8px;
+  }
+  .shell.polish-b .mcard { box-shadow: 0 6px 14px rgba(0,0,0,.10); }
+  .shell.polish-b .mcard.m5 { box-shadow: 0 6px 16px rgba(255,202,77,.45); }
+  .shell.polish-b .mcard.m15 { box-shadow: 0 6px 16px rgba(4,196,149,.4); }
+  .shell.polish-b .mcard.m30 { box-shadow: 0 6px 16px rgba(76,156,224,.4); }
+  .shell.polish-b .mcard.m60 { box-shadow: 0 6px 16px rgba(255,90,61,.4); }
+  .shell.polish-b .mcard .n { font-size:21px; }
+  .shell.polish-b .ico { font-size:20px; }
+  .shell.polish-b .task.done .check { animation: popCheck var(--motion-dur) var(--motion-ease); }
+  .shell.polish-b .mcard.sel { transform: scale(1.05); }
+  @keyframes popCheck { 0%{transform:scale(.6);} 100%{transform:scale(1);} }
+
+  /* ============================================================
+     POLISH C — "Structured Clarity": outlined, minimal, dense
+     ============================================================ */
+  .shell.polish-c {
+    --c5:#E6A400; --c15:#028A63; --c30:#1D6FB8; --c60:#D8452A;
+    --radius-lg:8px; --radius-sm:6px; --shadow-card:none;
+    --motion-dur:60ms; --motion-ease:linear; --title-size:13.5px; --gap-grid:6px;
+  }
+  .shell.polish-c .card { border:1px solid var(--line); }
+  .shell.polish-c .mcard { background:#fff !important; border:1.5px solid; color:var(--ink) !important; }
+  .shell.polish-c .mcard.m5 { border-color:var(--c5); } .shell.polish-c .mcard.m5 .n { color:var(--c5); }
+  .shell.polish-c .mcard.m15 { border-color:var(--c15); } .shell.polish-c .mcard.m15 .n { color:var(--c15); }
+  .shell.polish-c .mcard.m30 { border-color:var(--c30); } .shell.polish-c .mcard.m30 .n { color:var(--c30); }
+  .shell.polish-c .mcard.m60 { border-color:var(--c60); } .shell.polish-c .mcard.m60 .n { color:var(--c60); }
+  .shell.polish-c .ico { display:none; }
+  .shell.polish-c .nav-btn.on { text-decoration: underline; text-underline-offset:4px; }
+  .shell.polish-c .section-label { border-bottom:1px solid var(--line); padding-bottom:8px; margin: 0 20px; }
+  .shell.polish-c .log-row, .shell.polish-c .breakdown, .shell.polish-c .accordion, .shell.polish-c .progress-strip { border-radius:var(--radius-lg); }
+
+  .screen { display:none; padding-bottom: 84px; min-height: 100vh; }
+  .screen.active { display:block; }
+
+  /* -------- Shared bits -------- */
+  .hero { padding: 22px 20px 6px; }
+  .hero h1 { font-family:'Poppins',sans-serif; font-size:22px; margin:0 0 2px; font-weight:600; color:var(--ink); }
+  .hero p { margin:0; color:var(--ink-soft); font-size:13px; }
+  .section-label { padding: 4px 20px 8px; font-size:12px; font-weight:700; color:var(--ink-soft); }
+  .card { background:var(--surface); border-radius:var(--radius-lg); box-shadow:var(--shadow-card); transition: box-shadow var(--motion-dur) var(--motion-ease); }
+
+  .check { width:20px; height:20px; border-radius:50%; border:2px solid var(--c30); flex:none; margin-top:1px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:12px; color:transparent; transition: transform var(--motion-dur) var(--motion-ease); }
+  .task.done .check { background:var(--c30); border-color:var(--c30); color:#fff; }
+  .task.done .title { text-decoration:line-through; color:var(--ink-soft); }
+  .title { font-size:var(--title-size); font-weight:600; color:var(--ink); }
+  .meta { display:flex; gap:6px; margin-top:5px; flex-wrap:wrap; }
+  .tag { font-size:10.5px; padding:2px 8px; border-radius:8px; background:#EEF4EE; color:var(--ink-soft); font-weight:700; }
+  .tag.pri-3 { background:#FFE3DD; color:#C1401F; }
+  .tag.pri-2 { background:#FFF3D6; color:#A67300; }
+  .tag.pri-1 { background:#E4F3EA; color:#2F7B57; }
+
+  .pill { font-size:11px; border:1px solid var(--line); background:#fff; padding:3px 9px; border-radius:var(--radius-sm); cursor:pointer; font-weight:600; color:var(--ink); }
+  .pill.on { background:var(--c30); color:#fff; border-color:var(--c30); }
+  .needs-details { background:#FFF7E0; border-radius:10px; padding:8px; margin-top:6px; }
+  .needs-details .pills { display:flex; gap:5px; flex-wrap:wrap; margin-top:5px; }
+
+  .add-row { display:flex; gap:8px; padding: 8px 20px 4px; }
+  .add-row input { flex:1; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-sm); padding:10px 14px; font-size:14px; color:var(--ink); }
+  .add-row input:focus { outline:none; border-color:var(--c30); }
+  .add-row button { background:var(--ink); color:#fff; border:none; border-radius:var(--radius-sm); padding:0 16px; font-weight:700; cursor:pointer; }
+
+  /* -------- Bottom nav -------- */
+  .bottom-nav {
+    position:fixed; left:50%; transform:translateX(-50%); bottom:0; width:100%; max-width:460px;
+    background:#fff; border-top:1px solid var(--line); display:flex; padding: 8px 6px 12px; z-index:40;
+  }
+  .nav-btn { flex:1; background:none; border:none; display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; color:var(--ink-soft); font-family:'Inter',sans-serif; font-size:11px; font-weight:600; padding:4px 0; }
+  .nav-btn .ico { font-size:19px; line-height:1; }
+  .nav-btn.on { color:var(--c30); }
+  .ico-a, .ico-b, .ico-c { display:none; }
+  .shell.polish-a .ico-a { display:inline; }
+  .shell.polish-b .ico-b { display:inline; }
+  .shell.polish-c .ico-c { display:inline; }
+
+  /* ============ HOME ============ */
+  .moments { display:grid; grid-template-columns: repeat(4,1fr); gap:var(--gap-grid); padding: 12px 20px; }
+  .mcard { border:none; border-radius:var(--radius-lg); padding:12px 6px; text-align:center; cursor:pointer; color:#1F3A2E; font-family:'Poppins',sans-serif; font-weight:600; font-size:12.5px; transition: transform var(--motion-dur) var(--motion-ease); }
+  .mcard .n { display:block; font-size:19px; font-weight:700; margin-bottom:1px; }
+  .mcard.m5 { background:var(--c5); }
+  .mcard.m15 { background:var(--c15); color:#fff; }
+  .mcard.m30 { background:var(--c30); color:#fff; }
+  .mcard.m60 { background:var(--c60); color:#fff; }
+  .mcard.sel { box-shadow: 0 0 0 3px #1F3A2E inset; }
+  .accordion { margin: 0 20px 14px; padding:12px 14px; display:none; }
+  .accordion.open { display:block; animation: fadeSlide var(--motion-dur) var(--motion-ease); }
+  @keyframes fadeSlide { from{ opacity:0; transform:translateY(-4px);} to{ opacity:1; transform:translateY(0);} }
+  .accordion .a-title { font-size:12px; font-weight:700; color:var(--ink-soft); margin-bottom:8px; }
+  .accordion .a-task { display:flex; gap:8px; align-items:center; padding:6px 0; font-size:13.5px; color:var(--ink); }
+  .accordion .a-task .est { margin-left:auto; font-size:11px; color:var(--ink-soft); font-weight:600; }
+  .progress-strip { margin: 4px 20px 6px; padding:10px 14px; display:flex; align-items:center; gap:10px; }
+  .progress-strip .bar { flex:1; height:8px; background:var(--line); border-radius:4px; overflow:hidden; }
+  .progress-strip .bar .fill { height:100%; background:var(--c15); transition: width .3s; }
+  .progress-strip .lbl { font-size:11.5px; font-weight:700; color:var(--ink-soft); }
+  .home-list { padding: 4px 20px; }
+  .task { display:flex; gap:10px; align-items:flex-start; padding:11px 12px; margin-bottom:8px; }
+  .see-all { display:block; text-align:center; padding:8px; color:var(--c30); font-weight:700; font-size:13px; cursor:pointer; }
+
+  /* ============ TASKS ============ */
+  .filters { display:flex; gap:8px; padding: 6px 20px 10px; }
+  .fbtn { border:1px solid var(--line); background:#fff; border-radius:10px; padding:6px 12px; font-size:12.5px; font-weight:600; color:var(--ink-soft); cursor:pointer; }
+  .fbtn.on { background:var(--ink); color:#fff; border-color:var(--ink); }
+  .sort-row { display:flex; align-items:center; gap:8px; padding: 0 20px 10px; }
+  .sort-row select { border:1px solid var(--line); border-radius:10px; padding:6px 10px; font-size:12.5px; color:var(--ink); background:#fff; font-family:'Inter'; }
+  .task .del { border:none; background:none; color:var(--ink-soft); cursor:pointer; font-size:15px; align-self:center; }
+
+  /* ============ TIMER ============ */
+  .timer-hero { text-align:center; padding: 30px 20px 20px; }
+  .timer-hero .modes { display:inline-flex; gap:4px; background:#fff; padding:3px; border-radius:20px; margin-bottom:18px; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
+  .timer-hero .modes button { border:none; background:transparent; color:var(--ink-soft); font-size:12px; font-weight:700; padding:7px 16px; border-radius:16px; cursor:pointer; font-family:'Inter'; }
+  .timer-hero .modes button.on { background:var(--c30); color:#fff; }
+  .timer-hero .time { font-family:'Poppins',sans-serif; font-size:58px; font-weight:700; color:var(--ink); }
+  .timer-hero .task-select { margin-top:10px; }
+  .timer-hero select { border:1px solid var(--line); border-radius:12px; padding:8px 14px; font-size:13px; color:var(--ink); background:#fff; font-family:'Inter'; max-width: 260px; }
+  .timer-hero .ctl { display:flex; gap:10px; justify-content:center; margin-top:18px; }
+  .timer-hero .ctl button { border:none; border-radius:22px; padding:11px 24px; font-weight:700; font-size:13.5px; cursor:pointer; font-family:'Inter'; }
+  .timer-hero .ctl button.primary { background:var(--c30); color:#fff; }
+  .timer-hero .ctl button.secondary { background:#fff; color:var(--ink); box-shadow: 0 2px 8px rgba(0,0,0,.04); }
+  .session-log { padding: 8px 20px; }
+  .log-row { display:flex; justify-content:space-between; align-items:center; padding:10px 14px; margin-bottom:6px; font-size:13px; }
+  .log-row .lname { font-weight:600; color:var(--ink); }
+  .log-row .ltime { color:var(--ink-soft); font-size:11.5px; }
+  .log-empty { padding: 14px; text-align:center; color:var(--ink-soft); font-size:13px; }
+
+  /* ============ STATS ============ */
+  .stat-hero { padding: 20px; display:flex; gap:16px; align-items:center; }
+  .ring { width:88px; height:88px; border-radius:50%; flex:none; display:flex; align-items:center; justify-content:center; background: conic-gradient(var(--c15) calc(var(--pct)*1%), #E4EDE6 0); }
+  .ring .inner { width:66px; height:66px; border-radius:50%; background:#EEF4EE; display:flex; align-items:center; justify-content:center; font-family:'Poppins',sans-serif; font-weight:700; font-size:16px; color:var(--ink); }
+  .stat-hero .label { font-size:13px; color:var(--ink-soft); font-weight:600; }
+  .stat-hero .label b { display:block; font-size:20px; color:var(--ink); font-family:'Poppins',sans-serif; }
+  .breakdown { margin: 6px 20px 14px; padding:14px; }
+  .breakdown h3 { margin:0 0 10px; font-size:13px; color:var(--ink); font-family:'Poppins',sans-serif; }
+  .brow { display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size:12.5px; color:var(--ink-soft); }
+  .brow .brow-label { width:60px; flex:none; font-weight:600; }
+  .brow .brow-bar { flex:1; height:8px; border-radius:4px; background:#EEF4EE; overflow:hidden; }
+  .brow .brow-bar .f { height:100%; }
+  .brow .brow-n { width:20px; text-align:right; font-weight:700; color:var(--ink); }
+  .weekchart { display:flex; align-items:flex-end; gap:8px; height:90px; margin: 6px 20px 4px; padding: 12px 14px; }
+  .weekchart .wbar { flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; justify-content:flex-end; height:100%; }
+  .weekchart .wbar .stick { width: 60%; border-radius:6px 6px 3px 3px; background: var(--c30); }
+  .weekchart .wbar .wl { font-size:10.5px; color:var(--ink-soft); font-weight:600; }
+</style>
+</head>
+<body>
+  <div class="control-bar">
+    <div class="tabs">
+      <button class="tab active" data-p="a" id="tabbtn-a">Polish A</button>
+      <button class="tab" data-p="b" id="tabbtn-b">Polish B</button>
+      <button class="tab" data-p="c" id="tabbtn-c">Polish C</button>
+    </div>
+    <button class="reveal-btn" id="revealBtn">Reveal</button>
+  </div>
+  <div class="note-strip" id="noteStrip"></div>
+
+<div class="shell polish-a" id="shell">
+
+  <!-- ================= HOME ================= -->
+  <div class="screen active" id="screen-home">
+    <div class="hero">
+      <h1>Momentodo</h1>
+      <p>Tap how much time you've got.</p>
+    </div>
+    <div class="moments" id="chips-home"></div>
+    <div class="accordion card" id="accordion-home">
+      <div class="a-title" id="accordion-title">Fits in 15 minutes</div>
+      <div id="accordion-list"></div>
+    </div>
+    <div class="progress-strip card">
+      <div class="lbl" id="progress-lbl">1/3 today</div>
+      <div class="bar"><div class="fill" id="progress-fill"></div></div>
+    </div>
+    <div class="section-label">Up next</div>
+    <div class="home-list" id="home-list"></div>
+    <div class="see-all" onclick="goTo('tasks')">See all tasks →</div>
+  </div>
+
+  <!-- ================= TASKS ================= -->
+  <div class="screen" id="screen-tasks">
+    <div class="hero"><h1>Tasks</h1><p>Everything on your plate.</p></div>
+    <div class="add-row">
+      <input type="text" id="input-add" placeholder="Add a task...">
+      <button onclick="quickAdd()">Add</button>
+    </div>
+    <div class="filters">
+      <button class="fbtn on" data-f="all" onclick="setStatusFilter('all')">All</button>
+      <button class="fbtn" data-f="active" onclick="setStatusFilter('active')">Active</button>
+      <button class="fbtn" data-f="done" onclick="setStatusFilter('done')">Done</button>
+    </div>
+    <div class="sort-row">
+      <span style="font-size:12.5px;color:var(--ink-soft);font-weight:600;">Sort by</span>
+      <select id="sortSelect" onchange="render()">
+        <option value="default">Added order</option>
+        <option value="priority">Priority</option>
+        <option value="difficulty">Difficulty</option>
+        <option value="time">Time needed</option>
+      </select>
+    </div>
+    <div class="home-list" id="tasks-list"></div>
+  </div>
+
+  <!-- ================= TIMER ================= -->
+  <div class="screen" id="screen-timer">
+    <div class="timer-hero">
+      <div class="modes">
+        <button class="on" id="mode-focus" onclick="setMode('focus')">Focus 25</button>
+        <button id="mode-stop" onclick="setMode('stopwatch')">Stopwatch</button>
+      </div>
+      <div class="time" id="timer-time">25:00</div>
+      <div class="task-select">
+        <select id="timer-task-select"></select>
+      </div>
+      <div class="ctl">
+        <button class="primary" onclick="startTimer()">Start</button>
+        <button class="secondary" onclick="pauseTimer()">Pause</button>
+        <button class="secondary" onclick="resetTimer()">Reset</button>
+      </div>
+    </div>
+    <div class="section-label">Recent sessions</div>
+    <div class="session-log" id="session-log"></div>
+  </div>
+
+  <!-- ================= STATS ================= -->
+  <div class="screen" id="screen-stats">
+    <div class="hero"><h1>Stats</h1><p>How today's going.</p></div>
+    <div class="stat-hero">
+      <div class="ring" id="stat-ring" style="--pct:33"><div class="inner" id="stat-ring-txt">33%</div></div>
+      <div class="label"><b id="stat-done-count">1/3</b>tasks completed today</div>
+    </div>
+    <div class="breakdown card">
+      <h3>By difficulty</h3>
+      <div id="diff-breakdown"></div>
+    </div>
+    <div class="breakdown card">
+      <h3>By priority</h3>
+      <div id="pri-breakdown"></div>
+    </div>
+    <div class="section-label">This week</div>
+    <div class="weekchart card" id="weekchart"></div>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="nav-btn on" data-s="home" onclick="goTo('home')">
+      <span class="ico ico-a">◔</span><span class="ico ico-b">⏳</span><span class="ico ico-c">·</span>Home
+    </button>
+    <button class="nav-btn" data-s="tasks" onclick="goTo('tasks')">
+      <span class="ico ico-a">▢</span><span class="ico ico-b">✅</span><span class="ico ico-c">·</span>Tasks
+    </button>
+    <button class="nav-btn" data-s="timer" onclick="goTo('timer')">
+      <span class="ico ico-a">◷</span><span class="ico ico-b">⏱️</span><span class="ico ico-c">·</span>Timer
+    </button>
+    <button class="nav-btn" data-s="stats" onclick="goTo('stats')">
+      <span class="ico ico-a">▤</span><span class="ico ico-b">📊</span><span class="ico ico-c">·</span>Stats
+    </button>
+  </div>
+</div>
+
+<script>
+/* ---------------- Data ---------------- */
+let tasks = [
+  { id:1, title:'Reply to client email', est:10, diff:1, pri:2, done:false, needsDetails:false },
+  { id:2, title:'Quick stretch break', est:5, diff:1, pri:1, done:false, needsDetails:false },
+  { id:3, title:'Review PR #482', est:20, diff:2, pri:2, done:false, needsDetails:false },
+  { id:4, title:'Outline blog post', est:25, diff:2, pri:3, done:false, needsDetails:false },
+  { id:5, title:'Clean inbox', est:15, diff:1, pri:1, done:true, needsDetails:false },
+  { id:6, title:'Prep quarterly slides', est:60, diff:3, pri:3, done:false, needsDetails:false },
+];
+let nextId = 100;
+let momentFilter = null;
+let statusFilter = 'all';
+const durations = [5,15,30,60];
+const diffLabel = {1:'Easy',2:'Medium',3:'Hard'};
+const priLabel  = {1:'Low',2:'Med',3:'High'};
+const weekMock = [ {l:'Mon',n:2},{l:'Tue',n:4},{l:'Wed',n:1},{l:'Thu',n:5},{l:'Fri',n:3},{l:'Sat',n:0},{l:'Sun',n:1} ];
+
+/* ---------------- Blind polish switcher ---------------- */
+const polishInfo = {
+  a: { title:'Polish A — "Quiet Precision"', desc:'Desaturated pastel accents, generous spacing, soft ambient shadows, thin minimal icons, quick and understated motion. Reads calm and refined.' },
+  b: { title:'Polish B — "Warm & Tactile"', desc:'Fuller saturation, chunkier rounded corners, colored glow shadows matching each time-card, bigger emoji icons, and bouncy spring motion on taps. Reads playful and energetic.' },
+  c: { title:'Polish C — "Structured Clarity"', desc:'Outlined cards instead of solid fills, sharper corners, no icons (just labels), thin borders for hierarchy, near-instant motion. Reads dense and utilitarian, like a focused productivity tool.' },
+};
+let revealed = false;
+function setPolish(p){
+  const shell = document.getElementById('shell');
+  shell.classList.remove('polish-a','polish-b','polish-c');
+  shell.classList.add('polish-'+p);
+  document.querySelectorAll('.control-bar .tab').forEach(el=>el.classList.remove('active'));
+  document.getElementById('tabbtn-'+p).classList.add('active');
+  if(revealed){
+    document.getElementById('noteStrip').innerHTML = '<strong>'+polishInfo[p].title+'</strong><br>'+polishInfo[p].desc;
+  }
+}
+document.querySelectorAll('.control-bar .tab').forEach(btn=>{
+  btn.addEventListener('click', ()=>setPolish(btn.dataset.p));
+});
+document.getElementById('revealBtn').addEventListener('click', ()=>{
+  revealed = !revealed;
+  document.getElementById('revealBtn').textContent = revealed ? 'Hide names' : 'Reveal';
+  const strip = document.getElementById('noteStrip');
+  const activeP = document.querySelector('.control-bar .tab.active').dataset.p;
+  if(revealed){
+    strip.classList.add('show');
+    strip.innerHTML = '<strong>'+polishInfo[activeP].title+'</strong><br>'+polishInfo[activeP].desc;
+    document.getElementById('tabbtn-a').textContent = 'Quiet Precision';
+    document.getElementById('tabbtn-b').textContent = 'Warm & Tactile';
+    document.getElementById('tabbtn-c').textContent = 'Structured Clarity';
+  } else {
+    strip.classList.remove('show');
+    document.getElementById('tabbtn-a').textContent = 'Polish A';
+    document.getElementById('tabbtn-b').textContent = 'Polish B';
+    document.getElementById('tabbtn-c').textContent = 'Polish C';
+  }
+});
+
+/* ---------------- Nav ---------------- */
+function goTo(s){
+  document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));
+  document.getElementById('screen-'+s).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(el=>el.classList.toggle('on', el.dataset.s===s));
+  render();
+}
+
+/* ---------------- Task ops ---------------- */
+function quickAdd(){
+  const input = document.getElementById('input-add');
+  const val = input.value.trim();
+  if(!val) return;
+  tasks.unshift({ id: nextId++, title: val, est:null, diff:null, pri:null, done:false, needsDetails:true });
+  input.value='';
+  render();
+}
+document.getElementById('input-add').addEventListener('keydown', e=>{ if(e.key==='Enter') quickAdd(); });
+
+function toggleDone(id){
+  const t = tasks.find(t=>t.id===id);
+  t.done = !t.done;
+  render();
+}
+function deleteTask(id){
+  tasks = tasks.filter(t=>t.id!==id);
+  render();
+}
+function setDetail(id,field,val){
+  const t = tasks.find(t=>t.id===id);
+  t[field] = val;
+  render();
+}
+function finishDetails(id){
+  const t = tasks.find(t=>t.id===id);
+  t.needsDetails = false;
+  render();
+}
+function setMomentFilter(d){
+  momentFilter = (momentFilter===d) ? null : d;
+  render();
+}
+function setStatusFilter(f){
+  statusFilter = f;
+  document.querySelectorAll('.fbtn').forEach(el=>el.classList.toggle('on', el.dataset.f===f));
+  render();
+}
+
+function taskMetaTags(t){
+  let out = '';
+  if(t.est!=null) out += '<span class="tag">'+t.est+' min</span>';
+  if(t.diff!=null) out += '<span class="tag">'+diffLabel[t.diff]+'</span>';
+  if(t.pri!=null) out += '<span class="tag pri-'+t.pri+'">'+priLabel[t.pri]+' priority</span>';
+  return out;
+}
+function detailsBlock(t){
+  return '<div class="needs-details">Quick — got a sec to fill this in?'
+    + '<div class="pills">'
+    + durations.map(d=>'<div class="pill'+(t.est===d?' on':'')+'" onclick="setDetail('+t.id+',\'est\','+d+')">'+d+'m</div>').join('')
+    + [1,2,3].map(d=>'<div class="pill'+(t.diff===d?' on':'')+'" onclick="setDetail('+t.id+',\'diff\','+d+')">'+diffLabel[d]+'</div>').join('')
+    + [1,2,3].map(p=>'<div class="pill'+(t.pri===p?' on':'')+'" onclick="setDetail('+t.id+',\'pri\','+p+')">'+priLabel[p]+'</div>').join('')
+    + '<div class="pill" onclick="finishDetails('+t.id+')">Done</div>'
+    + '</div></div>';
+}
+function taskRow(t, withDelete){
+  return '<div class="task card'+(t.done?' done':'')+'">'
+    + '<div class="check" onclick="toggleDone('+t.id+')">'+(t.done?'✓':'')+'</div>'
+    + '<div style="flex:1">'
+      + '<div class="title">'+t.title+'</div>'
+      + '<div class="meta">'+taskMetaTags(t)+'</div>'
+      + (t.needsDetails ? detailsBlock(t) : '')
+    + '</div>'
+    + (withDelete ? '<button class="del" onclick="deleteTask('+t.id+')">✕</button>' : '')
+  + '</div>';
+}
+
+/* ---------------- Timer ---------------- */
+const timer = { mode:'focus', remaining:25*60, elapsed:0, running:false, iv:null };
+let sessionLog = [];
+function fmt(sec){ const m=Math.floor(sec/60), s=sec%60; return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'); }
+function paintTime(){ document.getElementById('timer-time').textContent = timer.mode==='focus' ? fmt(timer.remaining) : fmt(timer.elapsed); }
+function setMode(mode){
+  clearInterval(timer.iv); timer.running=false;
+  timer.mode = mode; timer.remaining = 25*60; timer.elapsed = 0;
+  document.getElementById('mode-focus').classList.toggle('on', mode==='focus');
+  document.getElementById('mode-stop').classList.toggle('on', mode==='stopwatch');
+  paintTime();
+}
+function startTimer(){
+  if(timer.running) return;
+  timer.running = true;
+  timer.iv = setInterval(()=>{
+    if(timer.mode==='focus'){ if(timer.remaining>0) timer.remaining--; else finishSession(); }
+    else { timer.elapsed++; }
+    paintTime();
+  },1000);
+}
+function pauseTimer(){ clearInterval(timer.iv); timer.running=false; }
+function resetTimer(){
+  if(timer.running || timer.elapsed>0 || (timer.mode==='focus' && timer.remaining<25*60)) logSession();
+  clearInterval(timer.iv); timer.running=false; timer.remaining=25*60; timer.elapsed=0; paintTime();
+}
+function finishSession(){
+  clearInterval(timer.iv); timer.running=false;
+  logSession();
+  timer.remaining = 25*60; paintTime();
+}
+function logSession(){
+  const sel = document.getElementById('timer-task-select');
+  const taskName = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : 'No task';
+  const dur = timer.mode==='focus' ? (25*60 - timer.remaining) : timer.elapsed;
+  if(dur < 1) return;
+  const now = new Date();
+  sessionLog.unshift({ name: taskName, mode: timer.mode, dur: dur, time: now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
+  renderSessionLog();
+}
+function renderSessionLog(){
+  const el = document.getElementById('session-log');
+  if(!sessionLog.length){ el.innerHTML = '<div class="log-empty card">No sessions yet — start a timer above.</div>'; return; }
+  el.innerHTML = sessionLog.map(s=>'<div class="log-row card"><div><div class="lname">'+s.name+'</div><div class="ltime">'+(s.mode==='focus'?'Focus':'Stopwatch')+' · '+fmt(s.dur)+'</div></div><div class="ltime">'+s.time+'</div></div>').join('');
+}
+function refreshTimerTaskOptions(){
+  const sel = document.getElementById('timer-task-select');
+  const current = sel.value;
+  sel.innerHTML = '<option value="">No task selected</option>' + tasks.filter(t=>!t.done).map(t=>'<option value="'+t.id+'">'+t.title+'</option>').join('');
+  if([...sel.options].some(o=>o.value===current)) sel.value = current;
+}
+
+/* ---------------- Renderers ---------------- */
+function render(){
+  renderHome();
+  renderTasks();
+  renderStats();
+  refreshTimerTaskOptions();
+}
+
+function renderHome(){
+  const colorClass = {5:'m5',15:'m15',30:'m30',60:'m60'};
+  document.getElementById('chips-home').innerHTML = durations.map(d=>'<div class="mcard '+colorClass[d]+(momentFilter===d?' sel':'')+'" onclick="setMomentFilter('+d+')"><span class="n">'+d+'</span>min</div>').join('');
+  const acc = document.getElementById('accordion-home');
+  if(momentFilter!=null){
+    acc.classList.add('open');
+    document.getElementById('accordion-title').textContent = 'Fits in '+momentFilter+' minutes';
+    const matches = tasks.filter(t=>!t.done && t.est!=null && t.est<=momentFilter);
+    document.getElementById('accordion-list').innerHTML = matches.length
+      ? matches.map(t=>'<div class="a-task"><span>'+t.title+'</span><span class="est">'+t.est+'m</span></div>').join('')
+      : '<div class="a-task" style="color:var(--ink-soft)">Nothing fits yet — add a shorter task?</div>';
+  } else { acc.classList.remove('open'); }
+
+  const done = tasks.filter(t=>t.done).length;
+  document.getElementById('progress-lbl').textContent = done+'/'+tasks.length+' today';
+  document.getElementById('progress-fill').style.width = Math.round(100*done/tasks.length)+'%';
+
+  const upNext = tasks.filter(t=>!t.done).slice(0,3);
+  document.getElementById('home-list').innerHTML = upNext.map(t=>taskRow(t,false)).join('');
+}
+
+function renderTasks(){
+  let list = tasks.slice();
+  if(statusFilter==='active') list = list.filter(t=>!t.done);
+  if(statusFilter==='done') list = list.filter(t=>t.done);
+  const sortBy = document.getElementById('sortSelect').value;
+  if(sortBy==='priority') list.sort((a,b)=>(b.pri||0)-(a.pri||0));
+  if(sortBy==='difficulty') list.sort((a,b)=>(b.diff||0)-(a.diff||0));
+  if(sortBy==='time') list.sort((a,b)=>(a.est||999)-(b.est||999));
+  document.getElementById('tasks-list').innerHTML = list.length
+    ? list.map(t=>taskRow(t,true)).join('')
+    : '<div class="log-empty card">Nothing here.</div>';
+}
+
+function renderStats(){
+  const done = tasks.filter(t=>t.done).length;
+  const pct = Math.round(100*done/tasks.length);
+  document.getElementById('stat-ring').style.setProperty('--pct', pct);
+  document.getElementById('stat-ring-txt').textContent = pct+'%';
+  document.getElementById('stat-done-count').textContent = done+'/'+tasks.length;
+
+  const diffCounts = {1:0,2:0,3:0}, priCounts = {1:0,2:0,3:0};
+  tasks.forEach(t=>{ if(t.diff) diffCounts[t.diff]++; if(t.pri) priCounts[t.pri]++; });
+  const maxD = Math.max(1, ...Object.values(diffCounts));
+  const maxP = Math.max(1, ...Object.values(priCounts));
+  document.getElementById('diff-breakdown').innerHTML = [1,2,3].map(d=>
+    '<div class="brow"><div class="brow-label">'+diffLabel[d]+'</div><div class="brow-bar"><div class="f" style="width:'+(100*diffCounts[d]/maxD)+'%;background:var(--c30)"></div></div><div class="brow-n">'+diffCounts[d]+'</div></div>'
+  ).join('');
+  document.getElementById('pri-breakdown').innerHTML = [3,2,1].map(p=>
+    '<div class="brow"><div class="brow-label">'+priLabel[p]+'</div><div class="brow-bar"><div class="f" style="width:'+(100*priCounts[p]/maxP)+'%;background:var(--c60)"></div></div><div class="brow-n">'+priCounts[p]+'</div></div>'
+  ).join('');
+
+  const maxW = Math.max(1, ...weekMock.map(w=>w.n));
+  document.getElementById('weekchart').innerHTML = weekMock.map(w=>
+    '<div class="wbar"><div class="stick" style="height:'+(w.n===0?2:Math.round(100*w.n/maxW))+'%"></div><div class="wl">'+w.l+'</div></div>'
+  ).join('');
+}
+
+/* ---------------- Init ---------------- */
+paintTime();
+renderSessionLog();
+render();
+</script>
+</body>
+</html>

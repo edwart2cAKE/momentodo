@@ -1,0 +1,89 @@
+{
+  "_source": "Extracted directly from design-reference/momentodo-conceptC-polish.html, .shell.polish-b ruleset (the chosen 'Warm & Tactile' polish). Treat this file as authoritative over any visual description in prose.",
+
+  "color": {
+    "background": "#EEF4EE",
+    "surface": "#FFFFFF",
+    "ink": "#1F3A2E",
+    "inkSoft": "#6C8578",
+    "line": "#DCE8E0",
+    "moment": {
+      "5min": "#FFCA4D",
+      "15min": "#04C495",
+      "30min": "#4C9CE0",
+      "60min": "#FF5A3D"
+    },
+    "priorityTag": {
+      "low": { "bg": "#E4F3EA", "text": "#2F7B57" },
+      "med": { "bg": "#FFF3D6", "text": "#A67300" },
+      "high": { "bg": "#FFE3DD", "text": "#C1401F" }
+    }
+  },
+
+  "radius": {
+    "card": "22px",
+    "pill": "14px"
+  },
+
+  "shadow": {
+    "cardDefault": "0 8px 20px rgba(31,58,46,0.08)",
+    "momentCardDefault": "0 6px 14px rgba(0,0,0,0.10)",
+    "momentCardGlow": {
+      "5min": "0 6px 16px rgba(255,202,77,0.45)",
+      "15min": "0 6px 16px rgba(4,196,149,0.4)",
+      "30min": "0 6px 16px rgba(76,156,224,0.4)",
+      "60min": "0 6px 16px rgba(255,90,61,0.4)"
+    }
+  },
+
+  "motion": {
+    "duration": "280ms",
+    "easing": "cubic-bezier(0.34, 1.56, 0.64, 1)",
+    "checkCompletePop": {
+      "keyframes": [
+        { "at": "0%", "transform": "scale(0.6)" },
+        { "at": "100%", "transform": "scale(1)" }
+      ],
+      "duration": "280ms",
+      "easing": "cubic-bezier(0.34, 1.56, 0.64, 1)"
+    },
+    "momentCardSelected": {
+      "transform": "scale(1.05)"
+    },
+    "accordionOpen": {
+      "keyframes": [
+        { "at": "0%", "opacity": 0, "transform": "translateY(-4px)" },
+        { "at": "100%", "opacity": 1, "transform": "translateY(0)" }
+      ]
+    }
+  },
+
+  "typography": {
+    "headingFont": "'Poppins', sans-serif",
+    "bodyFont": "'Inter', sans-serif",
+    "headingWeights": [500, 600, 700],
+    "bodyWeights": [400, 500, 600, 700],
+    "sizes": {
+      "screenTitle": "22px",
+      "taskTitle": "14.5px",
+      "momentCardNumber": "21px",
+      "timerDisplay": "58px",
+      "tag": "10.5px"
+    }
+  },
+
+  "iconography": {
+    "style": "emoji, larger scale for this polish",
+    "size": "20px",
+    "home": "⏳",
+    "tasks": "✅",
+    "timer": "⏱️",
+    "stats": "📊"
+  },
+
+  "layout": {
+    "maxWidth": "460px",
+    "momentGridColumns": 4,
+    "momentGridGap": "8px"
+  }
+}
