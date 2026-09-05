@@ -11,6 +11,22 @@ interface NeedsDetailsPromptProps {
   onDismiss: (id: string) => void
 }
 
+const labelStyle = {
+  fontSize: '10.5px',
+  fontWeight: 700 as const,
+  color: color.inkSoft,
+  textTransform: 'uppercase' as const,
+  letterSpacing: '0.5px',
+  marginBottom: '4px',
+}
+
+const rowStyle = {
+  display: 'flex',
+  gap: '5px',
+  flexWrap: 'wrap' as const,
+  alignItems: 'center',
+}
+
 export function NeedsDetailsPrompt({ task, onSetField, onDismiss }: NeedsDetailsPromptProps) {
   const [customTime, setCustomTime] = useState(
     task.estimatedMinutes !== null && !(MOMENT_DURATIONS as readonly number[]).includes(task.estimatedMinutes)
@@ -41,56 +57,75 @@ export function NeedsDetailsPrompt({ task, onSetField, onDismiss }: NeedsDetails
       }}
     >
       Quick — got a sec to fill this in?
-      <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginTop: '5px', alignItems: 'center' }}>
-        {MOMENT_DURATIONS.map((d) => (
-          <TimePill
-            key={d}
-            duration={d}
-            selected={task.estimatedMinutes === d}
-            onClick={() => {
-              setCustomTime('')
-              onSetField(task.id, 'estimatedMinutes', d)
+
+      <div style={{ marginTop: '6px' }}>
+        <div style={labelStyle}>⏱ Time</div>
+        <div style={rowStyle}>
+          {MOMENT_DURATIONS.map((d) => (
+            <TimePill
+              key={d}
+              duration={d}
+              selected={task.estimatedMinutes === d}
+              onClick={() => {
+                setCustomTime('')
+                onSetField(task.id, 'estimatedMinutes', d)
+              }}
+            />
+          ))}
+          <input
+            type="number"
+            min="1"
+            max="480"
+            placeholder="min"
+            value={customTime}
+            onInput={(e) => handleCustomTime((e.target as HTMLInputElement).value)}
+            style={{
+              width: '52px',
+              padding: '3px 6px',
+              fontSize: '11px',
+              border: `1px solid ${!isQuickTime && task.estimatedMinutes !== null ? color.moment['30min'] : color.line}`,
+              borderRadius: radius.pill,
+              background: color.surface,
+              color: color.ink,
+              fontWeight: 600,
+              fontFamily: 'Inter, sans-serif',
+              textAlign: 'center',
+              minHeight: '44px',
+              boxSizing: 'border-box',
             }}
           />
-        ))}
-        <input
-          type="number"
-          min="1"
-          max="480"
-          placeholder="min"
-          value={customTime}
-          onInput={(e) => handleCustomTime((e.target as HTMLInputElement).value)}
-          style={{
-            width: '52px',
-            padding: '3px 6px',
-            fontSize: '11px',
-            border: `1px solid ${!isQuickTime && task.estimatedMinutes !== null ? color.moment['30min'] : color.line}`,
-            borderRadius: radius.pill,
-            background: color.surface,
-            color: color.ink,
-            fontWeight: 600,
-            fontFamily: 'Inter, sans-serif',
-            textAlign: 'center',
-            minHeight: '44px',
-            boxSizing: 'border-box',
-          }}
-        />
-        {difficultyOptions.map((d) => (
-          <Pill
-            key={d}
-            label={difficultyLabels[d]}
-            selected={task.difficulty === d}
-            onClick={() => onSetField(task.id, 'difficulty', d)}
-          />
-        ))}
-        {priorityOptions.map((p) => (
-          <Pill
-            key={p}
-            label={priorityLabels[p]}
-            selected={task.priority === p}
-            onClick={() => onSetField(task.id, 'priority', p)}
-          />
-        ))}
+        </div>
+      </div>
+
+      <div style={{ marginTop: '6px' }}>
+        <div style={labelStyle}>💪 Difficulty</div>
+        <div style={rowStyle}>
+          {difficultyOptions.map((d) => (
+            <Pill
+              key={d}
+              label={difficultyLabels[d]}
+              selected={task.difficulty === d}
+              onClick={() => onSetField(task.id, 'difficulty', d)}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div style={{ marginTop: '6px' }}>
+        <div style={labelStyle}>🔥 Priority</div>
+        <div style={rowStyle}>
+          {priorityOptions.map((p) => (
+            <Pill
+              key={p}
+              label={priorityLabels[p]}
+              selected={task.priority === p}
+              onClick={() => onSetField(task.id, 'priority', p)}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div style={{ marginTop: '8px' }}>
         <Pill label="Done" onClick={() => onDismiss(task.id)} />
       </div>
     </div>
