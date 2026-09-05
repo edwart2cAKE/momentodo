@@ -6,7 +6,7 @@ export type Priority = 1 | 2 | 3
 export interface Task {
   id: string
   title: string
-  estimatedMinutes: MomentDuration | null
+  estimatedMinutes: number | null
   difficulty: Difficulty | null
   priority: Priority | null
   done: boolean

@@ -1,4 +1,4 @@
-import type { Task, MomentDuration, Difficulty, Priority, TaskField } from '../types'
+import type { Task, Difficulty, Priority, TaskField } from '../types'
 import { color, radius, shadow, motion, typography } from '../theme/tokens'
 import { difficultyLabels, priorityLabels } from '../store/config'
 import { NeedsDetailsPrompt } from './NeedsDetailsPrompt'
@@ -7,7 +7,7 @@ interface TaskRowProps {
   task: Task
   onToggle: (id: string) => void
   onDelete?: (id: string) => void
-  onSetField?: (id: string, field: TaskField, value: MomentDuration | Difficulty | Priority) => void
+  onSetField?: (id: string, field: TaskField, value: number | Difficulty | Priority) => void
   onDismissDetails?: (id: string) => void
   showDelete?: boolean
 }

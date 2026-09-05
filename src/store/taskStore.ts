@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Task, MomentDuration, Difficulty, Priority, TaskField } from '../types'
+import type { Task, Difficulty, Priority, TaskField } from '../types'
 import { repository } from './persistence'
 
 interface TaskState {
@@ -7,7 +7,7 @@ interface TaskState {
   addTask: (title: string) => void
   toggleTask: (id: string) => void
   deleteTask: (id: string) => void
-  setTaskField: (id: string, field: TaskField, value: MomentDuration | Difficulty | Priority) => void
+  setTaskField: (id: string, field: TaskField, value: number | Difficulty | Priority) => void
   dismissNeedsDetails: (id: string) => void
   tasksFittingMinutes: (minutes: number) => Task[]
 }
@@ -59,7 +59,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     })
   },
 
-  setTaskField: (id: string, field: TaskField, value: MomentDuration | Difficulty | Priority) => {
+  setTaskField: (id: string, field: TaskField, value: number | Difficulty | Priority) => {
     set((state) => {
       const tasks = state.tasks.map((t) => (t.id === id ? { ...t, [field]: value } : t))
       repository.saveTasks(tasks)
