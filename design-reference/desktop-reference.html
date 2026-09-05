@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Momentodo — Desktop Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: #2A2D2A; color: #1F3A2E; overflow: hidden; height: 100vh; }
+
+  .layout { display: flex; height: 100vh; }
+
+  /* Sidebar — 180px, icons + labels */
+  .sidebar { width: 180px; background: #1F3A2E; padding: 20px 0; flex: none; display: flex; flex-direction: column; }
+  .logo { font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 600; color: #fff; padding: 0 16px 24px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; color: #8A9A8E; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; border-left: 3px solid transparent; }
+  .nav-item:hover { background: rgba(255,255,255,0.04); }
+  .nav-item.active { color: #fff; background: rgba(255,255,255,0.06); border-left-color: #4C9CE0; }
+  .nav-item .icon { font-size: 18px; width: 24px; text-align: center; }
+
+  /* Main content */
+  .main { flex: 1; overflow-y: auto; background: #EEF4EE; }
+  .content { max-width: 960px; margin: 0 auto; padding: 22px 24px; }
+
+  /* Screen visibility */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* Shared components */
+  .hero { padding: 0 0 6px; }
+  .hero h2 { font-family: 'Poppins', sans-serif; font-size: 22px; font-weight: 600; color: #1F3A2E; margin-bottom: 2px; }
+  .hero p { color: #6C8578; font-size: 12.5px; }
+
+  .card { background: #fff; border-radius: 18px; padding: 14px; box-shadow: 0 8px 20px rgba(31,58,46,0.08); }
+  .card h3 { font-size: 13px; font-weight: 700; color: #1F3A2E; font-family: 'Poppins', sans-serif; margin-bottom: 10px; }
+
+  .section-label { font-size: 12px; font-weight: 700; color: #6C8578; margin: 14px 0 8px; }
+
+  /* Moment cards */
+  .mcard { border-radius: 22px; padding: 16px 12px; text-align: center; cursor: pointer; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 13px; color: #1F3A2E; transition: transform 0.2s; }
+  .mcard:hover { transform: scale(1.03); }
+  .mcard .num { display: block; font-size: 26px; font-weight: 700; margin-bottom: 2px; }
+  .mcard .unit { font-size: 11px; opacity: 0.8; }
+  .mcard.m5 { background: #FFCA4D; box-shadow: 0 6px 16px rgba(255,202,77,0.4); }
+  .mcard.m15 { background: #04C495; color: #fff; box-shadow: 0 6px 16px rgba(4,196,149,0.4); }
+  .mcard.m30 { background: #4C9CE0; color: #fff; box-shadow: 0 6px 16px rgba(76,156,224,0.4); }
+  .mcard.m60 { background: #FF5A3D; color: #fff; box-shadow: 0 6px 16px rgba(255,90,61,0.4); }
+  .mcard.sel { box-shadow: 0 0 0 3px #1F3A2E inset; transform: scale(1.03); }
+
+  /* Ring */
+  .ring { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: conic-gradient(#04C495 33%, #E4EDE6 0); flex: none; }
+  .ring .inner { width: 42px; height: 42px; border-radius: 50%; background: #EEF4EE; display: flex; align-items: center; justify-content: center; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 13px; color: #1F3A2E; }
+
+  /* Task rows */
+  .task-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; font-size: 13px; font-weight: 600; color: #1F3A2E; }
+  .task-row .dot { width: 6px; height: 6px; border-radius: 50%; background: #DCE8E0; flex: none; }
+  .task-row .est { margin-left: auto; font-size: 11px; color: #6C8578; font-weight: 600; }
+
+  /* Timer ring */
+  .timer-ring-wrap { position: relative; display: inline-block; }
+  .timer-ring-wrap svg { transform: rotate(-90deg); }
+  .timer-ring-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Poppins', sans-serif; font-size: 42px; font-weight: 700; color: #1F3A2E; }
+
+  /* Task chip next to timer */
+  .active-task-chip { display: flex; align-items: center; gap: 10px; background: #fff; border: 2px solid #04C495; border-radius: 16px; padding: 12px 16px; }
+  .active-task-chip .dot { width: 10px; height: 10px; border-radius: 50%; background: #04C495; flex: none; }
+  .active-task-chip .task-name { font-size: 14px; font-weight: 700; color: #1F3A2E; }
+  .active-task-chip .task-meta { font-size: 11px; color: #6C8578; margin-top: 2px; }
+
+  /* Mode toggle */
+  .mode-toggle { display: inline-flex; gap: 4px; background: #fff; padding: 3px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+  .mode-btn { border: none; background: transparent; color: #6C8578; font-size: 12px; font-weight: 700; padding: 7px 16px; border-radius: 16px; cursor: pointer; font-family: 'Inter', sans-serif; }
+  .mode-btn.on { background: #4C9CE0; color: #fff; }
+
+  /* Buttons */
+  .btn-primary { background: #4C9CE0; color: #fff; border: none; border-radius: 22px; padding: 11px 24px; font-weight: 700; font-size: 13.5px; cursor: pointer; font-family: 'Inter', sans-serif; }
+  .btn-secondary { background: #fff; color: #1F3A2E; border: none; border-radius: 22px; padding: 11px 24px; font-weight: 700; font-size: 13.5px; cursor: pointer; font-family: 'Inter', sans-serif; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+
+  /* Session log */
+  .log-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; margin-bottom: 6px; background: #fff; border-radius: 18px; box-shadow: 0 8px 20px rgba(31,58,46,0.08); font-size: 13px; }
+  .log-name { font-weight: 600; color: #1F3A2E; }
+  .log-meta { color: #6C8578; font-size: 11.5px; }
+
+  /* Stats */
+  .stat-card { background: #fff; border-radius: 18px; padding: 16px; text-align: center; box-shadow: 0 8px 20px rgba(31,58,46,0.08); }
+  .stat-card .stat-num { font-family: 'Poppins', sans-serif; font-size: 28px; font-weight: 700; color: #1F3A2E; }
+  .stat-card .stat-label { font-size: 11px; color: #6C8578; font-weight: 600; margin-top: 2px; }
+
+  .stacked-bar { height: 20px; border-radius: 10px; background: #EEF4E6; display: flex; overflow: hidden; margin-bottom: 6px; }
+  .stacked-seg { height: 100%; }
+  .bar-legend { display: flex; gap: 12px; }
+  .bar-legend-item { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #6C8578; }
+  .bar-legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  .heatmap { display: flex; gap: 10px; justify-content: space-between; }
+  .heat-day { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .heat-dot { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+  .heat-dot.l0 { background: #EEF4EE; color: #DCE8E0; }
+  .heat-dot.l1 { background: #E4F3EA; color: #04C495; }
+  .heat-dot.l2 { background: #B8EDCF; color: #04A67A; }
+  .heat-dot.l3 { background: #04C495; color: #fff; }
+  .heat-label { font-size: 11px; color: #6C8578; font-weight: 600; }
+
+  /* Quick add */
+  .add-row { display: flex; gap: 8px; }
+  .add-row input { flex: 1; border: 1px solid #DCE8E0; border-radius: 14px; padding: 10px 14px; font-size: 14px; font-family: 'Inter', sans-serif; color: #1F3A2E; }
+  .add-row input:focus { outline: none; border-color: #4C9CE0; }
+
+  /* Filters */
+  .filter-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  .filter-btn { border: 1px solid #DCE8E0; background: #fff; border-radius: 10px; padding: 6px 12px; font-size: 12.5px; font-weight: 600; color: #6C8578; cursor: pointer; font-family: 'Inter', sans-serif; }
+  .filter-btn.on { background: #1F3A2E; color: #fff; border-color: #1F3A2E; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="logo">Momentodo</div>
+    <div class="nav-item active" onclick="showScreen('home')"><span class="icon">⏳</span>Home</div>
+    <div class="nav-item" onclick="showScreen('tasks')"><span class="icon">✅</span>Tasks</div>
+    <div class="nav-item" onclick="showScreen('timer')"><span class="icon">⏱️</span>Timer</div>
+    <div class="nav-item" onclick="showScreen('stats')"><span class="icon">📊</span>Stats</div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <!-- ==================== HOME ==================== -->
+    <div class="screen active" id="screen-home">
+      <div class="content">
+        <div class="hero"><h2>Momentodo</h2><p>Tap how much time you've got.</p></div>
+
+        <!-- 4-col moment cards -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0;">
+          <div class="mcard m5" onclick="toggleHome(this)"><span class="num">5</span><span class="unit">minutes</span></div>
+          <div class="mcard m15" onclick="toggleHome(this)"><span class="num">15</span><span class="unit">minutes</span></div>
+          <div class="mcard m30 sel" onclick="toggleHome(this)"><span class="num">30</span><span class="unit">minutes</span></div>
+          <div class="mcard m60" onclick="toggleHome(this)"><span class="num">60</span><span class="unit">minutes</span></div>
+        </div>
+
+        <!-- Inline expansion -->
+        <div id="home-expanded" style="background:#fff;border-radius:18px;padding:14px;margin:-6px 0 14px;">
+          <div style="font-size:12px;font-weight:700;color:#6C8578;margin-bottom:8px;">Fits in 30 minutes</div>
+          <div class="task-row"><span class="dot"></span>Reply to client email<span class="est">10m</span></div>
+          <div class="task-row"><span class="dot"></span>Quick stretch break<span class="est">5m</span></div>
+        </div>
+
+        <!-- Two-col: ring + up next -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;">
+          <div class="card">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div class="ring"><div class="inner">33%</div></div>
+              <div style="font-size:13px;color:#6C8578;font-weight:600;"><b style="display:block;font-size:18px;color:#1F3A2E;font-family:'Poppins',sans-serif;">1/3</b>completed today</div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Up next</h3>
+            <div class="task-row"><span class="dot"></span>Review PR #482<span class="est">20m</span></div>
+            <div class="task-row"><span class="dot"></span>Outline blog post<span class="est">25m</span></div>
+            <div class="task-row"><span class="dot"></span>Prep quarterly slides<span class="est">60m</span></div>
+          </div>
+        </div>
+
+        <!-- Quick add -->
+        <div class="card">
+          <h3>Quick add</h3>
+          <div class="add-row">
+            <input type="text" placeholder="Add a task...">
+            <button class="btn-primary">Add</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TASKS ==================== -->
+    <div class="screen" id="screen-tasks">
+      <div class="content">
+        <div class="hero"><h2>Tasks</h2><p>Everything on your plate.</p></div>
+
+        <!-- Quick add -->
+        <div class="add-row" style="margin:14px 0;">
+          <input type="text" placeholder="Add a task...">
+          <button class="btn-primary">Add</button>
+        </div>
+
+        <!-- Filters -->
+        <div class="filter-row">
+          <button class="filter-btn on">All</button>
+          <button class="filter-btn">Active</button>
+          <button class="filter-btn">Done</button>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+            <span style="font-size:12px;color:#6C8578;font-weight:600;">Sort by</span>
+            <select style="border:1px solid #DCE8E0;border-radius:10px;padding:6px 10px;font-size:12px;color:#1F3A2E;background:#fff;font-family:'Inter',sans-serif;">
+              <option>Added order</option>
+              <option>Priority</option>
+              <option>Difficulty</option>
+              <option>Time needed</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Task list -->
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div class="card" style="display:flex;gap:10px;align-items:flex-start;">
+            <div style="width:20px;height:20px;border-radius:50%;border:2px solid #4C9CE0;flex:none;margin-top:1px;"></div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:600;color:#1F3A2E;">Reply to client email</div>
+              <div style="display:flex;gap:5px;margin-top:4px;">
+                <span style="font-size:10px;padding:2px 7px;border-radius:8px;background:#EEF4EE;color:#6C8578;font-weight:700;">10 min</span>
+                <span style="font-size:10px;padding:2px 7px;border-radius:8px;background:#E4F3EA;color:#2F7B57;font-weight:700;">Easy</span>
+                <span style="font-size:10px;padding:2px 7px;border-radius:8px;background:#FFF3D6;color:#A67300;font-weight:700;">Med priority</span>
+              </div>
+            </div>
+            <button style="border:none;background:none;color:#6C8578;cursor:pointer;font-size:15px;">✕</button>
+          </div>
+          <div class="card" style="display:flex;gap:10px;align-items:flex-start;">
+            <div style="width:20px;height:20px;border-radius:50%;border:2px solid #4C9CE0;flex:none;margin-top:1px;"></div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:600;color:#1F3A2E;">Review PR #482</div>
+              <div style="display:flex;gap:5px;margin-top:4px;">
+                <span style="font-size:10px;padding:2px 7px;border-radius:8px;background:#EEF4EE;color:#6C8578;font-weight:700;">20 min</span>
+                <span style="font-size:10px;padding:2px 7px;border-radius:8px;background:#FFF3D6;color:#A67300;font-weight:700;">Medium</span>
+                <span style="font-size:10px;padding:2px 7px;border-radius:8px;background:#FFF3D6;color:#A67300;font-weight:700;">Med priority</span>
+              </div>
+            </div>
+            <button style="border:none;background:none;color:#6C8578;cursor:pointer;font-size:15px;">✕</button>
+          </div>
+          <div class="card" style="display:flex;gap:10px;align-items:flex-start;">
+            <div style="width:20px;height:20px;border-radius:50%;border:2px solid #4C9CE0;flex:none;margin-top:1px;"></div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:600;color:#1F3A2E;">Outline blog post</div>
+              <div style="display:flex;gap:5px;margin-top:4px;">
+                <span style="font-size:10px;padding:2px 7px;border-radius:8px;background:#EEF4EE;color:#6C8578;font-weight:700;">25 min</span>
+                <span style="font-size:10px;padding:2px 7px;border-radius:8px;background:#FFF3D6;color:#A67300;font-weight:700;">Medium</span>
+                <span style="font-size:10px;padding:2px 7px;border-radius:8px;background:#FFE3DD;color:#C1401F;font-weight:700;">High priority</span>
+              </div>
+            </div>
+            <button style="border:none;background:none;color:#6C8578;cursor:pointer;font-size:15px;">✕</button>
+          </div>
+          <div class="card" style="display:flex;gap:10px;align-items:flex-start;">
+            <div style="width:20px;height:20px;border-radius:50%;border:2px solid #4C9CE0;flex:none;margin-top:1px;"></div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:600;color:#1F3A2E;">Prep quarterly slides</div>
+              <div style="display:flex;gap:5px;margin-top:4px;">
+                <span style="font-size:10px;padding:2px 7px;border-radius:8px;background:#EEF4EE;color:#6C8578;font-weight:700;">60 min</span>
+                <span style="font-size:10px;padding:2px 7px;border-radius:8px;background:#FFE3DD;color:#C1401F;font-weight:700;">Hard</span>
+                <span style="font-size:10px;padding:2px 7px;border-radius:8px;background:#FFE3DD;color:#C1401F;font-weight:700;">High priority</span>
+              </div>
+            </div>
+            <button style="border:none;background:none;color:#6C8578;cursor:pointer;font-size:15px;">✕</button>
+          </div>
+          <div class="card" style="display:flex;gap:10px;align-items:flex-start;opacity:0.5;">
+            <div style="width:20px;height:20px;border-radius:50%;background:#4C9CE0;border:2px solid #4C9CE0;flex:none;margin-top:1px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;">✓</div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:600;color:#6C8578;text-decoration:line-through;">Clean inbox</div>
+            </div>
+            <button style="border:none;background:none;color:#6C8578;cursor:pointer;font-size:15px;">✕</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TIMER ==================== -->
+    <div class="screen" id="screen-timer">
+      <div class="content">
+        <div class="hero"><h2>Timer</h2><p>Stay focused, track your time.</p></div>
+
+        <!-- Timer + active task side by side -->
+        <div style="display:flex;align-items:center;gap:24px;margin:20px 0;">
+          <!-- Mode toggle + ring centered -->
+          <div style="text-align:center;">
+            <div class="mode-toggle" style="margin-bottom:14px;">
+              <button class="mode-btn on">Focus 25</button>
+              <button class="mode-btn">Stopwatch</button>
+            </div>
+            <div class="timer-ring-wrap">
+              <svg width="160" height="160" viewBox="0 0 160 160">
+                <circle cx="80" cy="80" r="70" fill="none" stroke="#E4EDE6" stroke-width="10"/>
+                <circle cx="80" cy="80" r="70" fill="none" stroke="#04C495" stroke-width="10" stroke-linecap="round" stroke-dasharray="439.82" stroke-dashoffset="146.6"/>
+              </svg>
+              <div class="timer-ring-text">18:47</div>
+            </div>
+            <div style="display:flex;gap:10px;justify-content:center;margin-top:14px;">
+              <button class="btn-secondary">Pause</button>
+              <button class="btn-secondary">Reset</button>
+            </div>
+          </div>
+
+          <!-- Active task chip — NEXT TO the timer -->
+          <div style="flex:1;">
+            <div class="active-task-chip">
+              <span class="dot"></span>
+              <div>
+                <div class="task-name">Review PR #482</div>
+                <div class="task-meta">Focus session · 18:47 remaining</div>
+              </div>
+            </div>
+            <div style="margin-top:12px;font-size:12px;color:#6C8578;font-weight:600;">Session log</div>
+            <div style="margin-top:8px;">
+              <div class="log-row"><div><div class="log-name">No task</div><div class="log-meta">Stopwatch · 12:34</div></div><div class="log-meta">1:15 PM</div></div>
+              <div class="log-row"><div><div class="log-name">Outline blog post</div><div class="log-meta">Focus · 25:00</div></div><div class="log-meta">11:00 AM</div></div>
+              <div class="log-row"><div><div class="log-name">Reply to client email</div><div class="log-meta">Focus · 10:00</div></div><div class="log-meta">9:30 AM</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== STATS ==================== -->
+    <div class="screen" id="screen-stats">
+      <div class="content">
+        <div class="hero"><h2>Stats</h2><p>How today's going.</p></div>
+
+        <!-- Two-panel: ring hero left | breakdowns right -->
+        <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:16px;margin-top:14px;">
+          <!-- Left panel: ring + summary -->
+          <div>
+            <div class="card" style="text-align:center;margin-bottom:14px;">
+              <div style="width:120px;height:120px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:conic-gradient(#04C495 33%,#E4EDE6 0);margin:0 auto 12px;">
+                <div style="width:90px;height:90px;border-radius:50%;background:#EEF4EE;display:flex;align-items:center;justify-content:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:28px;color:#1F3A2E;">33%</div>
+              </div>
+              <div style="font-size:13px;color:#6C8578;font-weight:600;"><b style="display:block;font-size:22px;color:#1F3A2E;font-family:'Poppins',sans-serif;">1/3</b>completed today</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <div class="stat-card"><div class="stat-num" style="font-size:22px;">3</div><div class="stat-label">total</div></div>
+              <div class="stat-card"><div class="stat-num" style="font-size:22px;">2</div><div class="stat-label">medium</div></div>
+            </div>
+          </div>
+
+          <!-- Right panel: breakdowns + week -->
+          <div>
+            <div class="card" style="margin-bottom:14px;">
+              <h3>By difficulty</h3>
+              <div class="stacked-bar">
+                <div class="stacked-seg" style="width:25%;background:#A9C9EA;"></div>
+                <div class="stacked-seg" style="width:50%;background:#5AA9E6;"></div>
+                <div class="stacked-seg" style="width:25%;background:#1D6FB8;"></div>
+              </div>
+              <div class="bar-legend">
+                <div class="bar-legend-item"><span class="bar-legend-dot" style="background:#A9C9EA;"></span>Easy 2</div>
+                <div class="bar-legend-item"><span class="bar-legend-dot" style="background:#5AA9E6;"></span>Medium 4</div>
+                <div class="bar-legend-item"><span class="bar-legend-dot" style="background:#1D6FB8;"></span>Hard 2</div>
+              </div>
+            </div>
+            <div class="card" style="margin-bottom:14px;">
+              <h3>By priority</h3>
+              <div class="stacked-bar">
+                <div class="stacked-seg" style="width:25%;background:#F2AA9C;"></div>
+                <div class="stacked-seg" style="width:50%;background:#FF6F59;"></div>
+                <div class="stacked-seg" style="width:25%;background:#D8452A;"></div>
+              </div>
+              <div class="bar-legend">
+                <div class="bar-legend-item"><span class="bar-legend-dot" style="background:#F2AA9C;"></span>Low 2</div>
+                <div class="bar-legend-item"><span class="bar-legend-dot" style="background:#FF6F59;"></span>Med 4</div>
+                <div class="bar-legend-item"><span class="bar-legend-dot" style="background:#D8452A;"></span>High 2</div>
+              </div>
+            </div>
+            <div class="card">
+              <h3>This week</h3>
+              <div class="heatmap">
+                <div class="heat-day"><div class="heat-dot l2">2</div><div class="heat-label">Mon</div></div>
+                <div class="heat-day"><div class="heat-dot l3">4</div><div class="heat-label">Tue</div></div>
+                <div class="heat-day"><div class="heat-dot l1">1</div><div class="heat-label">Wed</div></div>
+                <div class="heat-day"><div class="heat-dot l3">5</div><div class="heat-label">Thu</div></div>
+                <div class="heat-day"><div class="heat-dot l2">3</div><div class="heat-label">Fri</div></div>
+                <div class="heat-day"><div class="heat-dot l0">0</div><div class="heat-label">Sat</div></div>
+                <div class="heat-day"><div class="heat-dot l1">1</div><div class="heat-label">Sun</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+
+function toggleHome(el) {
+  document.querySelectorAll('.mcard').forEach(c => c.classList.remove('sel'));
+  el.classList.toggle('sel');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Momentodo — Blind Test: Desktop Variant C Deep Dive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: #2A2D2A; color: #1F3A2E; }
+
+  .page-header { max-width: 1300px; margin: 0 auto; padding: 30px 24px 10px; }
+  .page-header h1 { font-family: 'Poppins', sans-serif; font-size: 26px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+  .page-header p { color: #8A9A8E; font-size: 14px; line-height: 1.5; max-width: 700px; }
+
+  .variant-section { max-width: 1300px; margin: 0 auto; padding: 0 24px 40px; }
+  .variant-label { font-size: 13px; font-weight: 700; color: #8A9A8E; letter-spacing: 0.5px; margin-bottom: 10px; }
+  .variant-desc { font-size: 12px; color: #6C8578; margin-bottom: 14px; line-height: 1.5; max-width: 700px; }
+
+  .variant-frame { background: #E9E9E4; border-radius: 16px; overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+
+  /* Shared */
+  .app-bg { background: #EEF4EE; }
+  .hero { padding: 22px 24px 6px; }
+  .hero h2 { font-family: 'Poppins', sans-serif; font-size: 22px; font-weight: 600; color: #1F3A2E; margin-bottom: 2px; }
+  .hero p { color: #6C8578; font-size: 12.5px; }
+
+  .section { padding: 0; font-size: 12px; font-weight: 700; color: #6C8578; margin: 14px 0 8px; }
+
+  .card { background: #fff; border-radius: 18px; padding: 14px; box-shadow: 0 8px 20px rgba(31,58,46,0.08); }
+  .card h3 { font-size: 13px; font-weight: 700; color: #1F3A2E; font-family: 'Poppins', sans-serif; margin-bottom: 10px; }
+
+  .mcard { border-radius: 22px; padding: 16px 12px; text-align: center; cursor: pointer; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 13px; color: #1F3A2E; }
+  .mcard .num { display: block; font-size: 26px; font-weight: 700; margin-bottom: 2px; }
+  .mcard .unit { font-size: 11px; opacity: 0.8; }
+  .mcard.m5 { background: #FFCA4D; box-shadow: 0 6px 16px rgba(255,202,77,0.4); }
+  .mcard.m15 { background: #04C495; color: #fff; box-shadow: 0 6px 16px rgba(4,196,149,0.4); }
+  .mcard.m30 { background: #4C9CE0; color: #fff; box-shadow: 0 6px 16px rgba(76,156,224,0.4); }
+  .mcard.m60 { background: #FF5A3D; color: #fff; box-shadow: 0 6px 16px rgba(255,90,61,0.4); }
+
+  .ring { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: conic-gradient(#04C495 33%, #E4EDE6 0); flex: none; }
+  .ring .inner { width: 42px; height: 42px; border-radius: 50%; background: #EEF4EE; display: flex; align-items: center; justify-content: center; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 13px; color: #1F3A2E; }
+
+  .chip { display: inline-flex; align-items: center; gap: 6px; background: #fff; border: 1px solid #DCE8E0; border-radius: 14px; padding: 8px 12px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .chip .dot { width: 6px; height: 6px; border-radius: 50%; background: #DCE8E0; }
+
+  .task-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; font-size: 13px; font-weight: 600; color: #1F3A2E; }
+  .task-row .dot { width: 6px; height: 6px; border-radius: 50%; background: #DCE8E0; flex: none; }
+  .task-row .est { margin-left: auto; font-size: 11px; color: #6C8578; font-weight: 600; }
+
+  .heatmap { display: flex; gap: 10px; justify-content: space-between; }
+  .heat-day { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .heat-dot { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+  .heat-dot.l0 { background: #EEF4EE; color: #DCE8E0; }
+  .heat-dot.l1 { background: #E4F3EA; color: #04C495; }
+  .heat-dot.l2 { background: #B8EDCF; color: #04A67A; }
+  .heat-dot.l3 { background: #04C495; color: #fff; }
+  .heat-label { font-size: 11px; color: #6C8578; font-weight: 600; }
+
+  .stacked-bar { height: 20px; border-radius: 10px; background: #EEF4E6; display: flex; overflow: hidden; margin-bottom: 6px; }
+  .stacked-seg { height: 100%; }
+  .bar-legend { display: flex; gap: 12px; }
+  .bar-legend-item { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #6C8578; }
+  .bar-legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  .timer-ring-wrap { position: relative; display: inline-block; }
+  .timer-ring-wrap svg { transform: rotate(-90deg); }
+  .timer-ring-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Poppins', sans-serif; font-size: 42px; font-weight: 700; color: #1F3A2E; }
+  .timer-ring-task { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); font-size: 11px; font-weight: 600; color: #04C495; white-space: nowrap; }
+
+  .log-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; margin-bottom: 6px; background: #fff; border-radius: 18px; box-shadow: 0 8px 20px rgba(31,58,46,0.08); font-size: 13px; }
+  .log-name { font-weight: 600; color: #1F3A2E; }
+  .log-meta { color: #6C8578; font-size: 11.5px; }
+
+  .btn-primary { background: #4C9CE0; color: #fff; border: none; border-radius: 22px; padding: 11px 24px; font-weight: 700; font-size: 13.5px; cursor: pointer; font-family: 'Inter', sans-serif; }
+  .btn-secondary { background: #fff; color: #1F3A2E; border: none; border-radius: 22px; padding: 11px 24px; font-weight: 700; font-size: 13.5px; cursor: pointer; font-family: 'Inter', sans-serif; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+
+  .mode-toggle { display: inline-flex; gap: 4px; background: #fff; padding: 3px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+  .mode-btn { border: none; background: transparent; color: #6C8578; font-size: 12px; font-weight: 700; padding: 7px 16px; border-radius: 16px; cursor: pointer; font-family: 'Inter', sans-serif; }
+  .mode-btn.on { background: #4C9CE0; color: #fff; }
+
+  /* ==================== SIDEBAR VARIANTS ==================== */
+  /* Variant A: Narrow sidebar, icons only */
+  .sa-layout { display: flex; min-height: 640px; }
+  .sa-sidebar { width: 64px; background: #1F3A2E; padding: 16px 0; flex: none; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .sa-logo { font-family: 'Poppins', sans-serif; font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 12px; }
+  .sa-nav-item { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #8A9A8E; font-size: 20px; cursor: pointer; transition: all 0.15s; }
+  .sa-nav-item:hover { background: rgba(255,255,255,0.06); }
+  .sa-nav-item.active { background: rgba(76,156,224,0.15); color: #4C9CE0; }
+  .sa-main { flex: 1; overflow-y: auto; background: #EEF4EE; }
+  .sa-content { max-width: 960px; margin: 0 auto; padding: 22px 24px; }
+
+  /* Variant B: Medium sidebar, icons + labels */
+  .sb-layout { display: flex; min-height: 640px; }
+  .sb-sidebar { width: 180px; background: #1F3A2E; padding: 20px 0; flex: none; }
+  .sb-logo { font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 600; color: #fff; padding: 0 16px 20px; }
+  .sb-nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; color: #8A9A8E; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; border-left: 3px solid transparent; }
+  .sb-nav-item:hover { background: rgba(255,255,255,0.04); }
+  .sb-nav-item.active { color: #fff; background: rgba(255,255,255,0.06); border-left-color: #4C9CE0; }
+  .sb-nav-item .icon { font-size: 18px; width: 24px; text-align: center; }
+  .sb-main { flex: 1; overflow-y: auto; background: #EEF4EE; }
+  .sb-content { max-width: 960px; margin: 0 auto; padding: 22px 24px; }
+
+  /* Variant C: Wide sidebar with user area */
+  .sc-layout { display: flex; min-height: 640px; }
+  .sc-sidebar { width: 240px; background: #1F3A2E; padding: 20px 0; flex: none; display: flex; flex-direction: column; }
+  .sc-logo { font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 600; color: #fff; padding: 0 20px 24px; }
+  .sc-nav-section { padding: 0 12px; margin-bottom: 20px; }
+  .sc-nav-label { font-size: 10px; font-weight: 700; color: #5A6A5E; text-transform: uppercase; letter-spacing: 0.5px; padding: 0 8px; margin-bottom: 6px; }
+  .sc-nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 8px; color: #8A9A8E; font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 8px; transition: all 0.15s; }
+  .sc-nav-item:hover { background: rgba(255,255,255,0.04); }
+  .sc-nav-item.active { color: #fff; background: rgba(76,156,224,0.12); }
+  .sc-nav-item .icon { font-size: 18px; width: 24px; text-align: center; }
+  .sc-spacer { flex: 1; }
+  .sc-user { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; gap: 10px; }
+  .sc-avatar { width: 32px; height: 32px; border-radius: 50%; background: #4C9CE0; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 700; }
+  .sc-user-info { font-size: 12px; color: #8A9A8E; }
+  .sc-user-info b { display: block; color: #fff; font-size: 13px; }
+  .sc-main { flex: 1; overflow-y: auto; background: #EEF4EE; }
+  .sc-content { max-width: 960px; margin: 0 auto; padding: 22px 24px; }
+
+  /* ==================== CONTENT GRID VARIANTS ==================== */
+  /* Variant D: 2-col content (ring+upnext | quickadd+tasks) */
+  .content-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  /* Variant E: 3-col stats (statcards) */
+  .stats-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .stat-card { background: #fff; border-radius: 18px; padding: 16px; text-align: center; box-shadow: 0 8px 20px rgba(31,58,46,0.08); }
+  .stat-card .stat-num { font-family: 'Poppins', sans-serif; font-size: 28px; font-weight: 700; color: #1F3A2E; }
+  .stat-card .stat-label { font-size: 11px; color: #6C8578; font-weight: 600; margin-top: 2px; }
+
+  /* ==================== Feedback ==================== */
+  .feedback { max-width: 1300px; margin: 0 auto; padding: 0 24px 40px; }
+  .feedback-box { background: #fff; border-radius: 22px; box-shadow: 0 8px 20px rgba(31,58,46,0.08); padding: 24px; }
+  .feedback-box h2 { font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+  .feedback-box .sub { font-size: 13px; color: #6C8578; margin-bottom: 16px; }
+  .feedback-group { margin-bottom: 20px; }
+  .feedback-group-title { font-size: 14px; font-weight: 700; color: #1F3A2E; margin-bottom: 10px; }
+  .feedback-options { display: flex; flex-direction: column; gap: 8px; }
+  .feedback-option { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px; font-weight: 500; }
+  .feedback-option input[type="radio"] { width: 18px; height: 18px; accent-color: #4C9CE0; cursor: pointer; }
+  .feedback-note { width: 100%; border: 1px solid #DCE8E0; border-radius: 14px; padding: 10px 14px; font-size: 13px; font-family: 'Inter', sans-serif; resize: vertical; min-height: 60px; color: #1F3A2E; }
+  .feedback-note:focus { outline: none; border-color: #4C9CE0; }
+  .submit-btn { background: #4C9CE0; color: #fff; border: none; border-radius: 14px; padding: 11px 28px; font-weight: 700; font-size: 14px; cursor: pointer; font-family: 'Inter', sans-serif; margin-top: 12px; min-height: 44px; }
+  .result { margin-top: 12px; padding: 14px; background: #E4F3EA; border-radius: 12px; font-size: 14px; font-weight: 600; display: none; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Deep Dive: Desktop Variant C</h1>
+  <p>Two independent questions within the Variant C direction (sidebar + dashboard). Answer each separately — they'll combine into the final desktop layout.</p>
+</div>
+
+<!-- ==================== QUESTION 1: SIDEBAR STYLE ==================== -->
+<div class="variant-section">
+  <div class="variant-label" style="font-size:15px;color:#fff;margin-bottom:14px;">Question 1: Sidebar style</div>
+  <div class="variant-desc" style="color:#8A9A8E;">Three sidebar widths and densities. The content area is identical in all three — focus on the sidebar alone.</div>
+
+  <!-- SIDEBAR A: Icons only, 64px -->
+  <div style="margin-bottom:20px;">
+    <div class="variant-label">Sidebar A — Icons only (64px)</div>
+    <div class="variant-desc">Minimal: just icons, no labels. Maximum content width. Tooltips on hover for discovery.</div>
+    <div class="variant-frame">
+      <div class="sa-layout">
+        <div class="sa-sidebar">
+          <div class="sa-logo">M</div>
+          <div class="sa-nav-item active" title="Home">⏳</div>
+          <div class="sa-nav-item" title="Tasks">✅</div>
+          <div class="sa-nav-item" title="Timer">⏱️</div>
+          <div class="sa-nav-item" title="Stats">📊</div>
+        </div>
+        <div class="sa-main">
+          <div class="sa-content">
+            <div class="hero"><h2>Momentodo</h2><p>Tap how much time you've got.</p></div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0;">
+              <div class="mcard m5"><span class="num">5</span><span class="unit">min</span></div>
+              <div class="mcard m15"><span class="num">15</span><span class="unit">min</span></div>
+              <div class="mcard m30"><span class="num">30</span><span class="unit">min</span></div>
+              <div class="mcard m60"><span class="num">60</span><span class="unit">min</span></div>
+            </div>
+            <div class="content-grid-2">
+              <div class="card">
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <div class="ring"><div class="inner">33%</div></div>
+                  <div style="font-size:13px;color:#6C8578;font-weight:600;"><b style="display:block;font-size:18px;color:#1F3A2E;font-family:'Poppins',sans-serif;">1/3</b>completed today</div>
+                </div>
+              </div>
+              <div class="card">
+                <h3>Up next</h3>
+                <div class="task-row"><span class="dot"></span>Reply to client email<span class="est">10m</span></div>
+                <div class="task-row"><span class="dot"></span>Review PR #482<span class="est">20m</span></div>
+                <div class="task-row"><span class="dot"></span>Outline blog post<span class="est">25m</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR B: Icons + labels, 180px -->
+  <div style="margin-bottom:20px;">
+    <div class="variant-label">Sidebar B — Icons + labels (180px)</div>
+    <div class="variant-desc">Balanced: icons with text labels, active indicator bar. Classic sidebar pattern.</div>
+    <div class="variant-frame">
+      <div class="sb-layout">
+        <div class="sb-sidebar">
+          <div class="sb-logo">Momentodo</div>
+          <div class="sb-nav-item active"><span class="icon">⏳</span>Home</div>
+          <div class="sb-nav-item"><span class="icon">✅</span>Tasks</div>
+          <div class="sb-nav-item"><span class="icon">⏱️</span>Timer</div>
+          <div class="sb-nav-item"><span class="icon">📊</span>Stats</div>
+        </div>
+        <div class="sb-main">
+          <div class="sb-content">
+            <div class="hero"><h2>Momentodo</h2><p>Tap how much time you've got.</p></div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0;">
+              <div class="mcard m5"><span class="num">5</span><span class="unit">min</span></div>
+              <div class="mcard m15"><span class="num">15</span><span class="unit">min</span></div>
+              <div class="mcard m30"><span class="num">30</span><span class="unit">min</span></div>
+              <div class="mcard m60"><span class="num">60</span><span class="unit">min</span></div>
+            </div>
+            <div class="content-grid-2">
+              <div class="card">
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <div class="ring"><div class="inner">33%</div></div>
+                  <div style="font-size:13px;color:#6C8578;font-weight:600;"><b style="display:block;font-size:18px;color:#1F3A2E;font-family:'Poppins',sans-serif;">1/3</b>completed today</div>
+                </div>
+              </div>
+              <div class="card">
+                <h3>Up next</h3>
+                <div class="task-row"><span class="dot"></span>Reply to client email<span class="est">10m</span></div>
+                <div class="task-row"><span class="dot"></span>Review PR #482<span class="est">20m</span></div>
+                <div class="task-row"><span class="dot"></span>Outline blog post<span class="est">25m</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR C: Wide with sections + user, 240px -->
+  <div>
+    <div class="variant-label">Sidebar C — Wide with sections + user (240px)</div>
+    <div class="variant-desc">Full: grouped nav sections with labels, user avatar at bottom. App feels like a desktop workspace.</div>
+    <div class="variant-frame">
+      <div class="sc-layout">
+        <div class="sc-sidebar">
+          <div class="sc-logo">Momentodo</div>
+          <div class="sc-nav-section">
+            <div class="sc-nav-label">Main</div>
+            <div class="sc-nav-item active"><span class="icon">⏳</span>Home</div>
+            <div class="sc-nav-item"><span class="icon">✅</span>Tasks</div>
+          </div>
+          <div class="sc-nav-section">
+            <div class="sc-nav-label">Focus</div>
+            <div class="sc-nav-item"><span class="icon">⏱️</span>Timer</div>
+            <div class="sc-nav-item"><span class="icon">📊</span>Stats</div>
+          </div>
+          <div class="sc-spacer"></div>
+          <div class="sc-user">
+            <div class="sc-avatar">S</div>
+            <div class="sc-user-info"><b>Sri</b>sri@momentodo.app</div>
+          </div>
+        </div>
+        <div class="sc-main">
+          <div class="sc-content">
+            <div class="hero"><h2>Momentodo</h2><p>Tap how much time you've got.</p></div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0;">
+              <div class="mcard m5"><span class="num">5</span><span class="unit">min</span></div>
+              <div class="mcard m15"><span class="num">15</span><span class="unit">min</span></div>
+              <div class="mcard m30"><span class="num">30</span><span class="unit">min</span></div>
+              <div class="mcard m60"><span class="num">60</span><span class="unit">min</span></div>
+            </div>
+            <div class="content-grid-2">
+              <div class="card">
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <div class="ring"><div class="inner">33%</div></div>
+                  <div style="font-size:13px;color:#6C8578;font-weight:600;"><b style="display:block;font-size:18px;color:#1F3A2E;font-family:'Poppins',sans-serif;">1/3</b>completed today</div>
+                </div>
+              </div>
+              <div class="card">
+                <h3>Up next</h3>
+                <div class="task-row"><span class="dot"></span>Reply to client email<span class="est">10m</span></div>
+                <div class="task-row"><span class="dot"></span>Review PR #482<span class="est">20m</span></div>
+                <div class="task-row"><span class="dot"></span>Outline blog post<span class="est">25m</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== QUESTION 2: HOME CONTENT GRID ==================== -->
+<div class="variant-section">
+  <div class="variant-label" style="font-size:15px;color:#fff;margin-bottom:14px;">Question 2: Home content layout</div>
+  <div class="variant-desc" style="color:#8A9A8E;">Two options for how the content below the moment cards is arranged. Sidebar is the same in both (Variant B style).</div>
+
+  <!-- GRID A: Two-col (ring+upnext side by side) -->
+  <div style="margin-bottom:20px;">
+    <div class="variant-label">Grid A — Two equal columns</div>
+    <div class="variant-desc">Progress ring + "up next" side by side. Quick-add full width below. Balanced, scannable.</div>
+    <div class="variant-frame">
+      <div class="sb-layout">
+        <div class="sb-sidebar">
+          <div class="sb-logo">Momentodo</div>
+          <div class="sb-nav-item active"><span class="icon">⏳</span>Home</div>
+          <div class="sb-nav-item"><span class="icon">✅</span>Tasks</div>
+          <div class="sb-nav-item"><span class="icon">⏱️</span>Timer</div>
+          <div class="sb-nav-item"><span class="icon">📊</span>Stats</div>
+        </div>
+        <div class="sb-main">
+          <div class="sb-content">
+            <div class="hero"><h2>Momentodo</h2><p>Tap how much time you've got.</p></div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0;">
+              <div class="mcard m5"><span class="num">5</span><span class="unit">min</span></div>
+              <div class="mcard m15"><span class="num">15</span><span class="unit">min</span></div>
+              <div class="mcard m30"><span class="num">30</span><span class="unit">min</span></div>
+              <div class="mcard m60"><span class="num">60</span><span class="unit">min</span></div>
+            </div>
+            <div class="content-grid-2" style="margin-bottom:14px;">
+              <div class="card">
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <div class="ring"><div class="inner">33%</div></div>
+                  <div style="font-size:13px;color:#6C8578;font-weight:600;"><b style="display:block;font-size:18px;color:#1F3A2E;font-family:'Poppins',sans-serif;">1/3</b>completed today</div>
+                </div>
+              </div>
+              <div class="card">
+                <h3>Up next</h3>
+                <div class="task-row"><span class="dot"></span>Reply to client email<span class="est">10m</span></div>
+                <div class="task-row"><span class="dot"></span>Review PR #482<span class="est">20m</span></div>
+                <div class="task-row"><span class="dot"></span>Outline blog post<span class="est">25m</span></div>
+              </div>
+            </div>
+            <div class="card">
+              <h3>Quick add</h3>
+              <div style="display:flex;gap:8px;">
+                <input type="text" placeholder="Add a task..." style="flex:1;border:1px solid #DCE8E0;border-radius:14px;padding:10px 14px;font-size:14px;font-family:'Inter',sans-serif;color:#1F3A2E;">
+                <button class="btn-primary">Add</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GRID B: Three-col (ring | upnext | quickadd+stats) -->
+  <div>
+    <div class="variant-label">Grid B — Three columns (ring | up next | quick add)</div>
+    <div class="variant-desc">All three elements in a row. Dense, information-rich. Works well at wide viewports.</div>
+    <div class="variant-frame">
+      <div class="sb-layout">
+        <div class="sb-sidebar">
+          <div class="sb-logo">Momentodo</div>
+          <div class="sb-nav-item active"><span class="icon">⏳</span>Home</div>
+          <div class="sb-nav-item"><span class="icon">✅</span>Tasks</div>
+          <div class="sb-nav-item"><span class="icon">⏱️</span>Timer</div>
+          <div class="sb-nav-item"><span class="icon">📊</span>Stats</div>
+        </div>
+        <div class="sb-main">
+          <div class="sb-content">
+            <div class="hero"><h2>Momentodo</h2><p>Tap how much time you've got.</p></div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0;">
+              <div class="mcard m5"><span class="num">5</span><span class="unit">min</span></div>
+              <div class="mcard m15"><span class="num">15</span><span class="unit">min</span></div>
+              <div class="mcard m30"><span class="num">30</span><span class="unit">min</span></div>
+              <div class="mcard m60"><span class="num">60</span><span class="unit">min</span></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:14px;margin-bottom:14px;">
+              <div class="card" style="display:flex;align-items:center;gap:12px;">
+                <div class="ring"><div class="inner">33%</div></div>
+                <div style="font-size:13px;color:#6C8578;font-weight:600;"><b style="display:block;font-size:18px;color:#1F3A2E;font-family:'Poppins',sans-serif;">1/3</b>completed</div>
+              </div>
+              <div class="card">
+                <h3>Up next</h3>
+                <div class="task-row"><span class="dot"></span>Reply to client email<span class="est">10m</span></div>
+                <div class="task-row"><span class="dot"></span>Review PR #482<span class="est">20m</span></div>
+                <div class="task-row"><span class="dot"></span>Outline blog post<span class="est">25m</span></div>
+              </div>
+              <div class="card">
+                <h3>Quick add</h3>
+                <input type="text" placeholder="Add a task..." style="width:100%;border:1px solid #DCE8E0;border-radius:14px;padding:10px 14px;font-size:13px;font-family:'Inter',sans-serif;color:#1F3A2E;margin-bottom:8px;">
+                <button class="btn-primary" style="width:100%;">Add</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== QUESTION 3: TIMER SCREEN ==================== -->
+<div class="variant-section">
+  <div class="variant-label" style="font-size:15px;color:#fff;margin-bottom:14px;">Question 3: Timer screen on desktop</div>
+  <div class="variant-desc" style="color:#8A9A8E;">How the timer screen should look on desktop. Ring is the same — the question is what goes beside it.</div>
+
+  <!-- TIMER A: Ring centered, log below -->
+  <div style="margin-bottom:20px;">
+    <div class="variant-label">Timer A — Ring centered, log below</div>
+    <div class="variant-desc">Same as mobile layout, just wider. Ring centered, session log below. Simple, focused.</div>
+    <div class="variant-frame">
+      <div class="sb-layout">
+        <div class="sb-sidebar">
+          <div class="sb-logo">Momentodo</div>
+          <div class="sb-nav-item"><span class="icon">⏳</span>Home</div>
+          <div class="sb-nav-item"><span class="icon">✅</span>Tasks</div>
+          <div class="sb-nav-item active"><span class="icon">⏱️</span>Timer</div>
+          <div class="sb-nav-item"><span class="icon">📊</span>Stats</div>
+        </div>
+        <div class="sb-main">
+          <div class="sb-content" style="max-width:600px;">
+            <div class="hero"><h2>Timer</h2><p>Stay focused, track your time.</p></div>
+            <div style="text-align:center;padding:20px 0;">
+              <div class="mode-toggle" style="margin-bottom:18px;">
+                <button class="mode-btn on">Focus 25</button>
+                <button class="mode-btn">Stopwatch</button>
+              </div>
+              <div style="position:relative;display:inline-block;margin:16px 0;">
+                <svg width="160" height="160" viewBox="0 0 160 160" style="transform:rotate(-90deg);">
+                  <circle cx="80" cy="80" r="70" fill="none" stroke="#E4EDE6" stroke-width="10"/>
+                  <circle cx="80" cy="80" r="70" fill="none" stroke="#04C495" stroke-width="10" stroke-linecap="round" stroke-dasharray="439.82" stroke-dashoffset="293"/>
+                </svg>
+                <div class="timer-ring-text">12:34</div>
+                <div class="timer-ring-task">Review PR #482</div>
+              </div>
+              <div style="display:flex;gap:10px;justify-content:center;margin-top:18px;">
+                <button class="btn-secondary">Pause</button>
+                <button class="btn-secondary">Reset</button>
+              </div>
+            </div>
+            <div class="section">Recent sessions</div>
+            <div class="log-row"><div><div class="log-name">Review PR #482</div><div class="log-meta">Focus · 25:00</div></div><div class="log-meta">2:30 PM</div></div>
+            <div class="log-row"><div><div class="log-name">No task</div><div class="log-meta">Stopwatch · 12:34</div></div><div class="log-meta">1:15 PM</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIMER B: Ring + log side by side -->
+  <div>
+    <div class="variant-label">Timer B — Ring + session log side by side</div>
+    <div class="variant-desc">Ring on the left, session log on the right. Uses the wide desktop space. Denser, more dashboard-like.</div>
+    <div class="variant-frame">
+      <div class="sb-layout">
+        <div class="sb-sidebar">
+          <div class="sb-logo">Momentodo</div>
+          <div class="sb-nav-item"><span class="icon">⏳</span>Home</div>
+          <div class="sb-nav-item"><span class="icon">✅</span>Tasks</div>
+          <div class="sb-nav-item active"><span class="icon">⏱️</span>Timer</div>
+          <div class="sb-nav-item"><span class="icon">📊</span>Stats</div>
+        </div>
+        <div class="sb-main">
+          <div class="sb-content">
+            <div class="hero"><h2>Timer</h2><p>Stay focused, track your time.</p></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px;">
+              <div class="card" style="text-align:center;">
+                <div class="mode-toggle" style="margin-bottom:14px;">
+                  <button class="mode-btn on">Focus 25</button>
+                  <button class="mode-btn">Stopwatch</button>
+                </div>
+                <div style="position:relative;display:inline-block;margin:12px 0;">
+                  <svg width="140" height="140" viewBox="0 0 140 140" style="transform:rotate(-90deg);">
+                    <circle cx="70" cy="70" r="60" fill="none" stroke="#E4EDE6" stroke-width="8"/>
+                    <circle cx="70" cy="70" r="60" fill="none" stroke="#04C495" stroke-width="8" stroke-linecap="round" stroke-dasharray="376.99" stroke-dashoffset="251"/>
+                  </svg>
+                  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Poppins',sans-serif;font-size:36px;font-weight:700;color:#1F3A2E;">12:34</div>
+                  <div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:600;color:#04C495;">Review PR #482</div>
+                </div>
+                <div style="display:flex;gap:10px;justify-content:center;margin-top:14px;">
+                  <button class="btn-secondary">Pause</button>
+                  <button class="btn-secondary">Reset</button>
+                </div>
+              </div>
+              <div class="card">
+                <h3>Recent sessions</h3>
+                <div style="display:flex;flex-direction:column;gap:6px;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #F0F4F0;font-size:13px;">
+                    <div><div style="font-weight:600;color:#1F3A2E;">Review PR #482</div><div style="color:#6C8578;font-size:11px;">Focus · 25:00</div></div>
+                    <div style="color:#6C8578;font-size:11px;">2:30 PM</div>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #F0F4F0;font-size:13px;">
+                    <div><div style="font-weight:600;color:#1F3A2E;">No task</div><div style="color:#6C8578;font-size:11px;">Stopwatch · 12:34</div></div>
+                    <div style="color:#6C8578;font-size:11px;">1:15 PM</div>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:13px;">
+                    <div><div style="font-weight:600;color:#1F3A2E;">Outline blog post</div><div style="color:#6C8578;font-size:11px;">Focus · 25:00</div></div>
+                    <div style="color:#6C8578;font-size:11px;">11:00 AM</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== QUESTION 4: STATS SCREEN ==================== -->
+<div class="variant-section">
+  <div class="variant-label" style="font-size:15px;color:#fff;margin-bottom:14px;">Question 4: Stats screen on desktop</div>
+  <div class="variant-desc" style="color:#8A9A8E;">How the stats dashboard should reflow on wide screens.</div>
+
+  <!-- STATS A: 4-col stat grid + 2-col breakdowns -->
+  <div style="margin-bottom:20px;">
+    <div class="variant-label">Stats A — 4-col stats, 2-col breakdowns</div>
+    <div class="variant-desc">Stat cards in a 4-column row. Breakdowns side by side (difficulty left, priority right). Week chart full width below.</div>
+    <div class="variant-frame">
+      <div class="sb-layout">
+        <div class="sb-sidebar">
+          <div class="sb-logo">Momentodo</div>
+          <div class="sb-nav-item"><span class="icon">⏳</span>Home</div>
+          <div class="sb-nav-item"><span class="icon">✅</span>Tasks</div>
+          <div class="sb-nav-item"><span class="icon">⏱️</span>Timer</div>
+          <div class="sb-nav-item active"><span class="icon">📊</span>Stats</div>
+        </div>
+        <div class="sb-main">
+          <div class="sb-content">
+            <div class="hero"><h2>Stats</h2><p>How today's going.</p></div>
+            <div class="stats-grid-3" style="grid-template-columns:repeat(4,1fr);margin:14px 0;">
+              <div class="stat-card"><div class="stat-num">1/3</div><div class="stat-label">completed</div></div>
+              <div class="stat-card"><div class="stat-num">3</div><div class="stat-label">tasks total</div></div>
+              <div class="stat-card"><div class="stat-num">2</div><div class="stat-label">medium</div></div>
+              <div class="stat-card"><div class="stat-num">1</div><div class="stat-label">high priority</div></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+              <div class="card">
+                <h3>By difficulty</h3>
+                <div class="stacked-bar">
+                  <div class="stacked-seg" style="width:25%;background:#A9C9EA;"></div>
+                  <div class="stacked-seg" style="width:50%;background:#5AA9E6;"></div>
+                  <div class="stacked-seg" style="width:25%;background:#1D6FB8;"></div>
+                </div>
+                <div class="bar-legend">
+                  <div class="bar-legend-item"><span class="bar-legend-dot" style="background:#A9C9EA;"></span>Easy 2</div>
+                  <div class="bar-legend-item"><span class="bar-legend-dot" style="background:#5AA9E6;"></span>Medium 4</div>
+                  <div class="bar-legend-item"><span class="bar-legend-dot" style="background:#1D6FB8;"></span>Hard 2</div>
+                </div>
+              </div>
+              <div class="card">
+                <h3>By priority</h3>
+                <div class="stacked-bar">
+                  <div class="stacked-seg" style="width:25%;background:#F2AA9C;"></div>
+                  <div class="stacked-seg" style="width:50%;background:#FF6F59;"></div>
+                  <div class="stacked-seg" style="width:25%;background:#D8452A;"></div>
+                </div>
+                <div class="bar-legend">
+                  <div class="bar-legend-item"><span class="bar-legend-dot" style="background:#F2AA9C;"></span>Low 2</div>
+                  <div class="bar-legend-item"><span class="bar-legend-dot" style="background:#FF6F59;"></span>Med 4</div>
+                  <div class="bar-legend-item"><span class="bar-legend-dot" style="background:#D8452A;"></span>High 2</div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <h3>This week</h3>
+              <div class="heatmap">
+                <div class="heat-day"><div class="heat-dot l2">2</div><div class="heat-label">Mon</div></div>
+                <div class="heat-day"><div class="heat-dot l3">4</div><div class="heat-label">Tue</div></div>
+                <div class="heat-day"><div class="heat-dot l1">1</div><div class="heat-label">Wed</div></div>
+                <div class="heat-day"><div class="heat-dot l3">5</div><div class="heat-label">Thu</div></div>
+                <div class="heat-day"><div class="heat-dot l2">3</div><div class="heat-label">Fri</div></div>
+                <div class="heat-day"><div class="heat-dot l0">0</div><div class="heat-label">Sat</div></div>
+                <div class="heat-day"><div class="heat-dot l1">1</div><div class="heat-label">Sun</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS B: 2-col layout (ring hero left, breakdowns right) -->
+  <div>
+    <div class="variant-label">Stats B — Two-panel layout (ring hero | breakdowns)</div>
+    <div class="variant-desc">Left panel: large ring + summary. Right panel: stacked breakdowns + week chart. Asymmetric, editorial feel.</div>
+    <div class="variant-frame">
+      <div class="sb-layout">
+        <div class="sb-sidebar">
+          <div class="sb-logo">Momentodo</div>
+          <div class="sb-nav-item"><span class="icon">⏳</span>Home</div>
+          <div class="sb-nav-item"><span class="icon">✅</span>Tasks</div>
+          <div class="sb-nav-item"><span class="icon">⏱️</span>Timer</div>
+          <div class="sb-nav-item active"><span class="icon">📊</span>Stats</div>
+        </div>
+        <div class="sb-main">
+          <div class="sb-content">
+            <div class="hero"><h2>Stats</h2><p>How today's going.</p></div>
+            <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:16px;margin-top:14px;">
+              <div>
+                <div class="card" style="text-align:center;margin-bottom:14px;">
+                  <div style="width:120px;height:120px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:conic-gradient(#04C495 33%,#E4EDE6 0);margin:0 auto 12px;">
+                    <div style="width:90px;height:90px;border-radius:50%;background:#EEF4EE;display:flex;align-items:center;justify-content:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:28px;color:#1F3A2E;">33%</div>
+                  </div>
+                  <div style="font-size:13px;color:#6C8578;font-weight:600;"><b style="display:block;font-size:22px;color:#1F3A2E;font-family:'Poppins',sans-serif;">1/3</b>completed today</div>
+                </div>
+                <div class="stats-grid-3" style="grid-template-columns:1fr 1fr;">
+                  <div class="stat-card"><div class="stat-num" style="font-size:22px;">3</div><div class="stat-label">total</div></div>
+                  <div class="stat-card"><div class="stat-num" style="font-size:22px;">2</div><div class="stat-label">medium</div></div>
+                </div>
+              </div>
+              <div>
+                <div class="card" style="margin-bottom:14px;">
+                  <h3>By difficulty</h3>
+                  <div class="stacked-bar">
+                    <div class="stacked-seg" style="width:25%;background:#A9C9EA;"></div>
+                    <div class="stacked-seg" style="width:50%;background:#5AA9E6;"></div>
+                    <div class="stacked-seg" style="width:25%;background:#1D6FB8;"></div>
+                  </div>
+                  <div class="bar-legend">
+                    <div class="bar-legend-item"><span class="bar-legend-dot" style="background:#A9C9EA;"></span>Easy 2</div>
+                    <div class="bar-legend-item"><span class="bar-legend-dot" style="background:#5AA9E6;"></span>Medium 4</div>
+                    <div class="bar-legend-item"><span class="bar-legend-dot" style="background:#1D6FB8;"></span>Hard 2</div>
+                  </div>
+                </div>
+                <div class="card" style="margin-bottom:14px;">
+                  <h3>By priority</h3>
+                  <div class="stacked-bar">
+                    <div class="stacked-seg" style="width:25%;background:#F2AA9C;"></div>
+                    <div class="stacked-seg" style="width:50%;background:#FF6F59;"></div>
+                    <div class="stacked-seg" style="width:25%;background:#D8452A;"></div>
+                  </div>
+                  <div class="bar-legend">
+                    <div class="bar-legend-item"><span class="bar-legend-dot" style="background:#F2AA9C;"></span>Low 2</div>
+                    <div class="bar-legend-item"><span class="bar-legend-dot" style="background:#FF6F59;"></span>Med 4</div>
+                    <div class="bar-legend-item"><span class="bar-legend-dot" style="background:#D8452A;"></span>High 2</div>
+                  </div>
+                </div>
+                <div class="card">
+                  <h3>This week</h3>
+                  <div class="heatmap">
+                    <div class="heat-day"><div class="heat-dot l2">2</div><div class="heat-label">Mon</div></div>
+                    <div class="heat-day"><div class="heat-dot l3">4</div><div class="heat-label">Tue</div></div>
+                    <div class="heat-day"><div class="heat-dot l1">1</div><div class="heat-label">Wed</div></div>
+                    <div class="heat-day"><div class="heat-dot l3">5</div><div class="heat-label">Thu</div></div>
+                    <div class="heat-day"><div class="heat-dot l2">3</div><div class="heat-label">Fri</div></div>
+                    <div class="heat-day"><div class="heat-dot l0">0</div><div class="heat-label">Sat</div></div>
+                    <div class="heat-day"><div class="heat-dot l1">1</div><div class="heat-label">Sun</div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FEEDBACK ===== -->
+<div class="feedback">
+  <div class="feedback-box">
+    <h2>Pick your favorites</h2>
+    <p class="sub">One answer per question. These will combine into the final desktop layout.</p>
+
+    <div class="feedback-group">
+      <div class="feedback-group-title">Q1: Sidebar style</div>
+      <div class="feedback-options">
+        <label class="feedback-option"><input type="radio" name="sidebar" value="A"> A — Icons only (64px)</label>
+        <label class="feedback-option"><input type="radio" name="sidebar" value="B"> B — Icons + labels (180px)</label>
+        <label class="feedback-option"><input type="radio" name="sidebar" value="C"> C — Wide with sections + user (240px)</label>
+      </div>
+    </div>
+
+    <div class="feedback-group">
+      <div class="feedback-group-title">Q2: Home content layout</div>
+      <div class="feedback-options">
+        <label class="feedback-option"><input type="radio" name="homeGrid" value="A"> A — Two equal columns</label>
+        <label class="feedback-option"><input type="radio" name="homeGrid" value="B"> B — Three columns (ring | up next | quick add)</label>
+      </div>
+    </div>
+
+    <div class="feedback-group">
+      <div class="feedback-group-title">Q3: Timer screen</div>
+      <div class="feedback-options">
+        <label class="feedback-option"><input type="radio" name="timer" value="A"> A — Ring centered, log below</label>
+        <label class="feedback-option"><input type="radio" name="timer" value="B"> B — Ring + session log side by side</label>
+      </div>
+    </div>
+
+    <div class="feedback-group">
+      <div class="feedback-group-title">Q4: Stats screen</div>
+      <div class="feedback-options">
+        <label class="feedback-option"><input type="radio" name="stats" value="A"> A — 4-col stats, 2-col breakdowns</label>
+        <label class="feedback-option"><input type="radio" name="stats" value="B"> B — Two-panel (ring hero | breakdowns)</label>
+      </div>
+    </div>
+
+    <textarea class="feedback-note" placeholder="Any notes?"></textarea>
+    <button class="submit-btn" onclick="submitFeedback()">Submit</button>
+    <div class="result" id="result-msg"></div>
+  </div>
+</div>
+
+<script>
+function submitFeedback() {
+  const sidebar = document.querySelector('input[name="sidebar"]:checked');
+  const homeGrid = document.querySelector('input[name="homeGrid"]:checked');
+  const timer = document.querySelector('input[name="timer"]:checked');
+  const stats = document.querySelector('input[name="stats"]:checked');
+  const note = document.querySelector('.feedback-note').value;
+  if(!sidebar || !homeGrid || !timer || !stats) { alert('Please pick a variant for each question.'); return; }
+  const msg = document.getElementById('result-msg');
+  msg.style.display = 'block';
+  msg.innerHTML = '<strong>Desktop layout:</strong> Sidebar '+sidebar.value+' + Home grid '+homeGrid.value+' + Timer '+timer.value+' + Stats '+stats.value+(note ? '<br>Notes: "'+note+'"' : '');
+}
+</script>
+</body>
+</html>

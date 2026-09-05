@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Momentodo — Blind Test: Desktop Layout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: #2A2D2A; color: #1F3A2E; }
+
+  .page-header { max-width: 1200px; margin: 0 auto; padding: 30px 24px 10px; }
+  .page-header h1 { font-family: 'Poppins', sans-serif; font-size: 26px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+  .page-header p { color: #8A9A8E; font-size: 14px; line-height: 1.5; }
+
+  .variant-section { max-width: 1200px; margin: 0 auto; padding: 0 24px 40px; }
+  .variant-label { font-size: 13px; font-weight: 700; color: #8A9A8E; letter-spacing: 0.5px; margin-bottom: 10px; }
+  .variant-desc { font-size: 12px; color: #6C8578; margin-bottom: 14px; line-height: 1.5; }
+
+  .variant-frame { background: #E9E9E4; border-radius: 16px; overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+
+  /* ==================== VARIANT A: Centered phone frame ==================== */
+  .va-wrap { display: flex; justify-content: center; padding: 24px; background: #3A3D3A; min-height: 600px; }
+  .va-phone { width: 460px; background: #EEF4EE; border-radius: 22px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.25); min-height: 560px; }
+  .va-phone .app-content { padding-bottom: 80px; }
+
+  /* Shared styles */
+  .app-bg { background: #EEF4EE; }
+  .hero { padding: 22px 20px 6px; }
+  .hero h2 { font-family: 'Poppins', sans-serif; font-size: 22px; font-weight: 600; color: #1F3A2E; margin-bottom: 2px; }
+  .hero p { color: #6C8578; font-size: 12.5px; }
+
+  /* Moment cards */
+  .moments-2x2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 14px 20px; }
+  .moments-4col { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 14px 20px; }
+  .mcard { border-radius: 22px; padding: 16px 12px; text-align: center; cursor: pointer; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 13px; color: #1F3A2E; }
+  .mcard .num { display: block; font-size: 26px; font-weight: 700; margin-bottom: 2px; }
+  .mcard .unit { font-size: 11px; opacity: 0.8; }
+  .mcard.m5 { background: #FFCA4D; box-shadow: 0 6px 16px rgba(255,202,77,0.4); }
+  .mcard.m15 { background: #04C495; color: #fff; box-shadow: 0 6px 16px rgba(4,196,149,0.4); }
+  .mcard.m30 { background: #4C9CE0; color: #fff; box-shadow: 0 6px 16px rgba(76,156,224,0.4); }
+  .mcard.m60 { background: #FF5A3D; color: #fff; box-shadow: 0 6px 16px rgba(255,90,61,0.4); }
+
+  /* Progress ring */
+  .ring-row { display: flex; align-items: center; gap: 14px; margin: 0 20px 14px; padding: 14px; background: #fff; border-radius: 22px; box-shadow: 0 8px 20px rgba(31,58,46,0.08); }
+  .ring { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: conic-gradient(#04C495 33%, #E4EDE6 0); flex: none; }
+  .ring .inner { width: 48px; height: 48px; border-radius: 50%; background: #EEF4EE; display: flex; align-items: center; justify-content: center; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 14px; color: #1F3A2E; }
+  .ring-text { font-size: 13px; color: #6C8578; font-weight: 600; }
+  .ring-text b { display: block; font-size: 18px; color: #1F3A2E; font-family: 'Poppins', sans-serif; }
+
+  /* Chips */
+  .chips-row { display: flex; gap: 8px; overflow-x: auto; padding: 0 20px 4px; }
+  .chip { display: flex; align-items: center; gap: 6px; background: #fff; border: 1px solid #DCE8E0; border-radius: 14px; padding: 8px 12px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .chip .dot { width: 6px; height: 6px; border-radius: 50%; background: #DCE8E0; }
+
+  /* Section label */
+  .section { padding: 0 20px; font-size: 12px; font-weight: 700; color: #6C8578; margin: 12px 0 8px; }
+
+  /* ==================== VARIANT B: Sidebar + expanded ==================== */
+  .vb-layout { display: flex; min-height: 600px; }
+  .vb-sidebar { width: 200px; background: #1F3A2E; padding: 20px 0; flex: none; }
+  .vb-sidebar .logo { font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 600; color: #fff; padding: 0 20px 20px; }
+  .vb-nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; color: #8A9A8E; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+  .vb-nav-item:hover { background: rgba(255,255,255,0.05); }
+  .vb-nav-item.active { color: #fff; background: rgba(255,255,255,0.08); border-right: 3px solid #4C9CE0; }
+  .vb-nav-item .icon { font-size: 18px; width: 24px; text-align: center; }
+  .vb-main { flex: 1; overflow-y: auto; background: #EEF4EE; }
+  .vb-content { max-width: 680px; margin: 0 auto; padding: 22px 20px; }
+
+  /* Two-col layout */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 0 20px; }
+
+  /* ==================== VARIANT C: Full dashboard ==================== */
+  .vc-layout { display: flex; min-height: 600px; }
+  .vc-sidebar { width: 220px; background: #1F3A2E; padding: 20px 0; flex: none; }
+  .vc-sidebar .logo { font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 600; color: #fff; padding: 0 20px 24px; }
+  .vc-nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; color: #8A9A8E; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .vc-nav-item.active { color: #fff; background: rgba(255,255,255,0.08); border-right: 3px solid #4C9CE0; }
+  .vc-nav-item .icon { font-size: 18px; width: 24px; text-align: center; }
+  .vc-main { flex: 1; overflow-y: auto; background: #EEF4EE; }
+  .vc-content { max-width: 960px; margin: 0 auto; padding: 22px 24px; }
+
+  /* 4-col stat grid */
+  .stats-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 14px 0; }
+  .stat-card { background: #fff; border-radius: 18px; padding: 16px; text-align: center; box-shadow: 0 8px 20px rgba(31,58,46,0.08); }
+  .stat-card .stat-num { font-family: 'Poppins', sans-serif; font-size: 28px; font-weight: 700; color: #1F3A2E; }
+  .stat-card .stat-label { font-size: 11px; color: #6C8578; font-weight: 600; margin-top: 2px; }
+
+  /* Stacked bar */
+  .stacked-bar { height: 20px; border-radius: 10px; background: #EEF4E6; display: flex; overflow: hidden; margin-bottom: 6px; }
+  .stacked-seg { height: 100%; }
+  .bar-legend { display: flex; gap: 12px; }
+  .bar-legend-item { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #6C8578; }
+  .bar-legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* Heatmap */
+  .heatmap { display: flex; gap: 10px; justify-content: space-between; }
+  .heat-day { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .heat-dot { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+  .heat-dot.l0 { background: #EEF4EE; color: #DCE8E0; }
+  .heat-dot.l1 { background: #E4F3EA; color: #04C495; }
+  .heat-dot.l2 { background: #B8EDCF; color: #04A67A; }
+  .heat-dot.l3 { background: #04C495; color: #fff; }
+  .heat-label { font-size: 11px; color: #6C8578; font-weight: 600; }
+
+  /* Timer ring */
+  .timer-ring-wrap { position: relative; display: inline-block; }
+  .timer-ring-wrap svg { transform: rotate(-90deg); }
+  .timer-ring-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Poppins', sans-serif; font-size: 48px; font-weight: 700; color: #1F3A2E; }
+  .timer-ring-task { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); font-size: 12px; font-weight: 600; color: #04C495; white-space: nowrap; }
+  .timer-center { text-align: center; padding: 20px; }
+
+  /* Session log */
+  .log-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; margin-bottom: 6px; background: #fff; border-radius: 18px; box-shadow: 0 8px 20px rgba(31,58,46,0.08); font-size: 13px; }
+  .log-name { font-weight: 600; color: #1F3A2E; }
+  .log-meta { color: #6C8578; font-size: 11.5px; }
+
+  /* Card */
+  .card { background: #fff; border-radius: 18px; padding: 14px; box-shadow: 0 8px 20px rgba(31,58,46,0.08); }
+  .card h3 { font-size: 13px; font-weight: 700; color: #1F3A2E; font-family: 'Poppins', sans-serif; margin-bottom: 10px; }
+
+  /* ==================== VARIANT D: Fluid bottom-nav ==================== */
+  .vd-wrap { display: flex; justify-content: center; background: #3A3D3A; min-height: 600px; }
+  .vd-container { width: 100%; max-width: 900px; background: #EEF4EE; min-height: 600px; position: relative; }
+  .vd-content { padding: 22px 24px 90px; }
+  .moments-3col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 14px 0; }
+  .vd-bottom-nav { position: absolute; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #DCE8E0; display: flex; padding: 8px 6px 12px; }
+  .vd-nav-btn { flex: 1; background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; color: #6C8578; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; padding: 4px 0; }
+  .vd-nav-btn.active { color: #4C9CE0; }
+  .vd-nav-btn .icon { font-size: 19px; }
+
+  /* Feedback */
+  .feedback { max-width: 1200px; margin: 0 auto; padding: 0 24px 40px; }
+  .feedback-box { background: #fff; border-radius: 22px; box-shadow: 0 8px 20px rgba(31,58,46,0.08); padding: 24px; }
+  .feedback-box h2 { font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 600; margin-bottom: 14px; }
+  .feedback-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+  .feedback-option { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px; font-weight: 500; }
+  .feedback-option input[type="radio"] { width: 18px; height: 18px; accent-color: #4C9CE0; cursor: pointer; }
+  .feedback-note { width: 100%; border: 1px solid #DCE8E0; border-radius: 14px; padding: 10px 14px; font-size: 13px; font-family: 'Inter', sans-serif; resize: vertical; min-height: 60px; color: #1F3A2E; }
+  .feedback-note:focus { outline: none; border-color: #4C9CE0; }
+  .submit-btn { background: #4C9CE0; color: #fff; border: none; border-radius: 14px; padding: 11px 28px; font-weight: 700; font-size: 14px; cursor: pointer; font-family: 'Inter', sans-serif; margin-top: 12px; min-height: 44px; }
+  .result { margin-top: 12px; padding: 14px; background: #E4F3EA; border-radius: 12px; font-size: 14px; font-weight: 600; display: none; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Blind Test: Desktop Layout</h1>
+  <p>Compare 4 ways the app could adapt to desktop-width screens. Each shows the same Home screen content. Focus on: container width, navigation placement, and how the grid reflows. Pick your favorite below.</p>
+</div>
+
+<!-- ===== VARIANT A: Centered phone frame ===== -->
+<div class="variant-section">
+  <div class="variant-label">Variant A</div>
+  <div class="variant-desc">Keep the 460px mobile layout, center it on screen with a dark background. No adaptation — it's a phone-sized app on desktop.</div>
+  <div class="variant-frame">
+    <div class="va-wrap">
+      <div class="va-phone app-bg">
+        <div class="app-content">
+          <div class="hero"><h2>Momentodo</h2><p>Tap how much time you've got.</p></div>
+          <div class="moments-2x2">
+            <div class="mcard m5"><span class="num">5</span><span class="unit">minutes</span></div>
+            <div class="mcard m15"><span class="num">15</span><span class="unit">minutes</span></div>
+            <div class="mcard m30"><span class="num">30</span><span class="unit">minutes</span></div>
+            <div class="mcard m60"><span class="num">60</span><span class="unit">minutes</span></div>
+          </div>
+          <div class="ring-row">
+            <div class="ring"><div class="inner">33%</div></div>
+            <div class="ring-text"><b>1/3</b>tasks completed today</div>
+          </div>
+          <div class="section">Up next</div>
+          <div class="chips-row">
+            <div class="chip"><span class="dot"></span>Reply to client email</div>
+            <div class="chip"><span class="dot"></span>Review PR #482</div>
+            <div class="chip"><span class="dot"></span>Outline blog post</div>
+          </div>
+        </div>
+        <div style="position:absolute;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #DCE8E0;display:flex;padding:8px 6px 12px;">
+          <div style="flex:1;text-align:center;font-size:11px;font-weight:600;color:#4C9CE0;padding:4px 0;"><span style="font-size:19px;display:block;">⏳</span>Home</div>
+          <div style="flex:1;text-align:center;font-size:11px;font-weight:600;color:#6C8578;padding:4px 0;"><span style="font-size:19px;display:block;">✅</span>Tasks</div>
+          <div style="flex:1;text-align:center;font-size:11px;font-weight:600;color:#6C8578;padding:4px 0;"><span style="font-size:19px;display:block;">⏱️</span>Timer</div>
+          <div style="flex:1;text-align:center;font-size:11px;font-weight:600;color:#6C8578;padding:4px 0;"><span style="font-size:19px;display:block;">📊</span>Stats</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== VARIANT B: Sidebar nav + single column ===== -->
+<div class="variant-section">
+  <div class="variant-label">Variant B</div>
+  <div class="variant-desc">Left sidebar navigation (dark green), single-column content area (680px max). Content stays simple — wider cards, more breathing room. No grid reflow.</div>
+  <div class="variant-frame">
+    <div class="vb-layout">
+      <div class="vb-sidebar">
+        <div class="logo">Momentodo</div>
+        <div class="vb-nav-item active"><span class="icon">⏳</span>Home</div>
+        <div class="vb-nav-item"><span class="icon">✅</span>Tasks</div>
+        <div class="vb-nav-item"><span class="icon">⏱️</span>Timer</div>
+        <div class="vb-nav-item"><span class="icon">📊</span>Stats</div>
+      </div>
+      <div class="vb-main">
+        <div class="vb-content">
+          <div class="hero"><h2>Momentodo</h2><p>Tap how much time you've got.</p></div>
+          <div class="moments-2x2">
+            <div class="mcard m5"><span class="num">5</span><span class="unit">minutes</span></div>
+            <div class="mcard m15"><span class="num">15</span><span class="unit">minutes</span></div>
+            <div class="mcard m30"><span class="num">30</span><span class="unit">minutes</span></div>
+            <div class="mcard m60"><span class="num">60</span><span class="unit">minutes</span></div>
+          </div>
+          <div class="ring-row">
+            <div class="ring"><div class="inner">33%</div></div>
+            <div class="ring-text"><b>1/3</b>tasks completed today</div>
+          </div>
+          <div class="section">Up next</div>
+          <div class="chips-row">
+            <div class="chip"><span class="dot"></span>Reply to client email</div>
+            <div class="chip"><span class="dot"></span>Review PR #482</div>
+            <div class="chip"><span class="dot"></span>Outline blog post</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== VARIANT C: Sidebar + multi-column dashboard ===== -->
+<div class="variant-section">
+  <div class="variant-label">Variant C</div>
+  <div class="variant-desc">Left sidebar navigation, wide content area (960px). Grids reflow: moment cards go 4-across, stats go 4-across, timer + session log side-by-side. Dashboard feel.</div>
+  <div class="variant-frame">
+    <div class="vc-layout">
+      <div class="vc-sidebar">
+        <div class="logo">Momentodo</div>
+        <div class="vc-nav-item active"><span class="icon">⏳</span>Home</div>
+        <div class="vc-nav-item"><span class="icon">✅</span>Tasks</div>
+        <div class="vc-nav-item"><span class="icon">⏱️</span>Timer</div>
+        <div class="vc-nav-item"><span class="icon">📊</span>Stats</div>
+      </div>
+      <div class="vc-main">
+        <div class="vc-content">
+          <div class="hero"><h2>Momentodo</h2><p>Tap how much time you've got.</p></div>
+
+          <!-- Moment cards: 4 across -->
+          <div class="moments-4col">
+            <div class="mcard m5"><span class="num">5</span><span class="unit">minutes</span></div>
+            <div class="mcard m15"><span class="num">15</span><span class="unit">minutes</span></div>
+            <div class="mcard m30"><span class="num">30</span><span class="unit">minutes</span></div>
+            <div class="mcard m60"><span class="num">60</span><span class="unit">minutes</span></div>
+          </div>
+
+          <!-- Two-col: ring + up next -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:0 0 14px;">
+            <div class="ring-row" style="margin:0;">
+              <div class="ring"><div class="inner">33%</div></div>
+              <div class="ring-text"><b>1/3</b>tasks completed today</div>
+            </div>
+            <div class="card" style="margin:0;">
+              <h3>Up next</h3>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;"><span style="width:6px;height:6px;border-radius:50%;background:#DCE8E0;flex:none;"></span>Reply to client email<span style="margin-left:auto;font-size:11px;color:#6C8578;">10m</span></div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;"><span style="width:6px;height:6px;border-radius:50%;background:#DCE8E0;flex:none;"></span>Review PR #482<span style="margin-left:auto;font-size:11px;color:#6C8578;">20m</span></div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;"><span style="width:6px;height:6px;border-radius:50%;background:#DCE8E0;flex:none;"></span>Outline blog post<span style="margin-left:auto;font-size:11px;color:#6C8578;">25m</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick add -->
+          <div class="card" style="margin-bottom:14px;">
+            <h3>Quick add</h3>
+            <div style="display:flex;gap:8px;">
+              <input type="text" placeholder="Add a task..." style="flex:1;border:1px solid #DCE8E0;border-radius:14px;padding:10px 14px;font-size:14px;font-family:'Inter',sans-serif;color:#1F3A2E;">
+              <button style="background:#1F3A2E;color:#fff;border:none;border-radius:14px;padding:0 20px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;">Add</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== VARIANT D: Fluid center, bottom nav ===== -->
+<div class="variant-section">
+  <div class="variant-label">Variant D</div>
+  <div class="variant-desc">Max-width 900px centered, bottom nav stays. Moment cards go 3-across. Content has more room but stays simple. Bottom nav persists on desktop.</div>
+  <div class="variant-frame">
+    <div class="vd-wrap">
+      <div class="vd-container app-bg" style="position:relative;">
+        <div class="vd-content">
+          <div class="hero"><h2>Momentodo</h2><p>Tap how much time you've got.</p></div>
+
+          <!-- 3-col moment cards -->
+          <div class="moments-3col">
+            <div class="mcard m5"><span class="num">5</span><span class="unit">minutes</span></div>
+            <div class="mcard m15"><span class="num">15</span><span class="unit">minutes</span></div>
+            <div class="mcard m30"><span class="num">30</span><span class="unit">minutes</span></div>
+          </div>
+          <div style="padding:0 0 14px;">
+            <div class="mcard m60" style="max-width:calc(33.33% - 7px);display:inline-block;vertical-align:top;"><span class="num">60</span><span class="unit">minutes</span></div>
+          </div>
+
+          <div class="ring-row">
+            <div class="ring"><div class="inner">33%</div></div>
+            <div class="ring-text"><b>1/3</b>tasks completed today</div>
+          </div>
+          <div class="section">Up next</div>
+          <div class="chips-row">
+            <div class="chip"><span class="dot"></span>Reply to client email</div>
+            <div class="chip"><span class="dot"></span>Review PR #482</div>
+            <div class="chip"><span class="dot"></span>Outline blog post</div>
+          </div>
+        </div>
+        <div class="vd-bottom-nav">
+          <div class="vd-nav-btn active"><span class="icon">⏳</span>Home</div>
+          <div class="vd-nav-btn"><span class="icon">✅</span>Tasks</div>
+          <div class="vd-nav-btn"><span class="icon">⏱️</span>Timer</div>
+          <div class="vd-nav-btn"><span class="icon">📊</span>Stats</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FEEDBACK ===== -->
+<div class="feedback">
+  <div class="feedback-box">
+    <h2>Pick your favorite</h2>
+    <div class="feedback-options">
+      <label class="feedback-option"><input type="radio" name="fav" value="A"> Variant A — Centered phone frame</label>
+      <label class="feedback-option"><input type="radio" name="fav" value="B"> Variant B — Sidebar nav, single column</label>
+      <label class="feedback-option"><input type="radio" name="fav" value="C"> Variant C — Sidebar nav, multi-column dashboard</label>
+      <label class="feedback-option"><input type="radio" name="fav" value="D"> Variant D — Fluid center, bottom nav stays</label>
+    </div>
+    <textarea class="feedback-note" placeholder="Any notes? What did you like or dislike about each?"></textarea>
+    <button class="submit-btn" onclick="submitFeedback()">Submit</button>
+    <div class="result" id="result-msg"></div>
+  </div>
+</div>
+
+<script>
+function submitFeedback() {
+  const fav = document.querySelector('input[name="fav"]:checked');
+  const note = document.querySelector('.feedback-note').value;
+  if(!fav) { alert('Please pick a favorite variant.'); return; }
+  const msg = document.getElementById('result-msg');
+  msg.style.display = 'block';
+  msg.innerHTML = '<strong>Thanks!</strong> You picked Variant '+fav.value+(note ? '. Notes: "'+note+'"' : '.');
+}
+</script>
+</body>
+</html>

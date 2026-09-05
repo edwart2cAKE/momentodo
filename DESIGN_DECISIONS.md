@@ -64,3 +64,44 @@ The stats screen uses a dense dashboard layout:
 - Overall feel: data-dense, scannable, no wasted space
 
 Reference: `design-reference/blind-test-stats.html` (Variant C)
+
+---
+
+## Desktop Layout (screens wider than ~900px)
+
+Chosen via blind test (`design-reference/blind-test-desktop-deep.html`).
+These are the rules for how the mobile-first layouts adapt to desktop widths.
+
+### Sidebar: Variant B — Icons + Labels (180px)
+
+- Left sidebar, 180px wide, dark green (#1F3A2E) background
+- App name at top, then nav items: icon + text label
+- Active item: white text, left border accent (#4C9CE0)
+- Content area fills remaining width, max-width 960px, centered
+- Bottom nav is replaced by sidebar on desktop
+
+### Home: Grid A — Two Equal Columns
+
+- Moment cards go to 4-column row (instead of 2x2)
+- Below moment cards: two equal columns
+  - Left: Progress ring (56px) + "1/3 completed today"
+  - Right: "Up next" task list (up to 3 tasks)
+- Quick-add input goes full width below the two columns
+- Selected moment card still shows inline expansion beneath the grid
+
+### Timer: Variant A — Ring Centered, Task Beside Ring
+
+- Timer ring centered, same as mobile but wider
+- **Task name placed NEXT TO the ring** (not inside it) — a labeled chip
+  or card to the right of the ring showing the active task, so it's
+  visible at a glance without looking inside the ring
+- Session log below the timer (same as mobile)
+- Mode toggle above the ring (same as mobile)
+
+### Stats: Variant B — Two-Panel Layout
+
+- Left panel (narrower): Large ring hero (120px) + completion summary +
+  2x1 stat card grid (total tasks, medium count)
+- Right panel (wider): Stacked breakdowns (difficulty + priority) +
+  heatmap week chart, stacked vertically
+- Asymmetric split, editorial feel
