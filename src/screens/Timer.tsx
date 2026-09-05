@@ -1,4 +1,5 @@
 import { useTimerStore, useTaskStore } from '../store'
+import { useMediaQuery, DESKTOP_BREAKPOINT } from '../hooks'
 import { color, typography, radius, shadow } from '../theme/tokens'
 
 const FOCUS_SECONDS = 25 * 60
@@ -24,6 +25,7 @@ export function Timer() {
   const start = useTimerStore((s) => s.start)
   const pause = useTimerStore((s) => s.pause)
   const reset = useTimerStore((s) => s.reset)
+  const isDesktop = useMediaQuery(DESKTOP_BREAKPOINT)
 
   const tasks = useTaskStore((s) => s.tasks)
   const incompleteTasks = tasks.filter((t) => !t.done)
@@ -80,8 +82,8 @@ export function Timer() {
   }
 
   return (
-    <div style={{ paddingBottom: '84px' }}>
-      <div style={{ textAlign: 'center', padding: '30px 20px 20px' }}>
+    <div style={{ paddingBottom: isDesktop ? '22px' : '84px' }}>
+      <div style={{ textAlign: 'center', padding: isDesktop ? '30px 24px 20px' : '30px 20px 20px' }}>
         {/* Mode toggle */}
         <div
           style={{
@@ -102,70 +104,112 @@ export function Timer() {
           </button>
         </div>
 
-        {/* Progress ring */}
-        <div style={{ position: 'relative', display: 'inline-block', margin: '16px 0' }}>
-          <svg
-            width="160"
-            height="160"
-            viewBox="0 0 160 160"
-            style={{ transform: 'rotate(-90deg)' }}
-          >
-            {/* Background circle */}
-            <circle
-              cx="80"
-              cy="80"
-              r={RING_RADIUS}
-              fill="none"
-              stroke={color.ringEmpty}
-              strokeWidth={RING_STROKE}
-            />
-            {/* Progress circle */}
-            <circle
-              cx="80"
-              cy="80"
-              r={RING_RADIUS}
-              fill="none"
-              stroke={ringColor}
-              strokeWidth={RING_STROKE}
-              strokeLinecap="round"
-              strokeDasharray={CIRCUMFERENCE}
-              strokeDashoffset={ringOffset}
-              style={{ transition: 'stroke-dashoffset 1s linear, stroke 0.3s' }}
-            />
-          </svg>
-          {/* Timer text */}
-          <div
-            style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              fontFamily: typography.headingFont,
-              fontSize: '42px',
-              fontWeight: 700,
-              color: color.ink,
-            }}
-          >
-            {displayTime}
+        {/* Timer area: ring + task chip on desktop, ring only on mobile */}
+        <div
+          style={{
+            display: isDesktop ? 'flex' : 'block',
+            alignItems: isDesktop ? 'center' : undefined,
+            justifyContent: isDesktop ? 'center' : undefined,
+            gap: isDesktop ? '24px' : undefined,
+            margin: '16px 0',
+          }}
+        >
+          {/* Progress ring */}
+          <div style={{ position: 'relative', display: 'inline-block' }}>
+            <svg
+              width="160"
+              height="160"
+              viewBox="0 0 160 160"
+              style={{ transform: 'rotate(-90deg)' }}
+            >
+              <circle
+                cx="80"
+                cy="80"
+                r={RING_RADIUS}
+                fill="none"
+                stroke={color.ringEmpty}
+                strokeWidth={RING_STROKE}
+              />
+              <circle
+                cx="80"
+                cy="80"
+                r={RING_RADIUS}
+                fill="none"
+                stroke={ringColor}
+                strokeWidth={RING_STROKE}
+                strokeLinecap="round"
+                strokeDasharray={CIRCUMFERENCE}
+                strokeDashoffset={ringOffset}
+                style={{ transition: 'stroke-dashoffset 1s linear, stroke 0.3s' }}
+              />
+            </svg>
+            <div
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                fontFamily: typography.headingFont,
+                fontSize: '42px',
+                fontWeight: 700,
+                color: color.ink,
+              }}
+            >
+              {displayTime}
+            </div>
+            {/* Task name inside ring — mobile only */}
+            {!isDesktop && (
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: '12px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  color: running ? color.moment['15min'] : color.inkSoft,
+                  whiteSpace: 'nowrap',
+                  maxWidth: '120px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {taskName}
+              </div>
+            )}
           </div>
-          {/* Task name inside ring */}
-          <div
-            style={{
-              position: 'absolute',
-              bottom: '12px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              fontSize: '11px',
-              fontWeight: 600,
-              color: running ? color.moment['15min'] : color.inkSoft,
-              whiteSpace: 'nowrap',
-              maxWidth: '120px',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
-          >
-            {taskName}
-          </div>
+
+          {/* Active task chip — desktop only, NEXT TO ring */}
+          {isDesktop && selectedTask && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                background: color.surface,
+                border: `2px solid ${color.moment['15min']}`,
+                borderRadius: '16px',
+                padding: '12px 16px',
+                textAlign: 'left',
+              }}
+            >
+              <span
+                style={{
+                  width: '10px',
+                  height: '10px',
+                  borderRadius: '50%',
+                  background: color.moment['15min'],
+                  flex: 'none',
+                }}
+              />
+              <div>
+                <div style={{ fontSize: '14px', fontWeight: 700, color: color.ink }}>{selectedTask.title}</div>
+                <div style={{ fontSize: '11px', color: color.inkSoft, marginTop: '2px' }}>
+                  {mode === 'focus' ? 'Focus session' : 'Stopwatch'} · {displayTime} {mode === 'focus' ? 'remaining' : 'elapsed'}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Task selector */}
@@ -196,7 +240,7 @@ export function Timer() {
           </select>
         </div>
 
-        {/* Controls — Start/Pause toggle + Reset */}
+        {/* Controls */}
         <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '18px' }}>
           <button
             style={actionBtnStyle}
@@ -211,10 +255,10 @@ export function Timer() {
       </div>
 
       {/* Session log */}
-      <div style={{ padding: '4px 20px 8px', fontSize: '12px', fontWeight: 700, color: color.inkSoft }}>
+      <div style={{ padding: isDesktop ? '4px 24px 8px' : '4px 20px 8px', fontSize: '12px', fontWeight: 700, color: color.inkSoft }}>
         Recent sessions
       </div>
-      <div style={{ padding: '8px 20px' }}>
+      <div style={{ padding: isDesktop ? '8px 24px' : '8px 20px' }}>
         {sessions.length > 0 ? (
           sessions.map((s) => {
             const task = tasks.find((t) => t.id === s.taskId)

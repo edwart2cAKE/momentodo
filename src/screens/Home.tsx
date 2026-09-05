@@ -3,6 +3,7 @@ import type { MomentDuration } from '../types'
 import { useTaskStore, useUpNext, useCompletedToday, useTotalToday, useCompletionPercentage } from '../store'
 import { MomentCard, Ring } from '../components'
 import { MOMENT_DURATIONS } from '../types'
+import { useMediaQuery, DESKTOP_BREAKPOINT } from '../hooks'
 import { color, typography, layout, radius, shadow, motion } from '../theme/tokens'
 
 interface HomeProps {
@@ -16,14 +17,15 @@ export function Home({ onNavigateToTasks }: HomeProps) {
   const completed = useCompletedToday()
   const total = useTotalToday()
   const pct = useCompletionPercentage()
+  const isDesktop = useMediaQuery(DESKTOP_BREAKPOINT)
 
   const matchingTasks = momentFilter !== null
     ? tasks.filter((t) => !t.done && t.estimatedMinutes !== null && t.estimatedMinutes <= momentFilter)
     : []
 
   return (
-    <div style={{ paddingBottom: '84px' }}>
-      <div style={{ padding: '22px 20px 6px' }}>
+    <div style={{ paddingBottom: isDesktop ? '22px' : '84px' }}>
+      <div style={{ padding: isDesktop ? '22px 24px 6px' : '22px 20px 6px' }}>
         <h1
           style={{
             fontFamily: typography.headingFont,
@@ -40,13 +42,13 @@ export function Home({ onNavigateToTasks }: HomeProps) {
         </p>
       </div>
 
-      {/* Moment grid — 2x2 */}
+      {/* Moment grid — 4-col on desktop, 2-col on mobile */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: `repeat(${layout.momentGridColumns}, 1fr)`,
+          gridTemplateColumns: isDesktop ? 'repeat(4, 1fr)' : `repeat(${layout.momentGridColumns}, 1fr)`,
           gap: layout.momentGridGap,
-          padding: '14px 20px',
+          padding: isDesktop ? '14px 24px' : '14px 20px',
         }}
       >
         {MOMENT_DURATIONS.map((d) => (
@@ -63,7 +65,7 @@ export function Home({ onNavigateToTasks }: HomeProps) {
       {momentFilter !== null && (
         <div
           style={{
-            margin: '-6px 20px 12px',
+            margin: isDesktop ? '-6px 24px 12px' : '-6px 20px 12px',
             padding: '14px',
             background: color.surface,
             borderRadius: '18px',
@@ -121,89 +123,148 @@ export function Home({ onNavigateToTasks }: HomeProps) {
         </div>
       )}
 
-      {/* Progress ring + text */}
+      {/* Two-column: ring + up next on desktop, stacked on mobile */}
       <div
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '14px',
-          margin: '0 20px 14px',
+          display: 'grid',
+          gridTemplateColumns: isDesktop ? '1fr 1fr' : '1fr',
+          gap: '16px',
+          margin: isDesktop ? '0 24px 14px' : '0 20px 14px',
+        }}
+      >
+        {/* Progress ring + text */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '14px',
+            padding: '14px',
+            background: color.surface,
+            borderRadius: radius.card,
+            boxShadow: shadow.cardDefault,
+          }}
+        >
+          <Ring percentage={pct} size={isDesktop ? 56 : 56} innerSize={isDesktop ? 42 : 42} fontSize="13px" />
+          <div style={{ fontSize: '13px', color: color.inkSoft, fontWeight: 600 }}>
+            <span
+              style={{
+                display: 'block',
+                fontSize: '18px',
+                color: color.ink,
+                fontFamily: typography.headingFont,
+              }}
+            >
+              {completed}/{total}
+            </span>
+            tasks completed today
+          </div>
+        </div>
+
+        {/* Up next */}
+        <div
+          style={{
+            padding: '14px',
+            background: color.surface,
+            borderRadius: radius.card,
+            boxShadow: shadow.cardDefault,
+          }}
+        >
+          <div style={{ fontSize: '12px', fontWeight: 700, color: color.inkSoft, marginBottom: '8px' }}>
+            Up next
+          </div>
+          {upNext.length > 0 ? (
+            upNext.map((t) => (
+              <div
+                key={t.id}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '8px 0',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  color: color.ink,
+                }}
+              >
+                <span
+                  style={{
+                    width: '6px',
+                    height: '6px',
+                    borderRadius: '50%',
+                    background: color.line,
+                    flex: 'none',
+                  }}
+                />
+                <span style={{ flex: 1 }}>{t.title}</span>
+                <span style={{ fontSize: '11px', color: color.inkSoft, fontWeight: 600 }}>
+                  {t.estimatedMinutes}m
+                </span>
+              </div>
+            ))
+          ) : (
+            <div style={{ color: color.inkSoft, fontSize: '13px' }}>All clear</div>
+          )}
+          <div
+            onClick={onNavigateToTasks}
+            style={{
+              display: 'block',
+              textAlign: 'center',
+              padding: '8px',
+              color: color.moment['30min'],
+              fontWeight: 700,
+              fontSize: '13px',
+              cursor: 'pointer',
+            }}
+          >
+            See all tasks →
+          </div>
+        </div>
+      </div>
+
+      {/* Quick add */}
+      <div
+        style={{
+          margin: isDesktop ? '0 24px' : '0 20px',
           padding: '14px',
           background: color.surface,
           borderRadius: radius.card,
           boxShadow: shadow.cardDefault,
         }}
       >
-        <Ring percentage={pct} size={56} innerSize={42} fontSize="13px" />
-        <div style={{ fontSize: '13px', color: color.inkSoft, fontWeight: 600 }}>
-          <span
-            style={{
-              display: 'block',
-              fontSize: '18px',
-              color: color.ink,
-              fontFamily: typography.headingFont,
-            }}
-          >
-            {completed}/{total}
-          </span>
-          tasks completed today
+        <div style={{ fontSize: '12px', fontWeight: 700, color: color.inkSoft, marginBottom: '8px' }}>
+          Quick add
         </div>
-      </div>
-
-      {/* Up next — horizontal scroll chips */}
-      <div style={{ padding: '0 20px 8px', fontSize: '12px', fontWeight: 700, color: color.inkSoft }}>
-        Up next
-      </div>
-      <div
-        style={{
-          display: 'flex',
-          gap: '8px',
-          overflowX: 'auto',
-          padding: '0 20px 4px',
-        }}
-      >
-        {upNext.map((t) => (
-          <div
-            key={t.id}
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <input
+            type="text"
+            placeholder="Add a task..."
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              background: color.surface,
+              flex: 1,
               border: `1px solid ${color.line}`,
               borderRadius: radius.chip,
-              padding: '8px 12px',
-              fontSize: '12px',
-              fontWeight: 600,
-              whiteSpace: 'nowrap',
-              flex: 'none',
+              padding: '10px 14px',
+              fontSize: '14px',
+              fontFamily: typography.bodyFont,
+              color: color.ink,
+              outline: 'none',
+            }}
+          />
+          <button
+            style={{
+              background: color.moment['30min'],
+              color: color.white,
+              border: 'none',
+              borderRadius: radius.chip,
+              padding: '10px 18px',
+              fontWeight: 700,
+              fontSize: '13px',
+              cursor: 'pointer',
+              fontFamily: typography.bodyFont,
             }}
           >
-            <span
-              style={{
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                background: color.line,
-              }}
-            />
-            {t.title}
-          </div>
-        ))}
-      </div>
-      <div
-        onClick={onNavigateToTasks}
-        style={{
-          display: 'block',
-          textAlign: 'center',
-          padding: '8px',
-          color: color.moment['30min'],
-          fontWeight: 700,
-          fontSize: '13px',
-          cursor: 'pointer',
-        }}
-      >
-        See all tasks →
+            Add
+          </button>
+        </div>
       </div>
     </div>
   )
