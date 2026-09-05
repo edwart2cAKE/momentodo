@@ -1,6 +1,6 @@
 import { useTimerStore, useTaskStore } from '../store'
 import { TimerDisplay } from '../components'
-import { color, typography } from '../theme/tokens'
+import { color, typography, radius, shadow } from '../theme/tokens'
 
 function formatTime(sec: number): string {
   const m = Math.floor(sec / 60)
@@ -28,26 +28,26 @@ export function Timer() {
   const modeBtnStyle = (active: boolean) => ({
     border: 'none',
     background: active ? color.moment['30min'] : 'transparent',
-    color: active ? '#FFFFFF' : color.inkSoft,
+    color: active ? color.white : color.inkSoft,
     fontSize: '12px',
     fontWeight: 700,
     padding: '7px 16px',
-    borderRadius: '16px',
+    borderRadius: radius.modeToggle,
     cursor: 'pointer' as const,
     fontFamily: typography.bodyFont,
   })
 
   const ctlBtnStyle = (primary: boolean) => ({
     border: 'none',
-    borderRadius: '22px',
+    borderRadius: radius.card,
     padding: '11px 24px',
     fontWeight: 700,
     fontSize: '13.5px',
     cursor: 'pointer' as const,
     fontFamily: typography.bodyFont,
     background: primary ? color.moment['30min'] : color.surface,
-    color: primary ? '#FFFFFF' : color.ink,
-    boxShadow: primary ? 'none' : '0 2px 8px rgba(0,0,0,0.04)',
+    color: primary ? color.white : color.ink,
+    boxShadow: primary ? 'none' : shadow.cardSmall,
   })
 
   return (
@@ -60,9 +60,9 @@ export function Timer() {
             gap: '4px',
             background: color.surface,
             padding: '3px',
-            borderRadius: '20px',
+            borderRadius: radius.modeToggle,
             marginBottom: '18px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+            boxShadow: shadow.cardSmall,
           }}
         >
           <button style={modeBtnStyle(mode === 'focus')} onClick={() => setMode('focus')}>
@@ -86,7 +86,7 @@ export function Timer() {
             }}
             style={{
               border: `1px solid ${color.line}`,
-              borderRadius: '12px',
+              borderRadius: radius.select,
               padding: '8px 14px',
               fontSize: '13px',
               color: color.ink,
@@ -142,8 +142,8 @@ export function Timer() {
                   marginBottom: '6px',
                   fontSize: '13px',
                   background: color.surface,
-                  borderRadius: '22px',
-                  boxShadow: '0 8px 20px rgba(31,58,46,0.08)',
+                  borderRadius: radius.card,
+                  boxShadow: shadow.cardDefault,
                 }}
               >
                 <div>

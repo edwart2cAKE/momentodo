@@ -23,7 +23,7 @@ const glowMap: Record<MomentDuration, string> = {
 
 export function MomentCard({ duration, selected, onClick }: MomentCardProps) {
   const isLight = duration === 5
-  const textColor = isLight ? color.ink : '#FFFFFF'
+  const textColor = isLight ? color.ink : color.white
 
   return (
     <button

@@ -17,7 +17,7 @@ export function Ring({ percentage }: RingProps) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: `conic-gradient(${color.moment['15min']} ${clamped}%, #E4EDE6 0)`,
+        background: `conic-gradient(${color.moment['15min']} ${clamped}%, ${color.ringEmpty} 0)`,
       }}
     >
       <div

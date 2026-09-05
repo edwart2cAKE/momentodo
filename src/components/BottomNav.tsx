@@ -51,6 +51,7 @@ export function BottomNav({ active, onNavigate }: BottomNavProps) {
               fontSize: '11px',
               fontWeight: 600,
               padding: '4px 0',
+              minHeight: '44px',
               transition: `color ${motion.duration} ${motion.easing}`,
             }}
           >

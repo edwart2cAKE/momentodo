@@ -7,9 +7,12 @@
 export const color = {
   background: '#EEF4EE',
   surface: '#FFFFFF',
+  white: '#FFFFFF',
   ink: '#1F3A2E',
   inkSoft: '#6C8578',
   line: '#DCE8E0',
+  needsDetailsBg: '#FFF7E0',
+  ringEmpty: '#E4EDE6',
   moment: {
     '5min': '#FFCA4D',
     '15min': '#04C495',
@@ -26,10 +29,14 @@ export const color = {
 export const radius = {
   card: '22px',
   pill: '14px',
+  modeToggle: '20px',
+  filterBtn: '10px',
+  select: '10px',
 } as const
 
 export const shadow = {
   cardDefault: '0 8px 20px rgba(31,58,46,0.08)',
+  cardSmall: '0 2px 8px rgba(0,0,0,0.04)',
   momentCardDefault: '0 6px 14px rgba(0,0,0,0.10)',
   momentCardGlow: {
     '5min': '0 6px 16px rgba(255,202,77,0.45)',

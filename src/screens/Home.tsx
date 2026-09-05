@@ -3,7 +3,7 @@ import type { MomentDuration } from '../types'
 import { useTaskStore, useUpNext, useCompletedToday, useTotalToday } from '../store'
 import { MomentCard, TaskRow, ProgressBar } from '../components'
 import { MOMENT_DURATIONS } from '../types'
-import { color, typography, layout } from '../theme/tokens'
+import { color, typography, layout, radius, shadow, motion } from '../theme/tokens'
 
 interface HomeProps {
   onNavigateToTasks: () => void
@@ -70,9 +70,9 @@ export function Home({ onNavigateToTasks }: HomeProps) {
             margin: '0 20px 14px',
             padding: '12px 14px',
             background: color.surface,
-            borderRadius: '22px',
-            boxShadow: '0 8px 20px rgba(31,58,46,0.08)',
-            animation: 'fadeSlide 280ms cubic-bezier(0.34,1.56,0.64,1)',
+            borderRadius: radius.card,
+            boxShadow: shadow.cardDefault,
+            animation: `fadeSlide ${motion.duration} ${motion.easing}`,
           }}
         >
           <div
@@ -121,8 +121,8 @@ export function Home({ onNavigateToTasks }: HomeProps) {
           alignItems: 'center',
           gap: '10px',
           background: color.surface,
-          borderRadius: '22px',
-          boxShadow: '0 8px 20px rgba(31,58,46,0.08)',
+          borderRadius: radius.card,
+          boxShadow: shadow.cardDefault,
         }}
       >
         <span style={{ fontSize: '11.5px', fontWeight: 700, color: color.inkSoft, whiteSpace: 'nowrap' }}>

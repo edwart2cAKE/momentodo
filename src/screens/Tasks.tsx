@@ -1,7 +1,7 @@
 import { useState } from 'preact/hooks'
 import { useTaskStore } from '../store'
 import { TaskRow } from '../components'
-import { color, radius, typography } from '../theme/tokens'
+import { color, radius, shadow, typography } from '../theme/tokens'
 
 type StatusFilter = 'all' | 'active' | 'done'
 type SortBy = 'default' | 'priority' | 'difficulty' | 'time'
@@ -36,9 +36,10 @@ export function Tasks() {
   const filterBtnStyle = (active: boolean) => ({
     border: `1px solid ${active ? color.ink : color.line}`,
     background: active ? color.ink : color.surface,
-    color: active ? '#FFFFFF' : color.inkSoft,
-    borderRadius: '10px',
+    color: active ? color.white : color.inkSoft,
+    borderRadius: radius.filterBtn,
     padding: '6px 12px',
+    minHeight: '44px',
     fontSize: '12.5px',
     fontWeight: 600,
     cursor: 'pointer' as const,
@@ -88,7 +89,7 @@ export function Tasks() {
           onClick={handleAdd}
           style={{
             background: color.ink,
-            color: '#FFFFFF',
+            color: color.white,
             border: 'none',
             borderRadius: radius.pill,
             padding: '0 16px',
@@ -118,7 +119,7 @@ export function Tasks() {
           onChange={(e) => setSortBy((e.target as HTMLSelectElement).value as SortBy)}
           style={{
             border: `1px solid ${color.line}`,
-            borderRadius: '10px',
+            borderRadius: radius.select,
             padding: '6px 10px',
             fontSize: '12.5px',
             color: color.ink,
@@ -155,8 +156,8 @@ export function Tasks() {
               color: color.inkSoft,
               fontSize: '13px',
               background: color.surface,
-              borderRadius: '22px',
-              boxShadow: '0 8px 20px rgba(31,58,46,0.08)',
+              borderRadius: radius.card,
+              boxShadow: shadow.cardDefault,
             }}
           >
             Nothing here.

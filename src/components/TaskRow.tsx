@@ -45,10 +45,12 @@ export function TaskRow({
         style={{
           width: '20px',
           height: '20px',
+          minWidth: '44px',
+          minHeight: '44px',
           borderRadius: '50%',
           border: `2px solid ${color.moment['30min']}`,
           background: task.done ? color.moment['30min'] : 'transparent',
-          color: task.done ? '#FFFFFF' : 'transparent',
+          color: task.done ? color.white : 'transparent',
           flex: 'none',
           marginTop: '1px',
           cursor: 'pointer',
@@ -112,6 +114,8 @@ export function TaskRow({
             fontSize: '15px',
             alignSelf: 'center',
             padding: '4px',
+            minWidth: '44px',
+            minHeight: '44px',
           }}
         >
           ✕
@@ -128,7 +132,7 @@ function Tag({ label, style }: { label: string;   style?: preact.CSSProperties }
         fontSize: typography.sizes.tag,
         padding: '2px 8px',
         borderRadius: '8px',
-        background: '#EEF4EE',
+        background: color.background,
         color: color.inkSoft,
         fontWeight: 700,
         ...style,

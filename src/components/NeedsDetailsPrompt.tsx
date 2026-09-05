@@ -14,7 +14,7 @@ export function NeedsDetailsPrompt({ task, onSetField, onDismiss }: NeedsDetails
   return (
     <div
       style={{
-        background: '#FFF7E0',
+        background: color.needsDetailsBg,
         borderRadius: '10px',
         padding: '8px',
         marginTop: '6px',

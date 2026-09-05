@@ -7,7 +7,7 @@ import {
 } from '../store'
 import { difficultyLabels, priorityLabels } from '../store/config'
 import { Ring } from '../components'
-import { color, typography } from '../theme/tokens'
+import { color, typography, radius, shadow } from '../theme/tokens'
 import type { Difficulty, Priority } from '../types'
 
 const weekMock = [
@@ -24,7 +24,7 @@ function BreakdownBar({ label, count, max, barColor }: { label: string; count: n
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontSize: '12.5px', color: color.inkSoft }}>
       <div style={{ width: '60px', flex: 'none', fontWeight: 600 }}>{label}</div>
-      <div style={{ flex: 1, height: '8px', borderRadius: '4px', background: '#EEF4EE', overflow: 'hidden' }}>
+      <div style={{ flex: 1, height: '8px', borderRadius: '4px', background: color.background, overflow: 'hidden' }}>
         <div
           style={{
             height: '100%',
@@ -84,8 +84,8 @@ export function Stats() {
           margin: '6px 20px 14px',
           padding: '14px',
           background: color.surface,
-          borderRadius: '22px',
-          boxShadow: '0 8px 20px rgba(31,58,46,0.08)',
+          borderRadius: radius.card,
+          boxShadow: shadow.cardDefault,
         }}
       >
         <h3 style={{ margin: '0 0 10px', fontSize: '13px', color: color.ink, fontFamily: typography.headingFont }}>
@@ -108,8 +108,8 @@ export function Stats() {
           margin: '6px 20px 14px',
           padding: '14px',
           background: color.surface,
-          borderRadius: '22px',
-          boxShadow: '0 8px 20px rgba(31,58,46,0.08)',
+          borderRadius: radius.card,
+          boxShadow: shadow.cardDefault,
         }}
       >
         <h3 style={{ margin: '0 0 10px', fontSize: '13px', color: color.ink, fontFamily: typography.headingFont }}>
@@ -139,8 +139,8 @@ export function Stats() {
           margin: '6px 20px 4px',
           padding: '12px 14px',
           background: color.surface,
-          borderRadius: '22px',
-          boxShadow: '0 8px 20px rgba(31,58,46,0.08)',
+          borderRadius: radius.card,
+          boxShadow: shadow.cardDefault,
         }}
       >
         {weekMock.map((w) => (
