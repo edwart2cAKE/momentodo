@@ -24,6 +24,26 @@ export const color = {
     med: { bg: '#FFF3D6', text: '#A67300' },
     high: { bg: '#FFE3DD', text: '#C1401F' },
   },
+  heatmap: {
+    level0: '#EEF4EE',
+    level0Text: '#DCE8E0',
+    level1: '#E4F3EA',
+    level1Text: '#04C495',
+    level2: '#B8EDCF',
+    level2Text: '#04A67A',
+    level3: '#04C495',
+    level3Text: '#FFFFFF',
+  },
+  difficultyBar: {
+    easy: '#A9C9EA',
+    medium: '#5AA9E6',
+    hard: '#1D6FB8',
+  },
+  priorityBar: {
+    low: '#F2AA9C',
+    med: '#FF6F59',
+    high: '#D8452A',
+  },
 } as const
 
 export const radius = {
@@ -32,6 +52,9 @@ export const radius = {
   modeToggle: '20px',
   filterBtn: '10px',
   select: '10px',
+  heatmapDot: '8px',
+  stackedBar: '10px',
+  chip: '14px',
 } as const
 
 export const shadow = {
@@ -78,8 +101,12 @@ export const typography = {
 
 export const layout = {
   maxWidth: '460px',
-  momentGridColumns: 4,
-  momentGridGap: '8px',
+  momentGridColumns: 2,
+  momentGridGap: '10px',
+  heatmapDotSize: '28px',
+  stackedBarHeight: '20px',
+  timerRingSize: '160px',
+  timerRingStroke: '10',
 } as const
 
 export const iconography = {

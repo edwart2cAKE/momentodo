@@ -1,7 +1,7 @@
 import { useState } from 'preact/hooks'
 import type { MomentDuration } from '../types'
-import { useTaskStore, useUpNext, useCompletedToday, useTotalToday } from '../store'
-import { MomentCard, TaskRow, ProgressBar } from '../components'
+import { useTaskStore, useUpNext, useCompletedToday, useTotalToday, useCompletionPercentage } from '../store'
+import { MomentCard, Ring } from '../components'
 import { MOMENT_DURATIONS } from '../types'
 import { color, typography, layout, radius, shadow, motion } from '../theme/tokens'
 
@@ -12,18 +12,14 @@ interface HomeProps {
 export function Home({ onNavigateToTasks }: HomeProps) {
   const [momentFilter, setMomentFilter] = useState<MomentDuration | null>(null)
   const tasks = useTaskStore((s) => s.tasks)
-  const toggleTask = useTaskStore((s) => s.toggleTask)
-  const setTaskField = useTaskStore((s) => s.setTaskField)
-  const dismissNeedsDetails = useTaskStore((s) => s.dismissNeedsDetails)
-  const upNext = useUpNext(3)
+  const upNext = useUpNext(4)
   const completed = useCompletedToday()
   const total = useTotalToday()
+  const pct = useCompletionPercentage()
 
   const matchingTasks = momentFilter !== null
     ? tasks.filter((t) => !t.done && t.estimatedMinutes !== null && t.estimatedMinutes <= momentFilter)
     : []
-
-  const progress = total > 0 ? completed / total : 0
 
   return (
     <div style={{ paddingBottom: '84px' }}>
@@ -39,18 +35,18 @@ export function Home({ onNavigateToTasks }: HomeProps) {
         >
           Momentodo
         </h1>
-        <p style={{ margin: 0, color: color.inkSoft, fontSize: '13px' }}>
+        <p style={{ margin: 0, color: color.inkSoft, fontSize: '12.5px' }}>
           Tap how much time you've got.
         </p>
       </div>
 
-      {/* Moment grid */}
+      {/* Moment grid — 2x2 */}
       <div
         style={{
           display: 'grid',
           gridTemplateColumns: `repeat(${layout.momentGridColumns}, 1fr)`,
           gap: layout.momentGridGap,
-          padding: '12px 20px',
+          padding: '14px 20px',
         }}
       >
         {MOMENT_DURATIONS.map((d) => (
@@ -63,14 +59,14 @@ export function Home({ onNavigateToTasks }: HomeProps) {
         ))}
       </div>
 
-      {/* Accordion */}
+      {/* Inline expansion — task chips */}
       {momentFilter !== null && (
         <div
           style={{
-            margin: '0 20px 14px',
-            padding: '12px 14px',
+            margin: '-6px 20px 12px',
+            padding: '14px',
             background: color.surface,
-            borderRadius: radius.card,
+            borderRadius: '18px',
             boxShadow: shadow.cardDefault,
             animation: `fadeSlide ${motion.duration} ${motion.easing}`,
           }}
@@ -91,60 +87,108 @@ export function Home({ onNavigateToTasks }: HomeProps) {
                 key={t.id}
                 style={{
                   display: 'flex',
-                  gap: '8px',
                   alignItems: 'center',
-                  padding: '6px 0',
-                  fontSize: '13.5px',
+                  gap: '8px',
+                  padding: '8px 12px',
+                  background: '#f8faf8',
+                  borderRadius: radius.chip,
+                  marginBottom: '6px',
+                  fontSize: '13px',
+                  fontWeight: 600,
                   color: color.ink,
                 }}
               >
-                <span>{t.title}</span>
-                <span style={{ marginLeft: 'auto', fontSize: '11px', color: color.inkSoft, fontWeight: 600 }}>
+                <span
+                  style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    background: color.line,
+                    flex: 'none',
+                  }}
+                />
+                <span style={{ flex: 1 }}>{t.title}</span>
+                <span style={{ fontSize: '11px', color: color.inkSoft, fontWeight: 600 }}>
                   {t.estimatedMinutes}m
                 </span>
               </div>
             ))
           ) : (
-            <div style={{ padding: '6px 0', fontSize: '13.5px', color: color.inkSoft }}>
-              Nothing fits yet — add a shorter task?
+            <div style={{ color: color.inkSoft, fontSize: '13px', padding: '8px 0' }}>
+              Nothing fits yet
             </div>
           )}
         </div>
       )}
 
-      {/* Progress strip */}
+      {/* Progress ring + text */}
       <div
         style={{
-          margin: '4px 20px 6px',
-          padding: '10px 14px',
           display: 'flex',
           alignItems: 'center',
-          gap: '10px',
+          gap: '14px',
+          margin: '0 20px 14px',
+          padding: '14px',
           background: color.surface,
           borderRadius: radius.card,
           boxShadow: shadow.cardDefault,
         }}
       >
-        <span style={{ fontSize: '11.5px', fontWeight: 700, color: color.inkSoft, whiteSpace: 'nowrap' }}>
-          {completed}/{total} today
-        </span>
-        <ProgressBar value={progress} />
+        <Ring percentage={pct} size={56} innerSize={42} fontSize="13px" />
+        <div style={{ fontSize: '13px', color: color.inkSoft, fontWeight: 600 }}>
+          <span
+            style={{
+              display: 'block',
+              fontSize: '18px',
+              color: color.ink,
+              fontFamily: typography.headingFont,
+            }}
+          >
+            {completed}/{total}
+          </span>
+          tasks completed today
+        </div>
       </div>
 
-      {/* Up next */}
-      <div style={{ padding: '4px 20px 8px', fontSize: '12px', fontWeight: 700, color: color.inkSoft }}>
+      {/* Up next — horizontal scroll chips */}
+      <div style={{ padding: '0 20px 8px', fontSize: '12px', fontWeight: 700, color: color.inkSoft }}>
         Up next
       </div>
-      <div style={{ padding: '4px 20px' }}>
+      <div
+        style={{
+          display: 'flex',
+          gap: '8px',
+          overflowX: 'auto',
+          padding: '0 20px 4px',
+        }}
+      >
         {upNext.map((t) => (
-          <TaskRow
+          <div
             key={t.id}
-            task={t}
-            onToggle={toggleTask}
-            onSetField={setTaskField}
-            onDismissDetails={dismissNeedsDetails}
-            showDelete={false}
-          />
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: color.surface,
+              border: `1px solid ${color.line}`,
+              borderRadius: radius.chip,
+              padding: '8px 12px',
+              fontSize: '12px',
+              fontWeight: 600,
+              whiteSpace: 'nowrap',
+              flex: 'none',
+            }}
+          >
+            <span
+              style={{
+                width: '6px',
+                height: '6px',
+                borderRadius: '50%',
+                background: color.line,
+              }}
+            />
+            {t.title}
+          </div>
         ))}
       </div>
       <div

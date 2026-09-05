@@ -24,6 +24,9 @@ truth for exact values.
   corners (22px cards / 14px pills), colored glow shadows tinted to match
   each time-card's color, bouncy spring motion (`cubic-bezier(.34,1.56,.64,1)`,
   ~280ms) on taps and checkbox completion.
+- **Screen layouts** are documented in `DESIGN_DECISIONS.md` — the winning
+  variant from blind A/B/C/D comparison for each screen (Details, Timer,
+  Home, Stats). Don't re-litigate these layouts without being asked.
 - These were chosen via blind A/B/C comparison at both the IA level and the
   polish level. Don't propose alternative IAs or palettes without being asked.
 

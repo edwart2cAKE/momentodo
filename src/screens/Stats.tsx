@@ -5,10 +5,8 @@ import {
   useDifficultyBreakdown,
   usePriorityBreakdown,
 } from '../store'
-import { difficultyLabels, priorityLabels } from '../store/config'
 import { Ring } from '../components'
-import { color, typography, radius, shadow } from '../theme/tokens'
-import type { Difficulty, Priority } from '../types'
+import { color, typography, radius, shadow, layout } from '../theme/tokens'
 
 const weekMock = [
   { l: 'Mon', n: 2 },
@@ -20,21 +18,66 @@ const weekMock = [
   { l: 'Sun', n: 1 },
 ]
 
-function BreakdownBar({ label, count, max, barColor }: { label: string; count: number; max: number; barColor: string }) {
+function heatmapLevel(n: number): { bg: string; text: string } {
+  if (n === 0) return { bg: color.heatmap.level0, text: color.heatmap.level0Text }
+  if (n === 1) return { bg: color.heatmap.level1, text: color.heatmap.level1Text }
+  if (n === 2) return { bg: color.heatmap.level2, text: color.heatmap.level2Text }
+  return { bg: color.heatmap.level3, text: color.heatmap.level3Text }
+}
+
+function StackedBar({
+  segments,
+  legend,
+}: {
+  segments: { label: string; count: number; color: string }[]
+  legend: { label: string; count: number; color: string }[]
+}) {
+  const total = segments.reduce((s, seg) => s + seg.count, 0)
+
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontSize: '12.5px', color: color.inkSoft }}>
-      <div style={{ width: '60px', flex: 'none', fontWeight: 600 }}>{label}</div>
-      <div style={{ flex: 1, height: '8px', borderRadius: '4px', background: color.background, overflow: 'hidden' }}>
-        <div
-          style={{
-            height: '100%',
-            width: max > 0 ? `${Math.round((100 * count) / max)}%` : '0%',
-            background: barColor,
-            borderRadius: '4px',
-          }}
-        />
+    <div style={{ marginBottom: '10px' }}>
+      <div
+        style={{
+          height: layout.stackedBarHeight,
+          borderRadius: radius.stackedBar,
+          background: color.background,
+          display: 'flex',
+          overflow: 'hidden',
+        }}
+      >
+        {segments.map((seg) => {
+          const width = total > 0 ? (seg.count / total) * 100 : 0
+          return (
+            <div
+              key={seg.label}
+              style={{
+                height: '100%',
+                width: `${width}%`,
+                background: seg.color,
+                transition: 'width 0.3s',
+              }}
+            />
+          )
+        })}
       </div>
-      <div style={{ width: '20px', textAlign: 'right', fontWeight: 700, color: color.ink }}>{count}</div>
+      <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
+        {legend.map((item) => (
+          <div
+            key={item.label}
+            style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '10px', color: color.inkSoft }}
+          >
+            <span
+              style={{
+                width: '6px',
+                height: '6px',
+                borderRadius: '50%',
+                background: item.color,
+              }}
+            />
+            {item.label} {item.count}
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
@@ -46,9 +89,17 @@ export function Stats() {
   const diffBreakdown = useDifficultyBreakdown()
   const priBreakdown = usePriorityBreakdown()
 
-  const maxDiff = Math.max(1, ...Object.values(diffBreakdown))
-  const maxPri = Math.max(1, ...Object.values(priBreakdown))
-  const maxWeek = Math.max(1, ...weekMock.map((w) => w.n))
+  const diffSegments = [
+    { label: 'Easy', count: diffBreakdown[1], color: color.difficultyBar.easy },
+    { label: 'Medium', count: diffBreakdown[2], color: color.difficultyBar.medium },
+    { label: 'Hard', count: diffBreakdown[3], color: color.difficultyBar.hard },
+  ]
+
+  const priSegments = [
+    { label: 'Low', count: priBreakdown[1], color: color.priorityBar.low },
+    { label: 'Med', count: priBreakdown[2], color: color.priorityBar.med },
+    { label: 'High', count: priBreakdown[3], color: color.priorityBar.high },
+  ]
 
   return (
     <div style={{ paddingBottom: '84px' }}>
@@ -67,106 +118,231 @@ export function Stats() {
         <p style={{ margin: 0, color: color.inkSoft, fontSize: '13px' }}>How today's going.</p>
       </div>
 
-      {/* Ring + summary */}
-      <div style={{ padding: '20px', display: 'flex', gap: '16px', alignItems: 'center' }}>
-        <Ring percentage={pct} />
-        <div style={{ fontSize: '13px', color: color.inkSoft, fontWeight: 600 }}>
-          <span style={{ display: 'block', fontSize: '20px', color: color.ink, fontFamily: typography.headingFont }}>
-            {completed}/{total}
-          </span>
-          tasks completed today
+      {/* 2-column stat grid */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '10px',
+          padding: '14px 20px',
+        }}
+      >
+        {/* Mini ring + completed */}
+        <div
+          style={{
+            background: color.surface,
+            borderRadius: radius.card,
+            boxShadow: shadow.cardDefault,
+            padding: '14px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+          }}
+        >
+          <Ring percentage={pct} size={48} innerSize={36} fontSize="12px" />
+          <div>
+            <div
+              style={{
+                fontFamily: typography.headingFont,
+                fontSize: '28px',
+                fontWeight: 700,
+                color: color.ink,
+                lineHeight: 1,
+              }}
+            >
+              {completed}/{total}
+            </div>
+            <div style={{ fontSize: '11px', color: color.inkSoft, fontWeight: 600, marginTop: '2px' }}>
+              completed
+            </div>
+          </div>
+        </div>
+
+        {/* Total tasks */}
+        <div
+          style={{
+            background: color.surface,
+            borderRadius: radius.card,
+            boxShadow: shadow.cardDefault,
+            padding: '14px',
+            textAlign: 'center',
+          }}
+        >
+          <div
+            style={{
+              fontFamily: typography.headingFont,
+              fontSize: '28px',
+              fontWeight: 700,
+              color: color.ink,
+            }}
+          >
+            {total}
+          </div>
+          <div style={{ fontSize: '11px', color: color.inkSoft, fontWeight: 600, marginTop: '2px' }}>
+            tasks total
+          </div>
+        </div>
+
+        {/* Medium difficulty */}
+        <div
+          style={{
+            background: color.surface,
+            borderRadius: radius.card,
+            boxShadow: shadow.cardDefault,
+            padding: '14px',
+            textAlign: 'center',
+          }}
+        >
+          <div
+            style={{
+              fontFamily: typography.headingFont,
+              fontSize: '28px',
+              fontWeight: 700,
+              color: color.ink,
+            }}
+          >
+            {diffBreakdown[2]}
+          </div>
+          <div style={{ fontSize: '11px', color: color.inkSoft, fontWeight: 600, marginTop: '2px' }}>
+            medium
+          </div>
+        </div>
+
+        {/* High priority */}
+        <div
+          style={{
+            background: color.surface,
+            borderRadius: radius.card,
+            boxShadow: shadow.cardDefault,
+            padding: '14px',
+            textAlign: 'center',
+          }}
+        >
+          <div
+            style={{
+              fontFamily: typography.headingFont,
+              fontSize: '28px',
+              fontWeight: 700,
+              color: color.ink,
+            }}
+          >
+            {priBreakdown[3]}
+          </div>
+          <div style={{ fontSize: '11px', color: color.inkSoft, fontWeight: 600, marginTop: '2px' }}>
+            high priority
+          </div>
         </div>
       </div>
 
-      {/* Difficulty breakdown */}
+      {/* Stacked difficulty breakdown */}
       <div
         style={{
-          margin: '6px 20px 14px',
+          margin: '0 20px 14px',
           padding: '14px',
           background: color.surface,
           borderRadius: radius.card,
           boxShadow: shadow.cardDefault,
         }}
       >
-        <h3 style={{ margin: '0 0 10px', fontSize: '13px', color: color.ink, fontFamily: typography.headingFont }}>
+        <h3
+          style={{
+            margin: '0 0 10px',
+            fontSize: '13px',
+            fontWeight: 700,
+            color: color.ink,
+            fontFamily: typography.headingFont,
+          }}
+        >
           By difficulty
         </h3>
-        {([1, 2, 3] as Difficulty[]).map((d) => (
-          <BreakdownBar
-            key={d}
-            label={difficultyLabels[d]}
-            count={diffBreakdown[d]}
-            max={maxDiff}
-            barColor={color.moment['30min']}
-          />
-        ))}
+        <StackedBar
+          segments={diffSegments}
+          legend={diffSegments.map((s) => ({ label: s.label, count: s.count, color: s.color }))}
+        />
       </div>
 
-      {/* Priority breakdown */}
+      {/* Stacked priority breakdown */}
       <div
         style={{
-          margin: '6px 20px 14px',
+          margin: '0 20px 14px',
           padding: '14px',
           background: color.surface,
           borderRadius: radius.card,
           boxShadow: shadow.cardDefault,
         }}
       >
-        <h3 style={{ margin: '0 0 10px', fontSize: '13px', color: color.ink, fontFamily: typography.headingFont }}>
+        <h3
+          style={{
+            margin: '0 0 10px',
+            fontSize: '13px',
+            fontWeight: 700,
+            color: color.ink,
+            fontFamily: typography.headingFont,
+          }}
+        >
           By priority
         </h3>
-        {([3, 2, 1] as Priority[]).map((p) => (
-          <BreakdownBar
-            key={p}
-            label={priorityLabels[p]}
-            count={priBreakdown[p]}
-            max={maxPri}
-            barColor={color.moment['60min']}
-          />
-        ))}
+        <StackedBar
+          segments={priSegments}
+          legend={priSegments.map((s) => ({ label: s.label, count: s.count, color: s.color }))}
+        />
       </div>
 
-      {/* Week chart */}
-      <div style={{ padding: '4px 20px 8px', fontSize: '12px', fontWeight: 700, color: color.inkSoft }}>
-        This week
-      </div>
+      {/* Heatmap week chart */}
       <div
         style={{
-          display: 'flex',
-          alignItems: 'flex-end',
-          gap: '8px',
-          height: '90px',
-          margin: '6px 20px 4px',
-          padding: '12px 14px',
+          margin: '0 20px 14px',
+          padding: '14px',
           background: color.surface,
           borderRadius: radius.card,
           boxShadow: shadow.cardDefault,
         }}
       >
-        {weekMock.map((w) => (
-          <div
-            key={w.l}
-            style={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '6px',
-              justifyContent: 'flex-end',
-              height: '100%',
-            }}
-          >
-            <div
-              style={{
-                width: '60%',
-                borderRadius: '6px 6px 3px 3px',
-                background: color.moment['30min'],
-                height: w.n === 0 ? '2px' : `${Math.round((100 * w.n) / maxWeek)}%`,
-              }}
-            />
-            <div style={{ fontSize: '10.5px', color: color.inkSoft, fontWeight: 600 }}>{w.l}</div>
-          </div>
-        ))}
+        <h3
+          style={{
+            margin: '0 0 10px',
+            fontSize: '13px',
+            fontWeight: 700,
+            color: color.ink,
+            fontFamily: typography.headingFont,
+          }}
+        >
+          This week
+        </h3>
+        <div style={{ display: 'flex', gap: '8px', justifyContent: 'space-between' }}>
+          {weekMock.map((w) => {
+            const level = heatmapLevel(w.n)
+            return (
+              <div
+                key={w.l}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+              >
+                <div
+                  style={{
+                    width: layout.heatmapDotSize,
+                    height: layout.heatmapDotSize,
+                    borderRadius: radius.heatmapDot,
+                    background: level.bg,
+                    color: level.text,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '10px',
+                    fontWeight: 700,
+                  }}
+                >
+                  {w.n}
+                </div>
+                <div style={{ fontSize: '10px', color: color.inkSoft, fontWeight: 600 }}>{w.l}</div>
+              </div>
+            )
+          })}
+        </div>
       </div>
     </div>
   )

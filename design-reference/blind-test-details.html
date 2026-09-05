@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Momentodo — Blind Test: Task Details Layout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: #E9E9E4; color: #1F3A2E; }
+  .shell { max-width: 460px; margin: 0 auto; background: #EEF4EE; min-height: 100vh; padding: 22px 20px 40px; }
+
+  h1 { font-family: 'Poppins', sans-serif; font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+  .subtitle { color: #6C8578; font-size: 13px; margin-bottom: 20px; }
+
+  .variant-label { font-size: 12px; font-weight: 700; color: #6C8578; margin-bottom: 8px; letter-spacing: 0.5px; }
+
+  .variant-card {
+    background: #FFFFFF; border-radius: 22px; box-shadow: 0 8px 20px rgba(31,58,46,0.08);
+    padding: 14px; margin-bottom: 20px; transition: box-shadow 0.2s;
+  }
+  .variant-card:hover { box-shadow: 0 8px 24px rgba(31,58,46,0.12); }
+
+  /* Task row mock */
+  .task-row { display: flex; gap: 10px; align-items: flex-start; }
+  .check {
+    width: 20px; height: 20px; border-radius: 50%; border: 2px solid #4C9CE0;
+    flex: none; margin-top: 1px; cursor: pointer; display: flex; align-items: center;
+    justify-content: center; font-size: 12px; color: transparent; min-width: 44px; min-height: 44px;
+  }
+  .task-body { flex: 1; }
+  .task-title { font-size: 14.5px; font-weight: 600; color: #1F3A2E; }
+
+  /* Needs details container */
+  .nd { background: #FFF7E0; border-radius: 10px; padding: 8px; margin-top: 6px; font-size: 12px; font-weight: 600; }
+  .nd-header { color: #1F3A2E; margin-bottom: 6px; }
+
+  /* Pills */
+  .pills { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px; align-items: center; }
+  .pill {
+    font-size: 11px; border: 1px solid #DCE8E0; background: #fff; padding: 3px 9px;
+    border-radius: 14px; cursor: pointer; font-weight: 600; color: #1F3A2E;
+    min-height: 44px; font-family: 'Inter', sans-serif;
+    transition: background 0.28s cubic-bezier(0.34,1.56,0.64,1), color 0.28s cubic-bezier(0.34,1.56,0.64,1), border-color 0.28s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .pill:hover { border-color: #4C9CE0; }
+  .pill.on { background: #4C9CE0; color: #fff; border-color: #4C9CE0; }
+  .pill.done-pill { background: #1F3A2E; color: #fff; border-color: #1F3A2E; }
+
+  .num-input {
+    width: 52px; padding: 3px 6px; font-size: 11px; border: 1px solid #DCE8E0;
+    border-radius: 14px; background: #fff; color: #1F3A2E; font-weight: 600;
+    font-family: 'Inter', sans-serif; text-align: center; min-height: 44px;
+    box-sizing: border-box;
+  }
+  .num-input:focus { outline: none; border-color: #4C9CE0; }
+
+  /* Variant B: labeled rows */
+  .row-group { margin-bottom: 6px; }
+  .row-label { font-size: 10.5px; font-weight: 700; color: #6C8578; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .row-pills { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
+
+  /* Variant C: stepped */
+  .step-section { transition: opacity 0.3s, max-height 0.3s; overflow: hidden; }
+  .step-section.hidden { opacity: 0; max-height: 0; margin-top: 0; }
+  .step-section.visible { opacity: 1; max-height: 200px; margin-top: 6px; }
+
+  /* Variant D: inline grouped */
+  .inline-groups { display: flex; gap: 0; flex-wrap: wrap; align-items: center; }
+  .inline-group { display: flex; gap: 5px; align-items: center; padding: 0 8px; }
+  .inline-group:first-child { padding-left: 0; }
+  .inline-group:last-child { padding-right: 0; }
+  .inline-sep { color: #DCE8E0; font-size: 16px; font-weight: 300; }
+  .inline-label { font-size: 10px; font-weight: 700; color: #6C8578; margin-right: 2px; white-space: nowrap; }
+
+  /* Feedback */
+  .feedback { background: #fff; border-radius: 22px; box-shadow: 0 8px 20px rgba(31,58,46,0.08); padding: 20px; margin-top: 10px; }
+  .feedback h2 { font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 600; margin-bottom: 12px; }
+  .feedback-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  .feedback-option { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px; font-weight: 500; }
+  .feedback-option input[type="radio"] { width: 18px; height: 18px; accent-color: #4C9CE0; cursor: pointer; }
+  .feedback-note { width: 100%; border: 1px solid #DCE8E0; border-radius: 14px; padding: 10px 14px; font-size: 13px; font-family: 'Inter', sans-serif; resize: vertical; min-height: 60px; color: #1F3A2E; }
+  .feedback-note:focus { outline: none; border-color: #4C9CE0; }
+  .submit-btn {
+    background: #4C9CE0; color: #fff; border: none; border-radius: 14px; padding: 10px 24px;
+    font-weight: 700; font-size: 13.5px; cursor: pointer; font-family: 'Inter', sans-serif;
+    margin-top: 12px; min-height: 44px;
+  }
+  .submit-btn:hover { background: #3a8ad0; }
+  .result { margin-top: 12px; padding: 12px; background: #E4F3EA; border-radius: 10px; font-size: 13px; font-weight: 600; display: none; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <h1>Blind Test</h1>
+  <p class="subtitle">Compare 4 ways to fill in task details after quick-add. Click the pills in each variant to try them out. Pick your favorite below.</p>
+
+  <!-- ===== VARIANT A ===== -->
+  <div class="variant-label">Variant A</div>
+  <div class="variant-card">
+    <div class="task-row">
+      <div class="check"></div>
+      <div class="task-body">
+        <div class="task-title">Reply to client email</div>
+        <div class="nd" id="va-nd">
+          <div class="nd-header">Quick — got a sec to fill this in?</div>
+          <div class="pills" id="va-pills"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== VARIANT B ===== -->
+  <div class="variant-label">Variant B</div>
+  <div class="variant-card">
+    <div class="task-row">
+      <div class="check"></div>
+      <div class="task-body">
+        <div class="task-title">Reply to client email</div>
+        <div class="nd" id="vb-nd">
+          <div class="nd-header">Quick — got a sec to fill this in?</div>
+          <div id="vb-groups"></div>
+          <div style="margin-top: 8px;" id="vb-done"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== VARIANT C ===== -->
+  <div class="variant-label">Variant C</div>
+  <div class="variant-card">
+    <div class="task-row">
+      <div class="check"></div>
+      <div class="task-body">
+        <div class="task-title">Reply to client email</div>
+        <div class="nd" id="vc-nd">
+          <div class="nd-header">Quick — got a sec to fill this in?</div>
+          <div id="vc-steps"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== VARIANT D ===== -->
+  <div class="variant-label">Variant D</div>
+  <div class="variant-card">
+    <div class="task-row">
+      <div class="check"></div>
+      <div class="task-body">
+        <div class="task-title">Reply to client email</div>
+        <div class="nd" id="vd-nd">
+          <div class="nd-header">Quick — got a sec to fill this in?</div>
+          <div id="vd-groups"></div>
+          <div style="margin-top: 8px;" id="vd-done"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FEEDBACK ===== -->
+  <div class="feedback">
+    <h2>Pick your favorite</h2>
+    <div class="feedback-options">
+      <label class="feedback-option"><input type="radio" name="fav" value="A"> Variant A</label>
+      <label class="feedback-option"><input type="radio" name="fav" value="B"> Variant B</label>
+      <label class="feedback-option"><input type="radio" name="fav" value="C"> Variant C</label>
+      <label class="feedback-option"><input type="radio" name="fav" value="D"> Variant D</label>
+    </div>
+    <textarea class="feedback-note" placeholder="Any notes? What did you like or dislike about each?"></textarea>
+    <button class="submit-btn" onclick="submitFeedback()">Submit</button>
+    <div class="result" id="result-msg"></div>
+  </div>
+</div>
+
+<script>
+const durations = [5, 15, 30, 60];
+const diffLabels = {1:'Easy', 2:'Medium', 3:'Hard'};
+const priLabels = {1:'Low', 2:'Med', 3:'High'};
+
+/* ---------- Shared helpers ---------- */
+function makePill(label, group, value, state, onClick) {
+  const el = document.createElement('button');
+  el.className = 'pill' + (state[group] === value ? ' on' : '');
+  el.textContent = label;
+  el.onclick = () => { onClick(group, value); };
+  return el;
+}
+
+function makeNumInput(state, onChange) {
+  const inp = document.createElement('input');
+  inp.type = 'number'; inp.min = '1'; inp.max = '480'; inp.placeholder = 'min';
+  inp.className = 'num-input';
+  if (state.time !== null && !durations.includes(state.time)) inp.value = state.time;
+  inp.oninput = () => {
+    const v = parseInt(inp.value, 10);
+    onChange(isNaN(v) || v <= 0 ? null : v);
+  };
+  return inp;
+}
+
+function makeDoneBtn(onClick) {
+  const el = document.createElement('button');
+  el.className = 'pill done-pill';
+  el.textContent = 'Done';
+  el.onclick = onClick;
+  return el;
+}
+
+function resetPills(container) {
+  container.querySelectorAll('.pill').forEach(p => {
+    p.classList.remove('on');
+  });
+}
+
+/* ---------- VARIANT A: Flat row ---------- */
+(function initA() {
+  const state = { time: null, diff: null, pri: null };
+  const pills = document.getElementById('va-pills');
+
+  function render() {
+    pills.innerHTML = '';
+    durations.forEach(d => {
+      pills.appendChild(makePill(d + 'm', 'time', d, state, (g, v) => { state[g] = v; render(); }));
+    });
+    pills.appendChild(makeNumInput(state, (v) => { state.time = v; render(); }));
+    [1,2,3].forEach(d => {
+      pills.appendChild(makePill(diffLabels[d], 'diff', d, state, (g, v) => { state[g] = v; render(); }));
+    });
+    [1,2,3].forEach(p => {
+      pills.appendChild(makePill(priLabels[p], 'pri', p, state, (g, v) => { state[g] = v; render(); }));
+    });
+    pills.appendChild(makeDoneBtn(() => {}));
+  }
+  render();
+})();
+
+/* ---------- VARIANT B: Labeled rows ---------- */
+(function initB() {
+  const state = { time: null, diff: null, pri: null };
+  const groups = document.getElementById('vb-groups');
+  const doneEl = document.getElementById('vb-done');
+
+  function render() {
+    groups.innerHTML = '';
+
+    // Time row
+    const timeGroup = document.createElement('div');
+    timeGroup.className = 'row-group';
+    timeGroup.innerHTML = '<div class="row-label">⏱ Time</div>';
+    const timePills = document.createElement('div');
+    timePills.className = 'row-pills';
+    durations.forEach(d => {
+      timePills.appendChild(makePill(d + 'm', 'time', d, state, (g, v) => { state[g] = v; render(); }));
+    });
+    timePills.appendChild(makeNumInput(state, (v) => { state.time = v; render(); }));
+    timeGroup.appendChild(timePills);
+    groups.appendChild(timeGroup);
+
+    // Difficulty row
+    const diffGroup = document.createElement('div');
+    diffGroup.className = 'row-group';
+    diffGroup.innerHTML = '<div class="row-label">💪 Difficulty</div>';
+    const diffPills = document.createElement('div');
+    diffPills.className = 'row-pills';
+    [1,2,3].forEach(d => {
+      diffPills.appendChild(makePill(diffLabels[d], 'diff', d, state, (g, v) => { state[g] = v; render(); }));
+    });
+    diffGroup.appendChild(diffPills);
+    groups.appendChild(diffGroup);
+
+    // Priority row
+    const priGroup = document.createElement('div');
+    priGroup.className = 'row-group';
+    priGroup.innerHTML = '<div class="row-label">🔥 Priority</div>';
+    const priPills = document.createElement('div');
+    priPills.className = 'row-pills';
+    [1,2,3].forEach(p => {
+      priPills.appendChild(makePill(priLabels[p], 'pri', p, state, (g, v) => { state[g] = v; render(); }));
+    });
+    priGroup.appendChild(priPills);
+    groups.appendChild(priGroup);
+
+    // Done
+    doneEl.innerHTML = '';
+    doneEl.appendChild(makeDoneBtn(() => {}));
+  }
+  render();
+})();
+
+/* ---------- VARIANT C: Stepped flow ---------- */
+(function initC() {
+  const state = { time: null, diff: null, pri: null };
+  const steps = document.getElementById('vc-steps');
+
+  function render() {
+    steps.innerHTML = '';
+
+    // Step 1: Time (always visible)
+    const sec1 = document.createElement('div');
+    sec1.className = 'step-section visible';
+    const lbl1 = document.createElement('div');
+    lbl1.className = 'row-label';
+    lbl1.textContent = '⏱ How long will this take?';
+    sec1.appendChild(lbl1);
+    const row1 = document.createElement('div');
+    row1.className = 'row-pills';
+    durations.forEach(d => {
+      row1.appendChild(makePill(d + 'm', 'time', d, state, (g, v) => { state[g] = v; render(); }));
+    });
+    row1.appendChild(makeNumInput(state, (v) => { state.time = v; render(); }));
+    sec1.appendChild(row1);
+    steps.appendChild(sec1);
+
+    // Step 2: Difficulty (shown after time set)
+    if (state.time !== null) {
+      const sec2 = document.createElement('div');
+      sec2.className = 'step-section visible';
+      const lbl2 = document.createElement('div');
+      lbl2.className = 'row-label';
+      lbl2.textContent = '💪 How difficult?';
+      sec2.appendChild(lbl2);
+      const row2 = document.createElement('div');
+      row2.className = 'row-pills';
+      [1,2,3].forEach(d => {
+        row2.appendChild(makePill(diffLabels[d], 'diff', d, state, (g, v) => { state[g] = v; render(); }));
+      });
+      sec2.appendChild(row2);
+      steps.appendChild(sec2);
+    }
+
+    // Step 3: Priority (shown after difficulty set)
+    if (state.diff !== null) {
+      const sec3 = document.createElement('div');
+      sec3.className = 'step-section visible';
+      const lbl3 = document.createElement('div');
+      lbl3.className = 'row-label';
+      lbl3.textContent = '🔥 How important?';
+      sec3.appendChild(lbl3);
+      const row3 = document.createElement('div');
+      row3.className = 'row-pills';
+      [1,2,3].forEach(p => {
+        row3.appendChild(makePill(priLabels[p], 'pri', p, state, (g, v) => { state[g] = v; render(); }));
+      });
+      sec3.appendChild(row3);
+      steps.appendChild(sec3);
+    }
+
+    // Done (shown after priority set, or anytime user wants to skip)
+    if (state.pri !== null) {
+      const doneRow = document.createElement('div');
+      doneRow.style.marginTop = '8px';
+      doneRow.appendChild(makeDoneBtn(() => {}));
+      steps.appendChild(doneRow);
+    } else if (state.time !== null || state.diff !== null) {
+      const skipRow = document.createElement('div');
+      skipRow.style.marginTop = '8px';
+      skipRow.appendChild(makeDoneBtn(() => {}));
+      steps.appendChild(skipRow);
+    }
+  }
+  render();
+})();
+
+/* ---------- VARIANT D: Compact inline grouped ---------- */
+(function initD() {
+  const state = { time: null, diff: null, pri: null };
+  const groups = document.getElementById('vd-groups');
+  const doneEl = document.getElementById('vd-done');
+
+  function render() {
+    groups.innerHTML = '';
+    const wrap = document.createElement('div');
+    wrap.className = 'inline-groups';
+
+    // Time group
+    const tg = document.createElement('div');
+    tg.className = 'inline-group';
+    const tl = document.createElement('span');
+    tl.className = 'inline-label';
+    tl.textContent = '⏱ Time';
+    tg.appendChild(tl);
+    durations.forEach(d => {
+      tg.appendChild(makePill(d + 'm', 'time', d, state, (g, v) => { state[g] = v; render(); }));
+    });
+    tg.appendChild(makeNumInput(state, (v) => { state.time = v; render(); }));
+    wrap.appendChild(tg);
+
+    // Separator
+    const s1 = document.createElement('span');
+    s1.className = 'inline-sep';
+    s1.textContent = '|';
+    wrap.appendChild(s1);
+
+    // Difficulty group
+    const dg = document.createElement('div');
+    dg.className = 'inline-group';
+    const dl = document.createElement('span');
+    dl.className = 'inline-label';
+    dl.textContent = '💪 Diff';
+    dg.appendChild(dl);
+    [1,2,3].forEach(d => {
+      dg.appendChild(makePill(diffLabels[d], 'diff', d, state, (g, v) => { state[g] = v; render(); }));
+    });
+    wrap.appendChild(dg);
+
+    // Separator
+    const s2 = document.createElement('span');
+    s2.className = 'inline-sep';
+    s2.textContent = '|';
+    wrap.appendChild(s2);
+
+    // Priority group
+    const pg = document.createElement('div');
+    pg.className = 'inline-group';
+    const pl = document.createElement('span');
+    pl.className = 'inline-label';
+    pl.textContent = '🔥 Pri';
+    pg.appendChild(pl);
+    [1,2,3].forEach(p => {
+      pg.appendChild(makePill(priLabels[p], 'pri', p, state, (g, v) => { state[g] = v; render(); }));
+    });
+    wrap.appendChild(pg);
+
+    groups.appendChild(wrap);
+
+    // Done
+    doneEl.innerHTML = '';
+    doneEl.appendChild(makeDoneBtn(() => {}));
+  }
+  render();
+})();
+
+/* ---------- Feedback ---------- */
+function submitFeedback() {
+  const fav = document.querySelector('input[name="fav"]:checked');
+  const note = document.querySelector('.feedback-note').value;
+  if (!fav) { alert('Please pick a favorite variant.'); return; }
+  const msg = document.getElementById('result-msg');
+  msg.style.display = 'block';
+  msg.innerHTML = '<strong>Thanks!</strong> You picked Variant ' + fav.value + (note ? '. Notes: "' + note + '"' : '.');
+}
+</script>
+</body>
+</html>

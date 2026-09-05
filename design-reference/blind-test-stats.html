@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Momentodo — Blind Test: Stats Layout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: #E9E9E4; color: #1F3A2E; }
+  .shell { max-width: 460px; margin: 0 auto; background: #EEF4EE; min-height: 100vh; padding: 22px 20px 40px; }
+  h1 { font-family: 'Poppins', sans-serif; font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+  .subtitle { color: #6C8578; font-size: 13px; margin-bottom: 20px; line-height: 1.5; }
+  .variant-label { font-size: 12px; font-weight: 700; color: #6C8578; margin-bottom: 8px; letter-spacing: 0.5px; }
+  .variant-card { background: #FFFFFF; border-radius: 22px; box-shadow: 0 8px 20px rgba(31,58,46,0.08); padding: 20px; margin-bottom: 24px; overflow: hidden; }
+  .v-hero h2 { font-family: 'Poppins', sans-serif; font-size: 20px; font-weight: 600; margin-bottom: 2px; }
+  .v-hero p { color: #6C8578; font-size: 12.5px; }
+  .va-hint { font-size: 11px; color: #6C8578; margin-top: 10px; font-style: italic; }
+
+  .section-label { font-size: 12px; font-weight: 700; color: #6C8578; margin-bottom: 8px; }
+
+  /* ==================== VARIANT A: Conic ring + bars + vertical bars ==================== */
+  .va-hero { display: flex; gap: 16px; align-items: center; padding: 14px 0; }
+  .va-ring { width: 88px; height: 88px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: conic-gradient(#04C495 33%, #E4EDE6 0); flex: none; }
+  .va-ring .inner { width: 66px; height: 66px; border-radius: 50%; background: #EEF4EE; display: flex; align-items: center; justify-content: center; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 16px; color: #1F3A2E; }
+  .va-hero-text { font-size: 13px; color: #6C8578; font-weight: 600; }
+  .va-hero-text b { display: block; font-size: 20px; color: #1F3A2E; font-family: 'Poppins', sans-serif; }
+
+  .va-breakdown { background: #fff; border-radius: 18px; padding: 14px; margin-bottom: 14px; }
+  .va-breakdown h3 { font-size: 13px; font-weight: 700; color: #1F3A2E; margin-bottom: 10px; font-family: 'Poppins', sans-serif; }
+  .va-brow { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 12.5px; color: #6C8578; }
+  .va-brow-label { width: 60px; flex: none; font-weight: 600; }
+  .va-brow-bar { flex: 1; height: 8px; border-radius: 4px; background: #EEF4EE; overflow: hidden; }
+  .va-brow-bar .f { height: 100%; border-radius: 4px; }
+  .va-brow-n { width: 20px; text-align: right; font-weight: 700; color: #1F3A2E; }
+
+  .va-weekchart { display: flex; align-items: flex-end; gap: 8px; height: 90px; background: #fff; border-radius: 18px; padding: 12px 14px; }
+  .va-wbar { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; justify-content: flex-end; height: 100%; }
+  .va-wbar .stick { width: 60%; border-radius: 6px 6px 3px 3px; background: #4C9CE0; }
+  .va-wbar .wl { font-size: 10.5px; color: #6C8578; font-weight: 600; }
+
+  /* ==================== VARIANT B: Big number + donuts + line ==================== */
+  .vb-hero { text-align: center; padding: 14px 0; }
+  .vb-big { font-family: 'Poppins', sans-serif; font-size: 56px; font-weight: 700; color: #1F3A2E; line-height: 1; }
+  .vb-sub { font-size: 14px; color: #6C8578; font-weight: 600; margin-top: 4px; }
+
+  .vb-donuts { display: flex; gap: 12px; margin: 14px 0; }
+  .vb-donut-card { flex: 1; background: #fff; border-radius: 18px; padding: 14px; text-align: center; }
+  .vb-donut-card h3 { font-size: 12px; font-weight: 700; color: #6C8578; margin-bottom: 10px; }
+  .vb-donut { position: relative; width: 70px; height: 70px; margin: 0 auto; }
+  .vb-donut svg { transform: rotate(-90deg); }
+  .vb-donut-bg { fill: none; stroke: #E4EDE6; }
+  .vb-donut-fg { fill: none; stroke-linecap: round; transition: stroke-dashoffset 0.5s; }
+  .vb-donut-label { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 13px; }
+  .vb-donut-legend { margin-top: 10px; }
+  .vb-legend-row { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #6C8578; margin-bottom: 4px; }
+  .vb-legend-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+
+  .vb-linechart { background: #fff; border-radius: 18px; padding: 14px; margin-bottom: 14px; }
+  .vb-linechart h3 { font-size: 13px; font-weight: 700; color: #1F3A2E; margin-bottom: 10px; font-family: 'Poppins', sans-serif; }
+  .vb-line-svg { width: 100%; height: 80px; }
+  .vb-line { fill: none; stroke: #4C9CE0; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+  .vb-line-dot { fill: #4C9CE0; }
+  .vb-line-grid { stroke: #E4EDE6; stroke-width: 0.5; }
+  .vb-line-label { font-size: 10px; fill: #6C8578; font-weight: 600; font-family: 'Inter', sans-serif; }
+
+  /* ==================== VARIANT C: Dashboard grid + stacked bars + heatmap ==================== */
+  .vb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; }
+  .vb-stat-card { background: #fff; border-radius: 18px; padding: 14px; text-align: center; }
+  .vb-stat-num { font-family: 'Poppins', sans-serif; font-size: 28px; font-weight: 700; color: #1F3A2E; }
+  .vb-stat-label { font-size: 11px; color: #6C8578; font-weight: 600; margin-top: 2px; }
+  .vb-stat-card.ring-card { display: flex; align-items: center; gap: 12px; text-align: left; }
+
+  .vb-mini-ring { width: 48px; height: 48px; border-radius: 50%; background: conic-gradient(#04C495 33%, #E4EDE6 0); display: flex; align-items: center; justify-content: center; flex: none; }
+  .vb-mini-ring .inner { width: 36px; height: 36px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 12px; }
+
+  .vb-stacked { background: #fff; border-radius: 18px; padding: 14px; margin-bottom: 14px; }
+  .vb-stacked h3 { font-size: 13px; font-weight: 700; color: #1F3A2E; margin-bottom: 10px; font-family: 'Poppins', sans-serif; }
+  .vb-stacked-row { margin-bottom: 10px; }
+  .vb-stacked-label { font-size: 12px; font-weight: 600; color: #6C8578; margin-bottom: 4px; }
+  .vb-stacked-bar { height: 20px; border-radius: 10px; background: #EEF4E6; display: flex; overflow: hidden; }
+  .vb-stacked-seg { height: 100%; transition: width 0.3s; }
+  .vb-stacked-legend { display: flex; gap: 10px; margin-top: 6px; }
+  .vb-slegend { display: flex; align-items: center; gap: 4px; font-size: 10px; color: #6C8578; }
+  .vb-slegend-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  .vb-heatmap { background: #fff; border-radius: 18px; padding: 14px; }
+  .vb-heatmap h3 { font-size: 13px; font-weight: 700; color: #1F3A2E; margin-bottom: 10px; font-family: 'Poppins', sans-serif; }
+  .vb-heat-grid { display: flex; gap: 8px; justify-content: space-between; }
+  .vb-heat-day { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .vb-heat-dot { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; }
+  .vb-heat-dot.l0 { background: #EEF4EE; color: #DCE8E0; }
+  .vb-heat-dot.l1 { background: #E4F3EA; color: #04C495; }
+  .vb-heat-dot.l2 { background: #B8EDCF; color: #04A67A; }
+  .vb-heat-dot.l3 { background: #04C495; color: #fff; }
+  .vb-heat-day-label { font-size: 10px; color: #6C8578; font-weight: 600; }
+
+  /* ==================== VARIANT D: Minimal text + lists ==================== */
+  .vd-hero { display: flex; align-items: center; gap: 16px; padding: 14px 0; }
+  .vd-ring { width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: conic-gradient(#04C495 33%, #E4EDE6 0); flex: none; }
+  .vd-ring .inner { width: 54px; height: 54px; border-radius: 50%; background: #EEF4EE; display: flex; align-items: center; justify-content: center; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 15px; }
+  .vd-hero-text { flex: 1; }
+  .vd-hero-text .vd-big { font-family: 'Poppins', sans-serif; font-size: 24px; font-weight: 700; color: #1F3A2E; }
+  .vd-hero-text .vd-sub { font-size: 12px; color: #6C8578; font-weight: 500; }
+
+  .vd-list-card { background: #fff; border-radius: 18px; padding: 14px; margin-bottom: 14px; }
+  .vd-list-card h3 { font-size: 13px; font-weight: 700; color: #1F3A2E; margin-bottom: 8px; font-family: 'Poppins', sans-serif; }
+  .vd-list-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #F0F4F0; font-size: 13px; }
+  .vd-list-row:last-child { border-bottom: none; }
+  .vd-list-row .lbl { color: #6C8578; font-weight: 500; }
+  .vd-list-row .val { font-weight: 700; color: #1F3A2E; }
+
+  .vd-week-summary { background: #fff; border-radius: 18px; padding: 14px; margin-bottom: 14px; }
+  .vd-week-summary h3 { font-size: 13px; font-weight: 700; color: #1F3A2E; margin-bottom: 8px; font-family: 'Poppins', sans-serif; }
+  .vd-week-line { display: flex; justify-content: space-between; padding: 5px 0; font-size: 12.5px; }
+  .vd-week-line .day { color: #6C8578; }
+  .vd-week-line .count { font-weight: 700; color: #1F3A2E; }
+  .vd-week-total { display: flex; justify-content: space-between; padding: 8px 0 0; margin-top: 6px; border-top: 1px solid #E4EDE6; font-size: 13px; font-weight: 700; }
+
+  /* ==================== Feedback ==================== */
+  .feedback { background: #fff; border-radius: 22px; box-shadow: 0 8px 20px rgba(31,58,46,0.08); padding: 20px; margin-top: 10px; }
+  .feedback h2 { font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 600; margin-bottom: 12px; }
+  .feedback-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  .feedback-option { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px; font-weight: 500; }
+  .feedback-option input[type="radio"] { width: 18px; height: 18px; accent-color: #4C9CE0; cursor: pointer; }
+  .feedback-note { width: 100%; border: 1px solid #DCE8E0; border-radius: 14px; padding: 10px 14px; font-size: 13px; font-family: 'Inter', sans-serif; resize: vertical; min-height: 60px; color: #1F3A2E; }
+  .feedback-note:focus { outline: none; border-color: #4C9CE0; }
+  .submit-btn { background: #4C9CE0; color: #fff; border: none; border-radius: 14px; padding: 10px 24px; font-weight: 700; font-size: 13.5px; cursor: pointer; font-family: 'Inter', sans-serif; margin-top: 12px; min-height: 44px; }
+  .result { margin-top: 12px; padding: 12px; background: #E4F3EA; border-radius: 10px; font-size: 13px; font-weight: 600; display: none; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <h1>Blind Test: Stats</h1>
+  <p class="subtitle">Compare 4 full-layout approaches for the Stats screen. All show the same data (1/3 tasks done, difficulty/priority breakdowns, this week's completions). Pick your favorite below.</p>
+
+  <!-- ===== VARIANT A: Conic ring + bars + vertical bars ===== -->
+  <div class="variant-label">Variant A</div>
+  <div class="variant-card" id="va">
+    <div class="v-hero"><h2>Stats</h2><p>How today's going.</p></div>
+    <div class="va-hero">
+      <div class="va-ring"><div class="inner">33%</div></div>
+      <div class="va-hero-text"><b>1/3</b>tasks completed today</div>
+    </div>
+    <div class="va-breakdown">
+      <h3>By difficulty</h3>
+      <div class="va-brow"><div class="va-brow-label">Easy</div><div class="va-brow-bar"><div class="f" style="width:50%;background:#4C9CE0"></div></div><div class="va-brow-n">2</div></div>
+      <div class="va-brow"><div class="va-brow-label">Medium</div><div class="va-brow-bar"><div class="f" style="width:100%;background:#4C9CE0"></div></div><div class="va-brow-n">4</div></div>
+      <div class="va-brow"><div class="va-brow-label">Hard</div><div class="va-brow-bar"><div class="f" style="width:50%;background:#4C9CE0"></div></div><div class="va-brow-n">2</div></div>
+    </div>
+    <div class="va-breakdown">
+      <h3>By priority</h3>
+      <div class="va-brow"><div class="va-brow-label">High</div><div class="va-brow-bar"><div class="f" style="width:50%;background:#FF5A3D"></div></div><div class="va-brow-n">2</div></div>
+      <div class="va-brow"><div class="va-brow-label">Med</div><div class="va-brow-bar"><div class="f" style="width:100%;background:#FF5A3D"></div></div><div class="va-brow-n">4</div></div>
+      <div class="va-brow"><div class="va-brow-label">Low</div><div class="va-brow-bar"><div class="f" style="width:50%;background:#FF5A3D"></div></div><div class="va-brow-n">2</div></div>
+    </div>
+    <div class="section-label">This week</div>
+    <div class="va-weekchart">
+      <div class="va-wbar"><div class="stick" style="height:40%"></div><div class="wl">Mon</div></div>
+      <div class="va-wbar"><div class="stick" style="height:80%"></div><div class="wl">Tue</div></div>
+      <div class="va-wbar"><div class="stick" style="height:20%"></div><div class="wl">Wed</div></div>
+      <div class="va-wbar"><div class="stick" style="height:100%"></div><div class="wl">Thu</div></div>
+      <div class="va-wbar"><div class="stick" style="height:60%"></div><div class="wl">Fri</div></div>
+      <div class="va-wbar"><div class="stick" style="height:2%"></div><div class="wl">Sat</div></div>
+      <div class="va-wbar"><div class="stick" style="height:20%"></div><div class="wl">Sun</div></div>
+    </div>
+    <p class="va-hint">Left-aligned ring hero · horizontal bar breakdowns · vertical bar week chart · stacked sections</p>
+  </div>
+
+  <!-- ===== VARIANT B: Big number + donuts + line ===== -->
+  <div class="variant-label">Variant B</div>
+  <div class="variant-card" id="vb">
+    <div class="v-hero"><h2>Stats</h2><p>How today's going.</p></div>
+    <div class="vb-hero">
+      <div class="vb-big">33%</div>
+      <div class="vb-sub">1 of 3 tasks completed today</div>
+    </div>
+    <div class="vb-donuts">
+      <div class="vb-donut-card">
+        <h3>Difficulty</h3>
+        <div class="vb-donut">
+          <svg width="70" height="70" viewBox="0 0 70 70">
+            <circle class="vb-donut-bg" cx="35" cy="35" r="28" stroke-width="10"/>
+            <circle class="vb-donut-fg" cx="35" cy="35" r="28" stroke-width="10" stroke="#A9C9EA" stroke-dasharray="175.93" stroke-dashoffset="44"/>
+            <circle class="vb-donut-fg" cx="35" cy="35" r="28" stroke-width="10" stroke="#5AA9E6" stroke-dasharray="175.93" stroke-dashoffset="88" stroke-dashoffset="0" transform="rotate(120 35 35)"/>
+            <circle class="vb-donut-fg" cx="35" cy="35" r="28" stroke-width="10" stroke="#1D6FB8" stroke-dasharray="175.93" stroke-dashoffset="44" transform="rotate(240 35 35)"/>
+          </svg>
+        </div>
+        <div class="vb-donut-legend">
+          <div class="vb-legend-row"><span class="vb-legend-dot" style="background:#A9C9EA"></span>Easy · 2</div>
+          <div class="vb-legend-row"><span class="vb-legend-dot" style="background:#5AA9E6"></span>Medium · 4</div>
+          <div class="vb-legend-row"><span class="vb-legend-dot" style="background:#1D6FB8"></span>Hard · 2</div>
+        </div>
+      </div>
+      <div class="vb-donut-card">
+        <h3>Priority</h3>
+        <div class="vb-donut">
+          <svg width="70" height="70" viewBox="0 0 70 70">
+            <circle class="vb-donut-bg" cx="35" cy="35" r="28" stroke-width="10"/>
+            <circle class="vb-donut-fg" cx="35" cy="35" r="28" stroke-width="10" stroke="#F2AA9C" stroke-dasharray="175.93" stroke-dashoffset="44" transform="rotate(0 35 35)"/>
+            <circle class="vb-donut-fg" cx="35" cy="35" r="28" stroke-width="10" stroke="#FF6F59" stroke-dasharray="175.93" stroke-dashoffset="88" transform="rotate(120 35 35)"/>
+            <circle class="vb-donut-fg" cx="35" cy="35" r="28" stroke-width="10" stroke="#D8452A" stroke-dasharray="175.93" stroke-dashoffset="44" transform="rotate(240 35 35)"/>
+          </svg>
+        </div>
+        <div class="vb-donut-legend">
+          <div class="vb-legend-row"><span class="vb-legend-dot" style="background:#F2AA9C"></span>Low · 2</div>
+          <div class="vb-legend-row"><span class="vb-legend-dot" style="background:#FF6F59"></span>Med · 4</div>
+          <div class="vb-legend-row"><span class="vb-legend-dot" style="background:#D8452A"></span>High · 2</div>
+        </div>
+      </div>
+    </div>
+    <div class="vb-linechart">
+      <h3>This week</h3>
+      <svg class="vb-line-svg" viewBox="0 0 300 80" preserveAspectRatio="none">
+        <line class="vb-line-grid" x1="0" y1="0" x2="300" y2="0"/>
+        <line class="vb-line-grid" x1="0" y1="26" x2="300" y2="26"/>
+        <line class="vb-line-grid" x1="0" y1="52" x2="300" y2="52"/>
+        <line class="vb-line-grid" x1="0" y1="78" x2="300" y2="78"/>
+        <polyline class="vb-line" points="0,52 50,26 100,65 150,0 200,39 250,78 300,65"/>
+        <circle class="vb-line-dot" cx="0" cy="52" r="4"/>
+        <circle class="vb-line-dot" cx="50" cy="26" r="4"/>
+        <circle class="vb-line-dot" cx="100" cy="65" r="4"/>
+        <circle class="vb-line-dot" cx="150" cy="0" r="4"/>
+        <circle class="vb-line-dot" cx="200" cy="39" r="4"/>
+        <circle class="vb-line-dot" cx="250" cy="78" r="4"/>
+        <circle class="vb-line-dot" cx="300" cy="65" r="4"/>
+        <text class="vb-line-label" x="0" y="78">Mon</text>
+        <text class="vb-line-label" x="46" y="78">Tue</text>
+        <text class="vb-line-label" x="96" y="78">Wed</text>
+        <text class="vb-line-label" x="144" y="78">Thu</text>
+        <text class="vb-line-label" x="196" y="78">Fri</text>
+        <text class="vb-line-label" x="246" y="78">Sat</text>
+        <text class="vb-line-label" x="290" y="78">Sun</text>
+      </svg>
+    </div>
+    <p class="va-hint">Big centered number hero · donut charts for breakdowns · line chart for week · card grid</p>
+  </div>
+
+  <!-- ===== VARIANT C: Dashboard grid + stacked bars + heatmap ===== -->
+  <div class="variant-label">Variant C</div>
+  <div class="variant-card" id="vc">
+    <div class="v-hero"><h2>Stats</h2><p>How today's going.</p></div>
+    <div class="vb-grid">
+      <div class="vb-stat-card ring-card">
+        <div class="vb-mini-ring"><div class="inner">33%</div></div>
+        <div><div class="vb-stat-num">1/3</div><div class="vb-stat-label">completed</div></div>
+      </div>
+      <div class="vb-stat-card"><div class="vb-stat-num">8</div><div class="vb-stat-label">tasks total</div></div>
+      <div class="vb-stat-card"><div class="vb-stat-num">4</div><div class="vb-stat-label">medium</div></div>
+      <div class="vb-stat-card"><div class="vb-stat-num">2</div><div class="vb-stat-label">high priority</div></div>
+    </div>
+    <div class="vb-stacked">
+      <h3>By difficulty</h3>
+      <div class="vb-stacked-row">
+        <div class="vb-stacked-label">All tasks</div>
+        <div class="vb-stacked-bar">
+          <div class="vb-stacked-seg" style="width:25%;background:#A9C9EA"></div>
+          <div class="vb-stacked-seg" style="width:50%;background:#5AA9E6"></div>
+          <div class="vb-stacked-seg" style="width:25%;background:#1D6FB8"></div>
+        </div>
+        <div class="vb-stacked-legend">
+          <div class="vb-slegend"><span class="vb-slegend-dot" style="background:#A9C9EA"></span>Easy 2</div>
+          <div class="vb-slegend"><span class="vb-slegend-dot" style="background:#5AA9E6"></span>Medium 4</div>
+          <div class="vb-slegend"><span class="vb-slegend-dot" style="background:#1D6FB8"></span>Hard 2</div>
+        </div>
+      </div>
+      <div class="vb-stacked-row">
+        <div class="vb-stacked-label">By priority</div>
+        <div class="vb-stacked-bar">
+          <div class="vb-stacked-seg" style="width:25%;background:#F2AA9C"></div>
+          <div class="vb-stacked-seg" style="width:50%;background:#FF6F59"></div>
+          <div class="vb-stacked-seg" style="width:25%;background:#D8452A"></div>
+        </div>
+        <div class="vb-stacked-legend">
+          <div class="vb-slegend"><span class="vb-slegend-dot" style="background:#F2AA9C"></span>Low 2</div>
+          <div class="vb-slegend"><span class="vb-slegend-dot" style="background:#FF6F59"></span>Med 4</div>
+          <div class="vb-slegend"><span class="vb-slegend-dot" style="background:#D8452A"></span>High 2</div>
+        </div>
+      </div>
+    </div>
+    <div class="vb-heatmap">
+      <h3>This week</h3>
+      <div class="vb-heat-grid">
+        <div class="vb-heat-day"><div class="vb-heat-dot l2">2</div><div class="vb-heat-day-label">Mon</div></div>
+        <div class="vb-heat-day"><div class="vb-heat-dot l3">4</div><div class="vb-heat-day-label">Tue</div></div>
+        <div class="vb-heat-day"><div class="vb-heat-dot l1">1</div><div class="vb-heat-day-label">Wed</div></div>
+        <div class="vb-heat-day"><div class="vb-heat-dot l3">5</div><div class="vb-heat-day-label">Thu</div></div>
+        <div class="vb-heat-day"><div class="vb-heat-dot l2">3</div><div class="vb-heat-day-label">Fri</div></div>
+        <div class="vb-heat-day"><div class="vb-heat-dot l0">0</div><div class="vb-heat-day-label">Sat</div></div>
+        <div class="vb-heat-day"><div class="vb-heat-dot l1">1</div><div class="vb-heat-day-label">Sun</div></div>
+      </div>
+    </div>
+    <p class="va-hint">2-col stat grid with mini ring · stacked horizontal bars · colored heatmap dots · dense dashboard</p>
+  </div>
+
+  <!-- ===== VARIANT D: Minimal text + lists ===== -->
+  <div class="variant-label">Variant D</div>
+  <div class="variant-card" id="vd">
+    <div class="v-hero"><h2>Stats</h2><p>How today's going.</p></div>
+    <div class="vd-hero">
+      <div class="vd-ring"><div class="inner">33%</div></div>
+      <div class="vd-hero-text">
+        <div class="vd-big">1 of 3 done</div>
+        <div class="vd-sub">tasks completed today</div>
+      </div>
+    </div>
+    <div class="vd-list-card">
+      <h3>Difficulty</h3>
+      <div class="vd-list-row"><span class="lbl">Easy</span><span class="val">2 tasks</span></div>
+      <div class="vd-list-row"><span class="lbl">Medium</span><span class="val">4 tasks</span></div>
+      <div class="vd-list-row"><span class="lbl">Hard</span><span class="val">2 tasks</span></div>
+    </div>
+    <div class="vd-list-card">
+      <h3>Priority</h3>
+      <div class="vd-list-row"><span class="lbl">Low</span><span class="val">2 tasks</span></div>
+      <div class="vd-list-row"><span class="lbl">Med</span><span class="val">4 tasks</span></div>
+      <div class="vd-list-row"><span class="lbl">High</span><span class="val">2 tasks</span></div>
+    </div>
+    <div class="vd-week-summary">
+      <h3>This week</h3>
+      <div class="vd-week-line"><span class="day">Monday</span><span class="count">2</span></div>
+      <div class="vd-week-line"><span class="day">Tuesday</span><span class="count">4</span></div>
+      <div class="vd-week-line"><span class="day">Wednesday</span><span class="count">1</span></div>
+      <div class="vd-week-line"><span class="day">Thursday</span><span class="count">5</span></div>
+      <div class="vd-week-line"><span class="day">Friday</span><span class="count">3</span></div>
+      <div class="vd-week-line"><span class="day">Saturday</span><span class="count">0</span></div>
+      <div class="vd-week-line"><span class="day">Sunday</span><span class="count">1</span></div>
+      <div class="vd-week-total"><span>This week total</span><span>16 tasks</span></div>
+    </div>
+    <p class="va-hint">Text-heavy minimal layout · list rows with counts · day-by-day text summary · no charts</p>
+  </div>
+
+  <!-- ===== FEEDBACK ===== -->
+  <div class="feedback">
+    <h2>Pick your favorite</h2>
+    <div class="feedback-options">
+      <label class="feedback-option"><input type="radio" name="fav" value="A"> Variant A</label>
+      <label class="feedback-option"><input type="radio" name="fav" value="B"> Variant B</label>
+      <label class="feedback-option"><input type="radio" name="fav" value="C"> Variant C</label>
+      <label class="feedback-option"><input type="radio" name="fav" value="D"> Variant D</label>
+    </div>
+    <textarea class="feedback-note" placeholder="Any notes? What did you like or dislike about each?"></textarea>
+    <button class="submit-btn" onclick="submitFeedback()">Submit</button>
+    <div class="result" id="result-msg"></div>
+  </div>
+</div>
+
+<script>
+function submitFeedback() {
+  const fav = document.querySelector('input[name="fav"]:checked');
+  const note = document.querySelector('.feedback-note').value;
+  if(!fav) { alert('Please pick a favorite variant.'); return; }
+  const msg = document.getElementById('result-msg');
+  msg.style.display = 'block';
+  msg.innerHTML = '<strong>Thanks!</strong> You picked Variant '+fav.value+(note ? '. Notes: "'+note+'"' : '.');
+}
+</script>
+</body>
+</html>

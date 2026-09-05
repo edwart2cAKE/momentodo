@@ -14,6 +14,9 @@ subagents in `.opencode/agent/` are auto-discovered too.
   criteria, and an explicit list of what's mocked vs. what needs to be real.
 - `BUILD_PLAN.md` — phased task breakdown with agent ownership and which
   phases/tasks can run in parallel.
+- `DESIGN_DECISIONS.md` — winning layouts from blind A/B/C/D comparison
+  for each screen (Details, Timer, Home, Stats). Source of truth for
+  screen layouts; don't re-litigate without being asked.
 - `design-tokens.json` — exact colors, radii, shadows, motion, and
   typography, extracted from the approved mockup. Source of truth for
   every visual value.

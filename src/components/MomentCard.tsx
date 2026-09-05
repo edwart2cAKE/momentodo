@@ -33,31 +33,33 @@ export function MomentCard({ duration, selected, onClick }: MomentCardProps) {
         color: textColor,
         border: selected ? `3px solid ${color.ink}` : '3px solid transparent',
         borderRadius: radius.card,
-        padding: '12px 6px',
+        padding: '16px 12px',
         textAlign: 'center',
         cursor: 'pointer',
         fontFamily: typography.headingFont,
         fontWeight: 600,
-        fontSize: '12.5px',
-        boxShadow: selected ? glowMap[duration] : shadow.momentCardDefault,
+        fontSize: '13px',
+        boxShadow: selected
+          ? `0 0 0 3px ${color.ink} inset`
+          : glowMap[duration],
         transform: selected ? 'scale(1.05)' : 'scale(1)',
         transition: `transform ${motion.duration} ${motion.easing}, box-shadow ${motion.duration} ${motion.easing}`,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: '1px',
+        gap: '2px',
       }}
     >
       <span
         style={{
-          fontSize: typography.sizes.momentCardNumber,
+          fontSize: '26px',
           fontWeight: 700,
           lineHeight: 1,
         }}
       >
         {duration}
       </span>
-      min
+      <span style={{ fontSize: '11px', opacity: 0.8 }}>minutes</span>
     </button>
   )
 }

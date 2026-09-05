@@ -2,16 +2,22 @@ import { color, typography } from '../theme/tokens'
 
 interface RingProps {
   percentage: number
+  size?: number
+  innerSize?: number
+  fontSize?: string
 }
 
-export function Ring({ percentage }: RingProps) {
+export function Ring({ percentage, size = 88, innerSize = 66, fontSize = '16px' }: RingProps) {
   const clamped = Math.max(0, Math.min(100, percentage))
+  const outerBorder = 4
+  const actualOuter = size + outerBorder * 2
+  const actualInner = innerSize
 
   return (
     <div
       style={{
-        width: '88px',
-        height: '88px',
+        width: `${actualOuter}px`,
+        height: `${actualOuter}px`,
         borderRadius: '50%',
         flex: 'none',
         display: 'flex',
@@ -22,8 +28,8 @@ export function Ring({ percentage }: RingProps) {
     >
       <div
         style={{
-          width: '66px',
-          height: '66px',
+          width: `${actualInner}px`,
+          height: `${actualInner}px`,
           borderRadius: '50%',
           background: color.background,
           display: 'flex',
@@ -31,7 +37,7 @@ export function Ring({ percentage }: RingProps) {
           justifyContent: 'center',
           fontFamily: typography.headingFont,
           fontWeight: 700,
-          fontSize: '16px',
+          fontSize,
           color: color.ink,
         }}
       >

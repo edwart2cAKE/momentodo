@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Momentodo — Blind Test: Timer Layout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: #E9E9E4; color: #1F3A2E; }
+  .shell { max-width: 460px; margin: 0 auto; background: #EEF4EE; min-height: 100vh; padding: 22px 20px 40px; }
+
+  h1 { font-family: 'Poppins', sans-serif; font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+  .subtitle { color: #6C8578; font-size: 13px; margin-bottom: 20px; line-height: 1.5; }
+
+  .variant-label { font-size: 12px; font-weight: 700; color: #6C8578; margin-bottom: 8px; letter-spacing: 0.5px; }
+
+  .variant-card {
+    background: #FFFFFF; border-radius: 22px; box-shadow: 0 8px 20px rgba(31,58,46,0.08);
+    padding: 20px; margin-bottom: 24px; text-align: center; position: relative; overflow: hidden;
+  }
+
+  .timer-display {
+    font-family: 'Poppins', sans-serif; font-size: 58px; font-weight: 700;
+    color: #1F3A2E; line-height: 1; margin: 16px 0;
+    transition: color 0.3s;
+  }
+  .timer-display.running { color: #04C495; }
+  .timer-display.paused { color: #FFCA4D; }
+  .timer-display.idle { color: #6C8578; }
+
+  .mode-toggle {
+    display: inline-flex; gap: 4px; background: #fff; padding: 3px;
+    border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 16px;
+  }
+  .mode-btn {
+    border: none; background: transparent; color: #6C8578; font-size: 12px;
+    font-weight: 700; padding: 7px 16px; border-radius: 16px; cursor: pointer;
+    font-family: 'Inter', sans-serif; transition: all 0.2s;
+  }
+  .mode-btn.on { background: #4C9CE0; color: #fff; }
+
+  .ctl-row { display: flex; gap: 10px; justify-content: center; margin-top: 18px; }
+  .ctl-btn {
+    border: none; border-radius: 22px; padding: 11px 24px; font-weight: 700;
+    font-size: 13.5px; cursor: pointer; font-family: 'Inter', sans-serif;
+    transition: all 0.2s; min-height: 44px;
+  }
+  .ctl-btn.primary { background: #4C9CE0; color: #fff; }
+  .ctl-btn.primary.running { background: #FFCA4D; color: #1F3A2E; }
+  .ctl-btn.secondary { background: #fff; color: #1F3A2E; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+
+  .task-select {
+    border: 1px solid #DCE8E0; border-radius: 12px; padding: 8px 14px;
+    font-size: 13px; color: #1F3A2E; background: #fff; font-family: 'Inter', sans-serif;
+    max-width: 260px; width: 100%; margin-top: 10px;
+  }
+  .task-select:focus { outline: none; border-color: #4C9CE0; }
+
+  /* Task card (for variants B/C) */
+  .task-card {
+    display: inline-flex; align-items: center; gap: 8px; background: #f8faf8;
+    border: 1px solid #DCE8E0; border-radius: 14px; padding: 8px 14px;
+    font-size: 13px; font-weight: 600; color: #1F3A2E; margin-top: 10px;
+    transition: all 0.3s; max-width: 260px;
+  }
+  .task-card.active { border-color: #04C495; background: #E4F3EA; }
+  .task-card .dot { width: 8px; height: 8px; border-radius: 50%; background: #DCE8E0; flex: none; }
+  .task-card.active .dot { background: #04C495; }
+  .task-card .task-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .task-card .task-label { font-size: 10px; font-weight: 700; color: #6C8578; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .no-task { color: #6C8578; font-size: 12px; margin-top: 8px; font-weight: 500; }
+
+  /* Status badge (Variant C) */
+  .status-badge {
+    display: inline-block; font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px; padding: 5px 14px; border-radius: 20px; margin-bottom: 12px;
+  }
+  .status-badge.ready { background: #EEF4EE; color: #6C8578; }
+  .status-badge.focusing { background: #E4F3EA; color: #04C495; }
+  .status-badge.paused { background: #FFF3D6; color: #A67300; }
+
+  /* Glow pulse (Variant B) */
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(4,196,149,0.3); }
+    50% { box-shadow: 0 0 20px 8px rgba(4,196,149,0.15); }
+  }
+  .glow-pulse { animation: pulse 2s ease-in-out infinite; border-radius: 22px; }
+
+  /* Progress ring (Variant D) */
+  .ring-container { position: relative; display: inline-block; margin: 16px 0; }
+  .ring-svg { transform: rotate(-90deg); }
+  .ring-bg { fill: none; stroke: #E4EDE6; }
+  .ring-progress { fill: none; stroke: #04C495; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
+  .ring-timer {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    font-family: 'Poppins', sans-serif; font-size: 42px; font-weight: 700; color: #1F3A2E;
+  }
+  .ring-task {
+    position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+    font-size: 11px; font-weight: 600; color: #6C8578; white-space: nowrap;
+    max-width: 120px; overflow: hidden; text-overflow: ellipsis;
+  }
+  .ring-task.active { color: #04C495; }
+
+  .section-label { font-size: 12px; font-weight: 700; color: #6C8578; text-align: left; margin: 20px 0 8px; }
+
+  /* Feedback */
+  .feedback { background: #fff; border-radius: 22px; box-shadow: 0 8px 20px rgba(31,58,46,0.08); padding: 20px; margin-top: 10px; }
+  .feedback h2 { font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 600; margin-bottom: 12px; }
+  .feedback-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  .feedback-option { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px; font-weight: 500; }
+  .feedback-option input[type="radio"] { width: 18px; height: 18px; accent-color: #4C9CE0; cursor: pointer; }
+  .feedback-note { width: 100%; border: 1px solid #DCE8E0; border-radius: 14px; padding: 10px 14px; font-size: 13px; font-family: 'Inter', sans-serif; resize: vertical; min-height: 60px; color: #1F3A2E; }
+  .feedback-note:focus { outline: none; border-color: #4C9CE0; }
+  .submit-btn {
+    background: #4C9CE0; color: #fff; border: none; border-radius: 14px; padding: 10px 24px;
+    font-weight: 700; font-size: 13.5px; cursor: pointer; font-family: 'Inter', sans-serif;
+    margin-top: 12px; min-height: 44px;
+  }
+  .result { margin-top: 12px; padding: 12px; background: #E4F3EA; border-radius: 10px; font-size: 13px; font-weight: 600; display: none; }
+
+  .hint { font-size: 11px; color: #6C8578; margin-top: 6px; font-style: italic; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <h1>Blind Test: Timer</h1>
+  <p class="subtitle">Compare 4 ways to show the timer state and active task. Click the buttons in each variant to try starting, pausing, and selecting a task. Pick your favorite below.</p>
+
+  <!-- ===== VARIANT A ===== -->
+  <div class="variant-label">Variant A</div>
+  <div class="variant-card" id="va">
+    <div class="mode-toggle">
+      <button class="mode-btn on" onclick="vaSetMode('focus')">Focus 25</button>
+      <button class="mode-btn" onclick="vaSetMode('stopwatch')">Stopwatch</button>
+    </div>
+    <div class="timer-display" id="va-time">25:00</div>
+    <select class="task-select" id="va-task" onchange="vaSelectTask()">
+      <option value="">No task selected</option>
+      <option value="1">Reply to client email</option>
+      <option value="2">Review PR #482</option>
+      <option value="3">Outline blog post</option>
+    </select>
+    <div class="ctl-row">
+      <button class="ctl-btn primary" onclick="vaStart()">Start</button>
+      <button class="ctl-btn secondary" onclick="vaPause()">Pause</button>
+      <button class="ctl-btn secondary" onclick="vaReset()">Reset</button>
+    </div>
+    <p class="hint">Current design — same buttons, dropdown, no state feedback</p>
+  </div>
+
+  <!-- ===== VARIANT B ===== -->
+  <div class="variant-label">Variant B</div>
+  <div class="variant-card" id="vb">
+    <div class="mode-toggle">
+      <button class="mode-btn on" onclick="vbSetMode('focus')">Focus 25</button>
+      <button class="mode-btn" onclick="vbSetMode('stopwatch')">Stopwatch</button>
+    </div>
+    <div class="timer-display idle" id="vb-time">25:00</div>
+    <div id="vb-task-area">
+      <div class="no-task">No task selected</div>
+    </div>
+    <div class="ctl-row">
+      <button class="ctl-btn primary" id="vb-action" onclick="vbAction()">Start</button>
+      <button class="ctl-btn secondary" onclick="vbReset()">Reset</button>
+    </div>
+    <p class="hint">Timer color changes by state · single Start/Pause toggle · task shown as card</p>
+  </div>
+
+  <!-- ===== VARIANT C ===== -->
+  <div class="variant-label">Variant C</div>
+  <div class="variant-card" id="vc">
+    <div class="status-badge ready" id="vc-badge">Ready</div>
+    <div class="mode-toggle">
+      <button class="mode-btn on" onclick="vcSetMode('focus')">Focus 25</button>
+      <button class="mode-btn" onclick="vcSetMode('stopwatch')">Stopwatch</button>
+    </div>
+    <div class="timer-display" id="vc-time">25:00</div>
+    <div id="vc-task-area">
+      <div class="no-task">Select a task to focus on</div>
+    </div>
+    <div class="ctl-row">
+      <button class="ctl-btn primary" id="vc-action" onclick="vcAction()">Start Focus</button>
+    </div>
+    <p class="hint">Status badge (Ready/Focusing/Paused) · task as prominent chip · single action button</p>
+  </div>
+
+  <!-- ===== VARIANT D ===== -->
+  <div class="variant-label">Variant D</div>
+  <div class="variant-card" id="vd">
+    <div class="mode-toggle">
+      <button class="mode-btn on" onclick="vdSetMode('focus')">Focus 25</button>
+      <button class="mode-btn" onclick="vdSetMode('stopwatch')">Stopwatch</button>
+    </div>
+    <div class="ring-container" id="vd-ring">
+      <svg class="ring-svg" width="160" height="160" viewBox="0 0 160 160">
+        <circle class="ring-bg" cx="80" cy="80" r="70" stroke-width="10"/>
+        <circle class="ring-progress" id="vd-progress" cx="80" cy="80" r="70" stroke-width="10"
+          stroke-dasharray="439.82" stroke-dashoffset="0"/>
+      </svg>
+      <div class="ring-timer" id="vd-time">25:00</div>
+      <div class="ring-task" id="vd-task-label">no task</div>
+    </div>
+    <div style="margin-top: 8px;">
+      <select class="task-select" id="vd-task" onchange="vdSelectTask()">
+        <option value="">No task selected</option>
+        <option value="1">Reply to client email</option>
+        <option value="2">Review PR #482</option>
+        <option value="3">Outline blog post</option>
+      </select>
+    </div>
+    <div class="ctl-row">
+      <button class="ctl-btn primary" id="vd-action" onclick="vdAction()">Start</button>
+      <button class="ctl-btn secondary" onclick="vdReset()">Reset</button>
+    </div>
+    <p class="hint">Progress ring · task shown inside ring · ring fills as time passes</p>
+  </div>
+
+  <!-- ===== FEEDBACK ===== -->
+  <div class="feedback">
+    <h2>Pick your favorite</h2>
+    <div class="feedback-options">
+      <label class="feedback-option"><input type="radio" name="fav" value="A"> Variant A</label>
+      <label class="feedback-option"><input type="radio" name="fav" value="B"> Variant B</label>
+      <label class="feedback-option"><input type="radio" name="fav" value="C"> Variant C</label>
+      <label class="feedback-option"><input type="radio" name="fav" value="D"> Variant D</label>
+    </div>
+    <textarea class="feedback-note" placeholder="Any notes? What did you like or dislike about each?"></textarea>
+    <button class="submit-btn" onclick="submitFeedback()">Submit</button>
+    <div class="result" id="result-msg"></div>
+  </div>
+</div>
+
+<script>
+const FOCUS = 25 * 60;
+function fmt(s) { return String(Math.floor(s/60)).padStart(2,'0')+':'+String(String(s%60).padStart(2,'0')); }
+
+/* ==================== VARIANT A: Current ==================== */
+let va = { mode:'focus', remaining:FOCUS, elapsed:0, running:false, iv:null, task:null };
+function vaRender() {
+  document.getElementById('va-time').textContent = va.mode==='focus' ? fmt(va.remaining) : fmt(va.elapsed);
+}
+function vaSetMode(m) {
+  clearInterval(va.iv); va.running=false;
+  va.mode=m; va.remaining=FOCUS; va.elapsed=0; vaRender();
+  const btns = document.querySelectorAll('#va .mode-btn');
+  btns[0].classList.toggle('on', m==='focus');
+  btns[1].classList.toggle('on', m==='stopwatch');
+}
+function vaSelectTask() { va.task = document.getElementById('va-task').value || null; }
+function vaStart() {
+  if(va.running) return; va.running=true;
+  va.iv = setInterval(()=>{
+    if(va.mode==='focus'){ if(va.remaining>0) va.remaining--; else { clearInterval(va.iv); va.running=false; } }
+    else { va.elapsed++; }
+    vaRender();
+  },1000);
+}
+function vaPause() { clearInterval(va.iv); va.running=false; }
+function vaReset() { clearInterval(va.iv); va.running=false; va.remaining=FOCUS; va.elapsed=0; vaRender(); }
+
+/* ==================== VARIANT B: State colors + task card ==================== */
+let vb = { mode:'focus', remaining:FOCUS, elapsed:0, running:false, iv:null, task:null };
+function vbRender() {
+  const el = document.getElementById('vb-time');
+  el.textContent = vb.mode==='focus' ? fmt(vb.remaining) : fmt(vb.elapsed);
+  el.className = 'timer-display ' + (vb.running ? 'running' : (vb.elapsed>0 || (vb.mode==='focus' && vb.remaining<FOCUS) ? 'paused' : 'idle'));
+
+  const card = document.getElementById('vb-task-area');
+  if(vb.task) {
+    const tasks = {1:'Reply to client email',2:'Review PR #482',3:'Outline blog post'};
+    card.innerHTML = '<div class="task-card '+(vb.running?'active':'')+'">'
+      + '<span class="dot"></span><span class="task-name">'+tasks[vb.task]+'</span></div>';
+  } else {
+    card.innerHTML = '<div class="no-task">No task selected</div>';
+  }
+
+  const btn = document.getElementById('vb-action');
+  if(vb.running) { btn.textContent='Pause'; btn.className='ctl-btn primary running'; }
+  else { btn.textContent='Start'; btn.className='ctl-btn primary'; }
+
+  const cardEl = document.getElementById('vb');
+  if(vb.running) cardEl.classList.add('glow-pulse');
+  else cardEl.classList.remove('glow-pulse');
+}
+function vbSetMode(m) {
+  clearInterval(vb.iv); vb.running=false;
+  vb.mode=m; vb.remaining=FOCUS; vb.elapsed=0; vbRender();
+  const btns = document.querySelectorAll('#vb .mode-btn');
+  btns[0].classList.toggle('on', m==='focus');
+  btns[1].classList.toggle('on', m==='stopwatch');
+}
+function vbAction() {
+  if(vb.running) { clearInterval(vb.iv); vb.running=false; }
+  else { vb.running=true; vb.iv=setInterval(()=>{
+    if(vb.mode==='focus'){ if(vb.remaining>0) vb.remaining--; else { clearInterval(vb.iv); vb.running=false; } }
+    else { vb.elapsed++; }
+    vbRender();
+  },1000); }
+  vbRender();
+}
+function vbReset() { clearInterval(vb.iv); vb.running=false; vb.remaining=FOCUS; vb.elapsed=0; vbRender(); }
+
+/* ==================== VARIANT C: Status badge + task chip ==================== */
+let vc = { mode:'focus', remaining:FOCUS, elapsed:0, running:false, iv:null, task:null };
+function vcRender() {
+  const badge = document.getElementById('vc-badge');
+  const el = document.getElementById('vc-time');
+  el.textContent = vc.mode==='focus' ? fmt(vc.remaining) : fmt(vc.elapsed);
+
+  if(vc.running) { badge.className='status-badge focusing'; badge.textContent='Focusing'; el.className='timer-display running'; }
+  else if(vc.elapsed>0 || (vc.mode==='focus' && vc.remaining<FOCUS)) { badge.className='status-badge paused'; badge.textContent='Paused'; el.className='timer-display paused'; }
+  else { badge.className='status-badge ready'; badge.textContent='Ready'; el.className='timer-display'; }
+
+  const card = document.getElementById('vc-task-area');
+  if(vc.task) {
+    const tasks = {1:'Reply to client email',2:'Review PR #482',3:'Outline blog post'};
+    card.innerHTML = '<div class="task-card '+(vc.running?'active':'')+'">'
+      + '<span class="dot"></span><span class="task-name">'+tasks[vc.task]+'</span></div>';
+  } else {
+    card.innerHTML = '<div class="no-task">Select a task to focus on</div>';
+  }
+
+  const btn = document.getElementById('vc-action');
+  if(vc.running) { btn.textContent='Pause Focus'; }
+  else if(vc.elapsed>0 || (vc.mode==='focus' && vc.remaining<FOCUS)) { btn.textContent='Resume'; }
+  else { btn.textContent = vc.mode==='focus' ? 'Start Focus' : 'Start Stopwatch'; }
+}
+function vcSetMode(m) {
+  clearInterval(vc.iv); vc.running=false;
+  vc.mode=m; vc.remaining=FOCUS; vc.elapsed=0; vcRender();
+  const btns = document.querySelectorAll('#vc .mode-btn');
+  btns[0].classList.toggle('on', m==='focus');
+  btns[1].classList.toggle('on', m==='stopwatch');
+}
+function vcAction() {
+  if(vc.running) { clearInterval(vc.iv); vc.running=false; }
+  else { vc.running=true; vc.iv=setInterval(()=>{
+    if(vc.mode==='focus'){ if(vc.remaining>0) vc.remaining--; else { clearInterval(vc.iv); vc.running=false; } }
+    else { vc.elapsed++; }
+    vcRender();
+  },1000); }
+  vcRender();
+}
+
+/* ==================== VARIANT D: Progress ring ==================== */
+let vd = { mode:'focus', remaining:FOCUS, elapsed:0, running:false, iv:null, task:null };
+const CIRC = 2 * Math.PI * 70;
+function vdRender() {
+  document.getElementById('vd-time').textContent = vd.mode==='focus' ? fmt(vd.remaining) : fmt(vd.elapsed);
+  const pct = vd.mode==='focus' ? (FOCUS - vd.remaining) / FOCUS : Math.min(vd.elapsed / FOCUS, 1);
+  document.getElementById('vd-progress').setAttribute('stroke-dashoffset', CIRC * (1 - pct));
+
+  const label = document.getElementById('vd-task-label');
+  if(vd.task) {
+    const tasks = {1:'Reply to client email',2:'Review PR #482',3:'Outline blog post'};
+    label.textContent = tasks[vd.task];
+    label.className = 'ring-task' + (vd.running ? ' active' : '');
+  } else {
+    label.textContent = 'no task';
+    label.className = 'ring-task';
+  }
+
+  const prog = document.getElementById('vd-progress');
+  prog.style.stroke = vd.running ? '#04C495' : (pct > 0 ? '#FFCA4D' : '#E4EDE6');
+
+  const btn = document.getElementById('vd-action');
+  if(vd.running) { btn.textContent='Pause'; btn.className='ctl-btn primary running'; }
+  else { btn.textContent='Start'; btn.className='ctl-btn primary'; }
+}
+function vdSetMode(m) {
+  clearInterval(vd.iv); vd.running=false;
+  vd.mode=m; vd.remaining=FOCUS; vd.elapsed=0; vdRender();
+  const btns = document.querySelectorAll('#vd .mode-btn');
+  btns[0].classList.toggle('on', m==='focus');
+  btns[1].classList.toggle('on', m==='stopwatch');
+}
+function vdSelectTask() { vd.task = document.getElementById('vd-task').value || null; vdRender(); }
+function vdAction() {
+  if(vd.running) { clearInterval(vd.iv); vd.running=false; }
+  else { vd.running=true; vd.iv=setInterval(()=>{
+    if(vd.mode==='focus'){ if(vd.remaining>0) vd.remaining--; else { clearInterval(vd.iv); vd.running=false; } }
+    else { vd.elapsed++; }
+    vdRender();
+  },1000); }
+  vdRender();
+}
+function vdReset() { clearInterval(vd.iv); vd.running=false; vd.remaining=FOCUS; vd.elapsed=0; vdRender(); }
+
+/* ==================== Feedback ==================== */
+function submitFeedback() {
+  const fav = document.querySelector('input[name="fav"]:checked');
+  const note = document.querySelector('.feedback-note').value;
+  if(!fav) { alert('Please pick a favorite variant.'); return; }
+  const msg = document.getElementById('result-msg');
+  msg.style.display='block';
+  msg.innerHTML='<strong>Thanks!</strong> You picked Variant '+fav.value+(note ? '. Notes: "'+note+'"' : '.');
+}
+</script>
+</body>
+</html>
