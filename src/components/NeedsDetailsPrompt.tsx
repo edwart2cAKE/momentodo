@@ -177,8 +177,10 @@ export function NeedsDetailsPrompt({ task, onSetField, onDismiss, onAddTag, onRe
             {task.tags && task.tags.map((tag) => {
               const tc = tagColor(tag)
               return (
-                <span
+                <button
                   key={tag}
+                  type="button"
+                  aria-label={`Remove tag ${tag}`}
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -190,11 +192,14 @@ export function NeedsDetailsPrompt({ task, onSetField, onDismiss, onAddTag, onRe
                     color: tc.text,
                     fontWeight: 700,
                     cursor: 'pointer',
+                    border: 'none',
+                    minHeight: '44px',
+                    fontFamily: 'Inter, sans-serif',
                   }}
                   onClick={() => onRemoveTag && onRemoveTag(task.id, tag)}
                 >
                   {tag} ✕
-                </span>
+                </button>
               )
             })}
             <div style={{ position: 'relative' }}>

@@ -223,6 +223,7 @@ export function Timer() {
               const val = (e.target as HTMLSelectElement).value
               setSelectedTaskId(val || null)
             }}
+            aria-label="Select task for timer"
             style={{
               border: `1px solid ${color.line}`,
               borderRadius: radius.select,

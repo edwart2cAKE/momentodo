@@ -205,8 +205,8 @@ function Tag({ label, style }: { label: string; style?: preact.CSSProperties }) 
         fontSize: typography.sizes.tag,
         padding: '2px 8px',
         borderRadius: '8px',
-        background: color.background,
-        color: color.inkSoft,
+        background: color.dueDate.default.bg,
+        color: color.dueDate.default.text,
         fontWeight: 700,
         ...style,
       }}

@@ -15,7 +15,7 @@ export function Home({ onNavigateToTasks }: HomeProps) {
   const [quickAddInput, setQuickAddInput] = useState('')
   const tasksFittingMinutes = useTaskStore((s) => s.tasksFittingMinutes)
   const quickAddParsed = useTaskStore((s) => s.quickAddParsed)
-  const upNext = useUpNext(4)
+  const upNext = useUpNext(3)
   const completed = useCompletedToday()
   const total = useTotalToday()
   const pct = useCompletionPercentage()
@@ -252,6 +252,7 @@ export function Home({ onNavigateToTasks }: HomeProps) {
               if (e.key === 'Enter') handleQuickAdd()
             }}
             placeholder="Try: call dentist 15m @errands"
+            aria-label="Quick add task"
             style={{
               flex: 1,
               border: `1px solid ${color.line}`,

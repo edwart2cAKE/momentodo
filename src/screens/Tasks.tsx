@@ -126,6 +126,7 @@ export function Tasks() {
             if (e.key === 'Enter') handleAdd()
           }}
           placeholder="Add a task... (try: call dentist 15m @errands)"
+          aria-label="Quick add task"
           style={{
             flex: 1,
             background: color.surface,
@@ -179,6 +180,7 @@ export function Tasks() {
         <select
           value={sortBy}
           onChange={(e) => setSortBy((e.target as HTMLSelectElement).value as SortBy)}
+          aria-label="Sort tasks by"
           style={{
             border: `1px solid ${color.line}`,
             borderRadius: radius.select,

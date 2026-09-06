@@ -20,9 +20,9 @@ export const color = {
     '60min': '#FF5A3D',
   },
   priorityTag: {
-    low: { bg: '#E4F3EA', text: '#2F7B57' },
-    med: { bg: '#FFF3D6', text: '#A67300' },
-    high: { bg: '#FFE3DD', text: '#C1401F' },
+    low: { bg: '#D4EDDA', text: '#1A5C3A' },
+    med: { bg: '#FFF0C8', text: '#7A5500' },
+    high: { bg: '#FFD6CC', text: '#8B2E15' },
   },
   heatmap: {
     level0: '#EEF4EE',
@@ -45,10 +45,10 @@ export const color = {
     high: '#D8452A',
   },
   dueDate: {
-    overdue: { bg: '#FFE3DD', text: '#C1401F' },
-    today: { bg: '#FFF3D6', text: '#A67300' },
-    tomorrow: { bg: '#E4E8F3', text: '#2F4F7B' },
-    default: { bg: '#EEF4EE', text: '#6C8578' },
+    overdue: { bg: '#FFD6CC', text: '#8B2E15' },
+    today: { bg: '#FFF0C8', text: '#7A5500' },
+    tomorrow: { bg: '#D6E0F0', text: '#1E3A6A' },
+    default: { bg: '#D4EDDA', text: '#1A5C3A' },
   },
   chipBg: '#f8faf8',
 } as const
