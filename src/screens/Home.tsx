@@ -12,7 +12,9 @@ interface HomeProps {
 
 export function Home({ onNavigateToTasks }: HomeProps) {
   const [momentFilter, setMomentFilter] = useState<MomentDuration | null>(null)
+  const [quickAddInput, setQuickAddInput] = useState('')
   const tasks = useTaskStore((s) => s.tasks)
+  const quickAddParsed = useTaskStore((s) => s.quickAddParsed)
   const upNext = useUpNext(4)
   const completed = useCompletedToday()
   const total = useTotalToday()
@@ -22,6 +24,13 @@ export function Home({ onNavigateToTasks }: HomeProps) {
   const matchingTasks = momentFilter !== null
     ? tasks.filter((t) => !t.done && t.estimatedMinutes !== null && t.estimatedMinutes <= momentFilter)
     : []
+
+  const handleQuickAdd = () => {
+    const val = quickAddInput.trim()
+    if (!val) return
+    quickAddParsed(val)
+    setQuickAddInput('')
+  }
 
   return (
     <div style={{ paddingBottom: isDesktop ? '22px' : '84px' }}>
@@ -237,7 +246,12 @@ export function Home({ onNavigateToTasks }: HomeProps) {
         <div style={{ display: 'flex', gap: '8px' }}>
           <input
             type="text"
-            placeholder="Add a task..."
+            value={quickAddInput}
+            onInput={(e) => setQuickAddInput((e.target as HTMLInputElement).value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleQuickAdd()
+            }}
+            placeholder="Try: call dentist 15m @errands"
             style={{
               flex: 1,
               border: `1px solid ${color.line}`,
@@ -250,6 +264,7 @@ export function Home({ onNavigateToTasks }: HomeProps) {
             }}
           />
           <button
+            onClick={handleQuickAdd}
             style={{
               background: color.moment['30min'],
               color: color.white,

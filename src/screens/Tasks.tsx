@@ -2,36 +2,47 @@ import { useState } from 'preact/hooks'
 import { useTaskStore } from '../store'
 import { TaskRow } from '../components'
 import { color, radius, shadow, typography } from '../theme/tokens'
+import type { Task } from '../types'
 
 type StatusFilter = 'all' | 'active' | 'done'
 type SortBy = 'default' | 'priority' | 'difficulty' | 'time'
 
 export function Tasks() {
   const tasks = useTaskStore((s) => s.tasks)
-  const addTask = useTaskStore((s) => s.addTask)
+  const quickAddParsed = useTaskStore((s) => s.quickAddParsed)
   const toggleTask = useTaskStore((s) => s.toggleTask)
   const deleteTask = useTaskStore((s) => s.deleteTask)
   const setTaskField = useTaskStore((s) => s.setTaskField)
   const dismissNeedsDetails = useTaskStore((s) => s.dismissNeedsDetails)
+  const addTag = useTaskStore((s) => s.addTag)
+  const removeTag = useTaskStore((s) => s.removeTag)
+  const availableTags = useTaskStore((s) => s.availableTags)
+  const addSubtask = useTaskStore((s) => s.addSubtask)
+  const setRecurrence = useTaskStore((s) => s.setRecurrence)
 
   const [input, setInput] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [sortBy, setSortBy] = useState<SortBy>('default')
+  const [tagFilter, setTagFilter] = useState<string | null>(null)
 
   const handleAdd = () => {
     const val = input.trim()
     if (!val) return
-    addTask(val)
+    quickAddParsed(val)
     setInput('')
   }
 
-  let filtered = tasks.slice()
-  if (statusFilter === 'active') filtered = filtered.filter((t) => !t.done)
-  if (statusFilter === 'done') filtered = filtered.filter((t) => t.done)
+  // Top-level tasks only (no parent)
+  let topLevel = tasks.filter((t) => t.parentId === null)
+  if (statusFilter === 'active') topLevel = topLevel.filter((t) => !t.done)
+  if (statusFilter === 'done') topLevel = topLevel.filter((t) => t.done)
+  if (tagFilter) topLevel = topLevel.filter((t) => t.tags.includes(tagFilter))
 
-  if (sortBy === 'priority') filtered.sort((a, b) => (b.priority || 0) - (a.priority || 0))
-  if (sortBy === 'difficulty') filtered.sort((a, b) => (b.difficulty || 0) - (a.difficulty || 0))
-  if (sortBy === 'time') filtered.sort((a, b) => (a.estimatedMinutes || 999) - (b.estimatedMinutes || 999))
+  if (sortBy === 'priority') topLevel.sort((a, b) => (b.priority || 0) - (a.priority || 0))
+  if (sortBy === 'difficulty') topLevel.sort((a, b) => (b.difficulty || 0) - (a.difficulty || 0))
+  if (sortBy === 'time') topLevel.sort((a, b) => (a.estimatedMinutes || 999) - (b.estimatedMinutes || 999))
+
+  const allTags = availableTags()
 
   const filterBtnStyle = (active: boolean) => ({
     border: `1px solid ${active ? color.ink : color.line}`,
@@ -45,6 +56,29 @@ export function Tasks() {
     cursor: 'pointer' as const,
     fontFamily: typography.bodyFont,
   })
+
+  function renderTaskWithSubtasks(task: Task, depth: number) {
+    const subtasks = tasks.filter((t) => t.parentId === task.id)
+    return (
+      <div key={task.id}>
+        <TaskRow
+          task={task}
+          onToggle={toggleTask}
+          onDelete={deleteTask}
+          onSetField={setTaskField}
+          onDismissDetails={dismissNeedsDetails}
+          onAddTag={addTag}
+          onRemoveTag={removeTag}
+          availableTags={allTags}
+          onAddSubtask={addSubtask}
+          onSetRecurrence={setRecurrence}
+          showDelete
+          depth={depth}
+        />
+        {subtasks.map((st) => renderTaskWithSubtasks(st, depth + 1))}
+      </div>
+    )
+  }
 
   return (
     <div style={{ paddingBottom: '84px' }}>
@@ -72,7 +106,7 @@ export function Tasks() {
           onKeyDown={(e) => {
             if (e.key === 'Enter') handleAdd()
           }}
-          placeholder="Add a task..."
+          placeholder="Add a task... (try: call dentist 15m @errands)"
           style={{
             flex: 1,
             background: color.surface,
@@ -103,10 +137,19 @@ export function Tasks() {
       </div>
 
       {/* Filters */}
-      <div style={{ display: 'flex', gap: '8px', padding: '6px 20px 10px' }}>
+      <div style={{ display: 'flex', gap: '8px', padding: '6px 20px 10px', flexWrap: 'wrap' }}>
         {(['all', 'active', 'done'] as const).map((f) => (
           <button key={f} style={filterBtnStyle(statusFilter === f)} onClick={() => setStatusFilter(f)}>
             {f.charAt(0).toUpperCase() + f.slice(1)}
+          </button>
+        ))}
+        {allTags.map((tag) => (
+          <button
+            key={tag}
+            style={filterBtnStyle(tagFilter === tag)}
+            onClick={() => setTagFilter(tagFilter === tag ? null : tag)}
+          >
+            {tag}
           </button>
         ))}
       </div>
@@ -136,18 +179,8 @@ export function Tasks() {
 
       {/* Task list */}
       <div style={{ padding: '0 20px' }}>
-        {filtered.length > 0 ? (
-          filtered.map((t) => (
-            <TaskRow
-              key={t.id}
-              task={t}
-              onToggle={toggleTask}
-              onDelete={deleteTask}
-              onSetField={setTaskField}
-              onDismissDetails={dismissNeedsDetails}
-              showDelete
-            />
-          ))
+        {topLevel.length > 0 ? (
+          topLevel.map((t) => renderTaskWithSubtasks(t, 0))
         ) : (
           <div
             style={{

@@ -1,6 +1,7 @@
-import type { Task, Difficulty, Priority, TaskField } from '../types'
+import type { Task, Difficulty, Priority, TaskField, RecurrencePattern } from '../types'
 import { color, radius, shadow, motion, typography } from '../theme/tokens'
 import { difficultyLabels, priorityLabels } from '../store/config'
+import { tagColor } from '../types'
 import { NeedsDetailsPrompt } from './NeedsDetailsPrompt'
 
 interface TaskRowProps {
@@ -9,7 +10,13 @@ interface TaskRowProps {
   onDelete?: (id: string) => void
   onSetField?: (id: string, field: TaskField, value: number | Difficulty | Priority) => void
   onDismissDetails?: (id: string) => void
+  onAddTag?: (id: string, tag: string) => void
+  onRemoveTag?: (id: string, tag: string) => void
+  availableTags?: string[]
+  onAddSubtask?: (parentId: string, title: string) => void
+  onSetRecurrence?: (id: string, pattern: RecurrencePattern) => void
   showDelete?: boolean
+  depth?: number
 }
 
 const priorityTagStyle: Record<number, { bg: string; text: string }> = {
@@ -24,7 +31,13 @@ export function TaskRow({
   onDelete,
   onSetField,
   onDismissDetails,
+  onAddTag,
+  onRemoveTag,
+  availableTags = [],
+  onAddSubtask,
+  onSetRecurrence,
   showDelete = false,
+  depth = 0,
 }: TaskRowProps) {
   return (
     <div
@@ -37,6 +50,7 @@ export function TaskRow({
         background: color.surface,
         borderRadius: radius.card,
         boxShadow: shadow.cardDefault,
+        marginLeft: depth > 0 ? `${depth * 20}px` : undefined,
       }}
     >
       <button
@@ -92,12 +106,33 @@ export function TaskRow({
               }}
             />
           )}
+          {task.tags.map((tag) => {
+            const tc = tagColor(tag)
+            return (
+              <Tag
+                key={tag}
+                label={tag}
+                style={{ background: tc.bg, color: tc.text }}
+              />
+            )
+          })}
+          {task.recurrence && (
+            <Tag
+              label={`🔄 ${task.recurrence}`}
+              style={{ background: '#E4E8F3', text: '#2F4F7B' }}
+            />
+          )}
         </div>
         {task.needsDetails && onSetField && onDismissDetails && (
           <NeedsDetailsPrompt
             task={task}
             onSetField={onSetField}
             onDismiss={onDismissDetails}
+            onAddTag={onAddTag}
+            onRemoveTag={onRemoveTag}
+            availableTags={availableTags}
+            onAddSubtask={onAddSubtask}
+            onSetRecurrence={onSetRecurrence}
           />
         )}
       </div>
@@ -125,7 +160,7 @@ export function TaskRow({
   )
 }
 
-function Tag({ label, style }: { label: string;   style?: preact.CSSProperties }) {
+function Tag({ label, style }: { label: string; style?: preact.CSSProperties }) {
   return (
     <span
       style={{
