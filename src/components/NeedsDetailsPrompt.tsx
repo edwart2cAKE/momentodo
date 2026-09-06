@@ -67,7 +67,7 @@ export function NeedsDetailsPrompt({ task, onSetField, onDismiss, onAddTag, onRe
   }
 
   const filteredSuggestions = availableTags.filter(
-    (t) => !task.tags.includes(t) && t.includes(tagInput.startsWith('@') ? tagInput : `@${tagInput}`),
+    (t) => !(task.tags && task.tags.includes(t)) && t.includes(tagInput.startsWith('@') ? tagInput : `@${tagInput}`),
   )
 
   const isQuickTime = task.estimatedMinutes !== null && (MOMENT_DURATIONS as readonly number[]).includes(task.estimatedMinutes)
@@ -157,7 +157,7 @@ export function NeedsDetailsPrompt({ task, onSetField, onDismiss, onAddTag, onRe
         <div style={{ marginTop: '6px' }}>
           <div style={labelStyle}>🏷️ Tags</div>
           <div style={rowStyle}>
-            {task.tags.map((tag) => {
+            {task.tags && task.tags.map((tag) => {
               const tc = tagColor(tag)
               return (
                 <span

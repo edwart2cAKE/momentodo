@@ -36,7 +36,7 @@ export function Tasks() {
   let topLevel = tasks.filter((t) => t.parentId === null)
   if (statusFilter === 'active') topLevel = topLevel.filter((t) => !t.done)
   if (statusFilter === 'done') topLevel = topLevel.filter((t) => t.done)
-  if (tagFilter) topLevel = topLevel.filter((t) => t.tags.includes(tagFilter))
+  if (tagFilter) topLevel = topLevel.filter((t) => t.tags && t.tags.includes(tagFilter))
 
   if (sortBy === 'priority') topLevel.sort((a, b) => (b.priority || 0) - (a.priority || 0))
   if (sortBy === 'difficulty') topLevel.sort((a, b) => (b.difficulty || 0) - (a.difficulty || 0))

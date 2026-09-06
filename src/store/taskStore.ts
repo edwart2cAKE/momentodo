@@ -196,7 +196,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     const normalized = tag.startsWith('@') ? tag : `@${tag}`
     set((state) => {
       const tasks = state.tasks.map((t) =>
-        t.id === id && !t.tags.includes(normalized) ? { ...t, tags: [...t.tags, normalized] } : t,
+        t.id === id && !(t.tags && t.tags.includes(normalized)) ? { ...t, tags: [...(t.tags || []), normalized] } : t,
       )
       repository.saveTasks(tasks)
       return { tasks }
@@ -206,7 +206,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   removeTag: (id: string, tag: string) => {
     set((state) => {
       const tasks = state.tasks.map((t) =>
-        t.id === id ? { ...t, tags: t.tags.filter((tg) => tg !== tag) } : t,
+        t.id === id ? { ...t, tags: (t.tags || []).filter((tg) => tg !== tag) } : t,
       )
       repository.saveTasks(tasks)
       return { tasks }
@@ -216,7 +216,9 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   availableTags: () => {
     const tags = new Set<string>()
     for (const t of get().tasks) {
-      for (const tag of t.tags) tags.add(tag)
+      if (t.tags) {
+        for (const tag of t.tags) tags.add(tag)
+      }
     }
     return [...tags].sort()
   },

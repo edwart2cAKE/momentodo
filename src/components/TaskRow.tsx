@@ -106,7 +106,7 @@ export function TaskRow({
               }}
             />
           )}
-          {task.tags.map((tag) => {
+          {task.tags && task.tags.map((tag) => {
             const tc = tagColor(tag)
             return (
               <Tag
