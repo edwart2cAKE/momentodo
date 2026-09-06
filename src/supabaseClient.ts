@@ -13,29 +13,35 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-// Momentodo uses username + password, but Supabase Auth is email-shaped
-// under the hood. We map usernames to a fake, never-contacted email domain
-// so we get Supabase's hashing / session / rate-limiting for free without
-// requiring a real email address from the user.
+// Momentodo accepts both email and username. Usernames are mapped to a
+// fake, never-contacted email domain so we get Supabase's hashing /
+// session / rate-limiting for free. Real emails are used directly.
 const FAKE_EMAIL_DOMAIN = 'momentodo.local'
 
-export function usernameToEmail(username: string): string {
-  return `${username.trim().toLowerCase()}@${FAKE_EMAIL_DOMAIN}`
+export function isEmail(input: string): boolean {
+  return input.includes('@')
 }
 
-export async function signUp(username: string, password: string) {
+function toSupabaseEmail(identifier: string): string {
+  const trimmed = identifier.trim().toLowerCase()
+  return isEmail(trimmed) ? trimmed : `${trimmed}@${FAKE_EMAIL_DOMAIN}`
+}
+
+export async function signUp(identifier: string, password: string) {
+  const email = toSupabaseEmail(identifier)
   const { data, error } = await supabase.auth.signUp({
-    email: usernameToEmail(username),
+    email,
     password,
-    options: { data: { username } },
+    options: { data: { username: identifier } },
   })
   if (error) throw error
   return data
 }
 
-export async function signIn(username: string, password: string) {
+export async function signIn(identifier: string, password: string) {
+  const email = toSupabaseEmail(identifier)
   const { data, error } = await supabase.auth.signInWithPassword({
-    email: usernameToEmail(username),
+    email,
     password,
   })
   if (error) throw error

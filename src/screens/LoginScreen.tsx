@@ -13,7 +13,7 @@ interface LoginScreenProps {
 
 export function LoginScreen({ onAuthenticated, onContinueOffline }: LoginScreenProps) {
   const [mode, setMode] = useState<Mode>('signIn')
-  const [username, setUsername] = useState('')
+  const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -22,9 +22,9 @@ export function LoginScreen({ onAuthenticated, onContinueOffline }: LoginScreenP
     e.preventDefault()
     setError(null)
 
-    const trimmedUsername = username.trim()
-    if (!trimmedUsername || !password) {
-      setError('Enter a username and password.')
+    const trimmedIdentifier = identifier.trim()
+    if (!trimmedIdentifier || !password) {
+      setError('Enter an email or username and password.')
       return
     }
     if (mode === 'signUp' && password.length < 6) {
@@ -35,9 +35,9 @@ export function LoginScreen({ onAuthenticated, onContinueOffline }: LoginScreenP
     setSubmitting(true)
     try {
       if (mode === 'signUp') {
-        await signUp(trimmedUsername, password)
+        await signUp(trimmedIdentifier, password)
       } else {
-        await signIn(trimmedUsername, password)
+        await signIn(trimmedIdentifier, password)
       }
       const userId = await getCurrentUserId()
       if (!userId) {
@@ -95,13 +95,13 @@ export function LoginScreen({ onAuthenticated, onContinueOffline }: LoginScreenP
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <label style={fieldLabelStyle}>
-            Username
+            Email or username
             <input
               type="text"
-              value={username}
-              onInput={(e) => setUsername((e.target as HTMLInputElement).value)}
-              autoComplete="username"
-              placeholder="yourname"
+              value={identifier}
+              onInput={(e) => setIdentifier((e.target as HTMLInputElement).value)}
+              autoComplete="email"
+              placeholder="you@email.com or yourname"
               style={inputStyle}
             />
           </label>
@@ -159,12 +159,8 @@ export function LoginScreen({ onAuthenticated, onContinueOffline }: LoginScreenP
 
 function messageFor(err: unknown): string {
   const raw = err instanceof Error ? err.message : String(err)
-  // Supabase's default copy mentions "email" since usernames are stored as
-  // fake emails internally — reword the common cases so they make sense
-  // for a username-based UI.
-  if (/invalid login credentials/i.test(raw)) return 'Incorrect username or password.'
-  if (/user already registered/i.test(raw)) return 'That username is already taken.'
-  if (/email/i.test(raw)) return raw.replace(/email/gi, 'username')
+  if (/invalid login credentials/i.test(raw)) return 'Incorrect email/username or password.'
+  if (/user already registered/i.test(raw)) return 'That account already exists.'
   return raw
 }
 
