@@ -59,30 +59,27 @@ export function TaskEditDropdown({
   const handleClose = () => setIsOpen(false)
 
   // Popover positioning (desktop) — useLayoutEffect to avoid flicker
-  const [popoverStyle, setPopoverStyle] = useState<preact.CSSProperties>({})
+  const [popoverPos, setPopoverPos] = useState<{ top: number; maxH: number }>({ top: 0, maxH: 400 })
   useLayoutEffect(() => {
     if (!isOpen || !isDesktop || !triggerRef.current) return
     const rect = triggerRef.current.getBoundingClientRect()
-    const estimatedHeight = 420
     const gap = 4
-    const spaceBelow = window.innerHeight - rect.bottom
-    if (spaceBelow < estimatedHeight + gap && rect.top > estimatedHeight + gap) {
-      // Flip above
-      setPopoverStyle({
-        position: 'fixed',
-        top: `${rect.top - estimatedHeight - gap}px`,
-        right: `${window.innerWidth - rect.right}px`,
-        zIndex: 100,
-      })
+    const spaceBelow = window.innerHeight - rect.bottom - gap
+    const spaceAbove = rect.top - gap
+    if (spaceBelow >= spaceAbove) {
+      setPopoverPos({ top: rect.bottom + gap, maxH: Math.max(spaceBelow, 200) })
     } else {
-      setPopoverStyle({
-        position: 'fixed',
-        top: `${rect.bottom + gap}px`,
-        right: `${window.innerWidth - rect.right}px`,
-        zIndex: 100,
-      })
+      setPopoverPos({ top: Math.max(gap, rect.top - spaceAbove), maxH: Math.max(spaceAbove, 200) })
     }
   }, [isOpen, isDesktop])
+
+  const popoverStyle: preact.CSSProperties = {
+    position: 'fixed',
+    top: `${popoverPos.top}px`,
+    right: `${window.innerWidth - (triggerRef.current?.getBoundingClientRect().right ?? 0)}px`,
+    zIndex: 100,
+    maxHeight: `${popoverPos.maxH}px`,
+  }
 
   const menuProps = {
     task,
@@ -131,7 +128,6 @@ export function TaskEditDropdown({
             boxShadow: shadow.momentCardDefault,
             border: `1px solid ${color.line}`,
             width: '280px',
-            maxHeight: '70vh',
             overflowY: 'auto',
           }}
         >
