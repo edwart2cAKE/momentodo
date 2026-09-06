@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'preact/hooks'
+import { useState, useRef, useEffect, useLayoutEffect } from 'preact/hooks'
 import type { Task, Difficulty, Priority, TaskField, RecurrencePattern } from '../types'
 import { TaskEditMenu } from './TaskEditMenu'
 import { useMediaQuery, DESKTOP_BREAKPOINT } from '../hooks/useMediaQuery'
@@ -58,9 +58,9 @@ export function TaskEditDropdown({
 
   const handleClose = () => setIsOpen(false)
 
-  // Popover positioning (desktop)
+  // Popover positioning (desktop) — useLayoutEffect to avoid flicker
   const [popoverStyle, setPopoverStyle] = useState<preact.CSSProperties>({})
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isOpen || !isDesktop || !triggerRef.current) return
     const rect = triggerRef.current.getBoundingClientRect()
     const estimatedHeight = 420
