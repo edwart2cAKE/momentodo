@@ -3,6 +3,7 @@ import { color, radius, shadow, motion, typography } from '../theme/tokens'
 import { difficultyLabels, priorityLabels } from '../store/config'
 import { tagColor } from '../types'
 import { NeedsDetailsPrompt } from './NeedsDetailsPrompt'
+import { TaskEditDropdown } from './TaskEditDropdown'
 
 interface TaskRowProps {
   task: Task
@@ -160,6 +161,19 @@ export function TaskRow({
           />
         )}
       </div>
+
+      {onSetField && (
+        <TaskEditDropdown
+          task={task}
+          onSetField={onSetField}
+          onAddTag={onAddTag}
+          onRemoveTag={onRemoveTag}
+          availableTags={availableTags}
+          onAddSubtask={onAddSubtask}
+          onSetRecurrence={onSetRecurrence}
+          onSetDueDate={onSetDueDate}
+        />
+      )}
 
       {showDelete && onDelete && (
         <button
