@@ -320,11 +320,12 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
   quickAddParsed: (input: string) => {
     const parsed = parseQuickAdd(input)
-    if (!parsed.title) return
+    const title = parsed.title.trim()
+    if (!title) return
 
     const task: Task = {
       id: genId(),
-      title: parsed.title,
+      title,
       estimatedMinutes: parsed.estimatedMinutes,
       difficulty: parsed.difficulty,
       priority: parsed.priority,

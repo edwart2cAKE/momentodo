@@ -44,6 +44,13 @@ export const color = {
     med: '#FF6F59',
     high: '#D8452A',
   },
+  dueDate: {
+    overdue: { bg: '#FFE3DD', text: '#C1401F' },
+    today: { bg: '#FFF3D6', text: '#A67300' },
+    tomorrow: { bg: '#E4E8F3', text: '#2F4F7B' },
+    default: { bg: '#EEF4EE', text: '#6C8578' },
+  },
+  chipBg: '#f8faf8',
 } as const
 
 export const radius = {

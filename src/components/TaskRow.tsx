@@ -33,13 +33,13 @@ function dueDateLabel(dueDate: string): { label: string; bg: string; text: strin
   tomorrow.setDate(tomorrow.getDate() + 1)
   const tomorrowStr = tomorrow.toISOString().split('T')[0]
 
-  if (dueDate < today) return { label: 'Overdue', bg: '#FFE3DD', text: '#C1401F' }
-  if (dueDate === today) return { label: 'Today', bg: '#FFF3D6', text: '#A67300' }
-  if (dueDate === tomorrowStr) return { label: 'Tomorrow', bg: '#E4E8F3', text: '#2F4F7B' }
+  if (dueDate < today) return { label: 'Overdue', ...color.dueDate.overdue }
+  if (dueDate === today) return { label: 'Today', ...color.dueDate.today }
+  if (dueDate === tomorrowStr) return { label: 'Tomorrow', ...color.dueDate.tomorrow }
   // Format as short day name
   const d = new Date(dueDate + 'T00:00:00')
   const dayName = d.toLocaleDateString('en-US', { weekday: 'short' })
-  return { label: dayName, bg: '#EEF4EE', text: '#6C8578' }
+  return { label: dayName, ...color.dueDate.default }
 }
 
 export function TaskRow({
@@ -143,7 +143,7 @@ export function TaskRow({
           {task.recurrence && (
             <Tag
               label={`🔄 ${task.recurrence}`}
-              style={{ background: '#E4E8F3', color: '#2F4F7B' }}
+              style={{ background: color.dueDate.tomorrow.bg, color: color.dueDate.tomorrow.text }}
             />
           )}
         </div>

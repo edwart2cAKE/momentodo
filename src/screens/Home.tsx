@@ -101,7 +101,7 @@ export function Home({ onNavigateToTasks }: HomeProps) {
                   alignItems: 'center',
                   gap: '8px',
                   padding: '8px 12px',
-                  background: '#f8faf8',
+                  background: color.chipBg,
                   borderRadius: radius.chip,
                   marginBottom: '6px',
                   fontSize: '13px',
