@@ -194,7 +194,6 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   },
 
   tasksFittingMinutes: (minutes: number) => {
-    const today = todayStr()
     const fitting = get().tasks.filter((t) => {
       if (t.done) return false
       if (t.estimatedMinutes === null || t.estimatedMinutes > minutes) return false
@@ -202,8 +201,6 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       if (t.subtaskIds.length > 0) return false
       // For recurring tasks, only show if due date is today or past
       if (t.recurrence && !isTodayOrPast(t.dueDate)) return false
-      // For non-recurring tasks with a due date, skip if due date is in the future
-      if (!t.recurrence && t.dueDate && t.dueDate > today) return false
       return true
     })
 

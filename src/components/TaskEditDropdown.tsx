@@ -63,12 +63,25 @@ export function TaskEditDropdown({
   useEffect(() => {
     if (!isOpen || !isDesktop || !triggerRef.current) return
     const rect = triggerRef.current.getBoundingClientRect()
-    setPopoverStyle({
-      position: 'fixed',
-      top: `${rect.bottom + 4}px`,
-      right: `${window.innerWidth - rect.right}px`,
-      zIndex: 100,
-    })
+    const estimatedHeight = 420
+    const gap = 4
+    const spaceBelow = window.innerHeight - rect.bottom
+    if (spaceBelow < estimatedHeight + gap && rect.top > estimatedHeight + gap) {
+      // Flip above
+      setPopoverStyle({
+        position: 'fixed',
+        top: `${rect.top - estimatedHeight - gap}px`,
+        right: `${window.innerWidth - rect.right}px`,
+        zIndex: 100,
+      })
+    } else {
+      setPopoverStyle({
+        position: 'fixed',
+        top: `${rect.bottom + gap}px`,
+        right: `${window.innerWidth - rect.right}px`,
+        zIndex: 100,
+      })
+    }
   }, [isOpen, isDesktop])
 
   const menuProps = {
