@@ -8,6 +8,7 @@ interface TaskState {
   addTask: (title: string) => void
   toggleTask: (id: string) => void
   deleteTask: (id: string) => void
+  setTitle: (id: string, title: string) => void
   setTaskField: (id: string, field: TaskField, value: number | Difficulty | Priority) => void
   dismissNeedsDetails: (id: string) => void
   tasksFittingMinutes: (minutes: number) => Task[]
@@ -172,6 +173,14 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   deleteTask: (id: string) => {
     set((state) => {
       const tasks = state.tasks.filter((t) => t.id !== id)
+      repository.saveTasks(tasks)
+      return { tasks }
+    })
+  },
+
+  setTitle: (id: string, title: string) => {
+    set((state) => {
+      const tasks = state.tasks.map((t) => (t.id === id ? { ...t, title } : t))
       repository.saveTasks(tasks)
       return { tasks }
     })

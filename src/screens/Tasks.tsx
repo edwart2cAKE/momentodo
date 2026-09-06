@@ -20,6 +20,7 @@ export function Tasks() {
   const addSubtask = useTaskStore((s) => s.addSubtask)
   const setRecurrence = useTaskStore((s) => s.setRecurrence)
   const setDueDate = useTaskStore((s) => s.setDueDate)
+  const setTitle = useTaskStore((s) => s.setTitle)
 
   const [input, setInput] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
@@ -83,6 +84,7 @@ export function Tasks() {
           task={task}
           onToggle={toggleTask}
           onDelete={deleteTask}
+          onSetTitle={setTitle}
           onSetField={setTaskField}
           onDismissDetails={dismissNeedsDetails}
           onAddTag={addTag}

@@ -9,6 +9,7 @@ interface TaskRowProps {
   task: Task
   onToggle: (id: string) => void
   onDelete?: (id: string) => void
+  onSetTitle?: (id: string, title: string) => void
   onSetField?: (id: string, field: TaskField, value: number | Difficulty | Priority) => void
   onDismissDetails?: (id: string) => void
   onAddTag?: (id: string, tag: string) => void
@@ -46,6 +47,7 @@ export function TaskRow({
   task,
   onToggle,
   onDelete,
+  onSetTitle,
   onSetField,
   onDismissDetails,
   onAddTag,
@@ -165,6 +167,7 @@ export function TaskRow({
       {onSetField && (
         <TaskEditDropdown
           task={task}
+          onSetTitle={onSetTitle}
           onSetField={onSetField}
           onAddTag={onAddTag}
           onRemoveTag={onRemoveTag}

@@ -6,6 +6,7 @@ import { color, radius, shadow } from '../theme/tokens'
 
 interface TaskEditDropdownProps {
   task: Task
+  onSetTitle?: (id: string, title: string) => void
   onSetField: (id: string, field: TaskField, value: number | Difficulty | Priority) => void
   onAddTag?: (id: string, tag: string) => void
   onRemoveTag?: (id: string, tag: string) => void
@@ -17,6 +18,7 @@ interface TaskEditDropdownProps {
 
 export function TaskEditDropdown({
   task,
+  onSetTitle,
   onSetField,
   onAddTag,
   onRemoveTag,
@@ -83,6 +85,7 @@ export function TaskEditDropdown({
 
   const menuProps = {
     task,
+    onSetTitle,
     onSetField,
     onClose: handleClose,
     onAddTag,

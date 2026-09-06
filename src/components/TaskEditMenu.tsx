@@ -23,6 +23,7 @@ function nextWeekStr(): string {
 
 interface TaskEditMenuProps {
   task: Task
+  onSetTitle?: (id: string, title: string) => void
   onSetField: (id: string, field: TaskField, value: number | Difficulty | Priority) => void
   onClose: () => void
   onAddTag?: (id: string, tag: string) => void
@@ -51,6 +52,7 @@ const rowStyle = {
 
 export function TaskEditMenu({
   task,
+  onSetTitle,
   onSetField,
   onClose,
   onAddTag,
@@ -129,6 +131,32 @@ export function TaskEditMenu({
           Close
         </button>
       </div>
+
+      {onSetTitle && (
+        <div style={{ marginBottom: '8px' }}>
+          <div style={labelStyle}>✏️ Title</div>
+          <input
+            type="text"
+            value={task.title}
+            onInput={(e) => onSetTitle(task.id, (e.target as HTMLInputElement).value)}
+            aria-label="Task title"
+            style={{
+              width: '100%',
+              padding: '6px 10px',
+              fontSize: '13px',
+              border: `1px solid ${color.line}`,
+              borderRadius: radius.pill,
+              background: color.surface,
+              color: color.ink,
+              fontWeight: 600,
+              fontFamily: typography.bodyFont,
+              outline: 'none',
+              minHeight: '44px',
+              boxSizing: 'border-box',
+            }}
+          />
+        </div>
+      )}
 
       <div style={{ marginBottom: '8px' }}>
         <div style={labelStyle}>⏱ Time</div>
