@@ -15,6 +15,7 @@
     "analyze": "vite build --mode analyze"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.115.0",
     "preact": "^10.29.8",
     "zustand": "^5.0.15"
   },

@@ -1,10 +1,12 @@
 import { create } from 'zustand'
 import type { Task, Difficulty, Priority, TaskField, RecurrencePattern } from '../types'
-import { repository } from './persistence'
+import { repository, onRepositoryChange } from './persistence'
 import { parseQuickAdd } from '../utils/nlp'
 
 interface TaskState {
   tasks: Task[]
+  hydrated: boolean
+  init: () => Promise<void>
   addTask: (title: string) => void
   toggleTask: (id: string) => void
   deleteTask: (id: string) => void
@@ -88,272 +90,279 @@ function dueDateSortScore(t: Task): number {
   return 3 // future
 }
 
-export const useTaskStore = create<TaskState>((set, get) => ({
-  tasks: repository.getTasks(),
+// Fire-and-forget: UI state already updated optimistically by the caller,
+// so we don't await this. Errors are logged rather than surfaced, since a
+// failed background sync shouldn't interrupt what the user is doing.
+// (See note at bottom of file re: retry / offline handling.)
+function persistTasks(tasks: Task[]): void {
+  repository.saveTasks(tasks).catch((err) => {
+    console.error('Failed to save tasks:', err)
+  })
+}
 
-  addTask: (title: string) => {
-    const task = makeTask(title)
-    set((state) => {
-      const tasks = [task, ...state.tasks]
-      repository.saveTasks(tasks)
-      return { tasks }
-    })
-  },
+export const useTaskStore = create<TaskState>((set, get) => {
+  // Re-hydrate whenever the active repository changes (login/logout).
+  onRepositoryChange(() => {
+    set({ hydrated: false, tasks: [] })
+    get().init()
+  })
 
-  toggleTask: (id: string) => {
-    set((state) => {
-      const task = state.tasks.find((t) => t.id === id)
-      if (!task) return state
+  return {
+    tasks: [],
+    hydrated: false,
 
-      const now = new Date().toISOString()
-      const newDone = !task.done
+    init: async () => {
+      const tasks = await repository.getTasks()
+      set({ tasks, hydrated: true })
+    },
 
-      let tasks = state.tasks.map((t) => {
-        if (t.id === id) {
-          return { ...t, done: newDone, completedAt: newDone ? now : null }
-        }
-        return t
+    addTask: (title: string) => {
+      const task = makeTask(title)
+      set((state) => {
+        const tasks = [task, ...state.tasks]
+        persistTasks(tasks)
+        return { tasks }
       })
+    },
 
-      // If completing a parent, complete all subtasks
-      if (newDone && task.subtaskIds.length > 0) {
-        tasks = tasks.map((t) =>
-          task.subtaskIds.includes(t.id)
-            ? { ...t, done: true, completedAt: now }
-            : t,
-        )
-      }
+    toggleTask: (id: string) => {
+      set((state) => {
+        const task = state.tasks.find((t) => t.id === id)
+        if (!task) return state
 
-      // If uncompleting a parent, uncomplete all subtasks
-      if (!newDone && task.subtaskIds.length > 0) {
-        tasks = tasks.map((t) =>
-          task.subtaskIds.includes(t.id)
-            ? { ...t, done: false, completedAt: null }
-            : t,
-        )
-      }
+        const now = new Date().toISOString()
+        const newDone = !task.done
 
-      // If completing a subtask, check if all siblings are done → auto-complete parent
-      if (newDone && task.parentId) {
-        const parent = tasks.find((t) => t.id === task.parentId)
-        if (parent && !parent.done) {
-          const allSiblingsDone = parent.subtaskIds.every((sid) => {
-            if (sid === id) return true
-            const sib = tasks.find((t) => t.id === sid)
-            return sib?.done
-          })
-          if (allSiblingsDone) {
-            tasks = tasks.map((t) =>
-              t.id === parent.id ? { ...t, done: true, completedAt: now } : t,
-            )
+        let tasks = state.tasks.map((t) => {
+          if (t.id === id) {
+            return { ...t, done: newDone, completedAt: newDone ? now : null }
+          }
+          return t
+        })
+
+        if (newDone && task.subtaskIds.length > 0) {
+          tasks = tasks.map((t) =>
+            task.subtaskIds.includes(t.id) ? { ...t, done: true, completedAt: now } : t,
+          )
+        }
+
+        if (!newDone && task.subtaskIds.length > 0) {
+          tasks = tasks.map((t) =>
+            task.subtaskIds.includes(t.id) ? { ...t, done: false, completedAt: null } : t,
+          )
+        }
+
+        if (newDone && task.parentId) {
+          const parent = tasks.find((t) => t.id === task.parentId)
+          if (parent && !parent.done) {
+            const allSiblingsDone = parent.subtaskIds.every((sid) => {
+              if (sid === id) return true
+              const sib = tasks.find((t) => t.id === sid)
+              return sib?.done
+            })
+            if (allSiblingsDone) {
+              tasks = tasks.map((t) => (t.id === parent.id ? { ...t, done: true, completedAt: now } : t))
+            }
           }
         }
-      }
 
-      // If completing a recurring task, clone it for the next occurrence
-      if (newDone && task.recurrence) {
-        const clone: Task = {
-          ...task,
-          id: genId(),
-          done: false,
-          completedAt: null,
-          needsDetails: false,
-          createdAt: now,
-          dueDate: computeNextDueDate(task.recurrence, new Date()),
-          subtaskIds: [],
+        if (newDone && task.recurrence) {
+          const clone: Task = {
+            ...task,
+            id: genId(),
+            done: false,
+            completedAt: null,
+            needsDetails: false,
+            createdAt: now,
+            dueDate: computeNextDueDate(task.recurrence, new Date()),
+            subtaskIds: [],
+          }
+          tasks = [clone, ...tasks]
         }
-        tasks = [clone, ...tasks]
+
+        persistTasks(tasks)
+        return { tasks }
+      })
+    },
+
+    deleteTask: (id: string) => {
+      set((state) => {
+        const tasks = state.tasks.filter((t) => t.id !== id)
+        persistTasks(tasks)
+        return { tasks }
+      })
+    },
+
+    setTitle: (id: string, title: string) => {
+      set((state) => {
+        const tasks = state.tasks.map((t) => (t.id === id ? { ...t, title } : t))
+        persistTasks(tasks)
+        return { tasks }
+      })
+    },
+
+    setTaskField: (id: string, field: TaskField, value: number | Difficulty | Priority) => {
+      set((state) => {
+        const tasks = state.tasks.map((t) => (t.id === id ? { ...t, [field]: value } : t))
+        persistTasks(tasks)
+        return { tasks }
+      })
+    },
+
+    dismissNeedsDetails: (id: string) => {
+      set((state) => {
+        const tasks = state.tasks.map((t) => (t.id === id ? { ...t, needsDetails: false } : t))
+        persistTasks(tasks)
+        return { tasks }
+      })
+    },
+
+    tasksFittingMinutes: (minutes: number) => {
+      const fitting = get().tasks.filter((t) => {
+        if (t.done) return false
+        if (t.estimatedMinutes === null || t.estimatedMinutes > minutes) return false
+        if (t.subtaskIds.length > 0) return false
+        if (t.recurrence && !isTodayOrPast(t.dueDate)) return false
+        return true
+      })
+
+      fitting.sort((a, b) => {
+        const ds = dueDateSortScore(a) - dueDateSortScore(b)
+        if (ds !== 0) return ds
+        const pa = a.priority ?? 0
+        const pb = b.priority ?? 0
+        if (pa !== pb) return pb - pa
+        const da = a.difficulty ?? 0
+        const db = b.difficulty ?? 0
+        if (da !== db) return db - da
+        return (a.estimatedMinutes ?? 999) - (b.estimatedMinutes ?? 999)
+      })
+
+      return fitting
+    },
+
+    addTag: (id: string, tag: string) => {
+      const normalized = tag.startsWith('@') ? tag : `@${tag}`
+      set((state) => {
+        const tasks = state.tasks.map((t) =>
+          t.id === id && !(t.tags && t.tags.includes(normalized))
+            ? { ...t, tags: [...(t.tags || []), normalized] }
+            : t,
+        )
+        persistTasks(tasks)
+        return { tasks }
+      })
+    },
+
+    removeTag: (id: string, tag: string) => {
+      set((state) => {
+        const tasks = state.tasks.map((t) =>
+          t.id === id ? { ...t, tags: (t.tags || []).filter((tg) => tg !== tag) } : t,
+        )
+        persistTasks(tasks)
+        return { tasks }
+      })
+    },
+
+    availableTags: () => {
+      const tags = new Set<string>()
+      for (const t of get().tasks) {
+        if (t.tags) {
+          for (const tag of t.tags) tags.add(tag)
+        }
+      }
+      return [...tags].sort()
+    },
+
+    addSubtask: (parentId: string, title: string) => {
+      const subtask = makeTask(title)
+      subtask.parentId = parentId
+      set((state) => {
+        const tasks = state.tasks.map((t) =>
+          t.id === parentId ? { ...t, subtaskIds: [...t.subtaskIds, subtask.id] } : t,
+        )
+        tasks.unshift(subtask)
+        persistTasks(tasks)
+        return { tasks }
+      })
+    },
+
+    deleteSubtask: (parentId: string, subtaskId: string) => {
+      set((state) => {
+        let tasks = state.tasks.filter((t) => t.id !== subtaskId)
+        tasks = tasks.map((t) =>
+          t.id === parentId ? { ...t, subtaskIds: t.subtaskIds.filter((sid) => sid !== subtaskId) } : t,
+        )
+        persistTasks(tasks)
+        return { tasks }
+      })
+    },
+
+    subtasksOf: (taskId: string) => {
+      return get().tasks.filter((t) => t.parentId === taskId)
+    },
+
+    setRecurrence: (id: string, pattern: RecurrencePattern) => {
+      set((state) => {
+        const tasks = state.tasks.map((t) => (t.id === id ? { ...t, recurrence: pattern, dueDate: todayStr() } : t))
+        persistTasks(tasks)
+        return { tasks }
+      })
+    },
+
+    skipNextOccurrence: (id: string) => {
+      set((state) => {
+        const task = state.tasks.find((t) => t.id === id)
+        if (!task || !task.recurrence) return state
+        const nextDate = computeNextDueDate(task.recurrence, new Date())
+        const tasks = state.tasks.map((t) => (t.id === id ? { ...t, dueDate: nextDate } : t))
+        persistTasks(tasks)
+        return { tasks }
+      })
+    },
+
+    setDueDate: (id: string, date: string | null) => {
+      set((state) => {
+        const tasks = state.tasks.map((t) => (t.id === id ? { ...t, dueDate: date } : t))
+        persistTasks(tasks)
+        return { tasks }
+      })
+    },
+
+    quickAddParsed: (input: string) => {
+      const parsed = parseQuickAdd(input)
+      const title = parsed.title.trim()
+      if (!title) return
+
+      const task: Task = {
+        id: genId(),
+        title,
+        estimatedMinutes: parsed.estimatedMinutes,
+        difficulty: parsed.difficulty,
+        priority: parsed.priority,
+        tags: parsed.tags,
+        done: false,
+        createdAt: new Date().toISOString(),
+        completedAt: null,
+        needsDetails: parsed.estimatedMinutes === null && parsed.difficulty === null && parsed.priority === null,
+        parentId: null,
+        subtaskIds: [],
+        recurrence: parsed.recurrence,
+        dueDate: parsed.dueDate,
       }
 
-      repository.saveTasks(tasks)
-      return { tasks }
-    })
-  },
+      set((state) => {
+        const tasks = [task, ...state.tasks]
+        persistTasks(tasks)
+        return { tasks }
+      })
+    },
+  }
+})
 
-  deleteTask: (id: string) => {
-    set((state) => {
-      const tasks = state.tasks.filter((t) => t.id !== id)
-      repository.saveTasks(tasks)
-      return { tasks }
-    })
-  },
-
-  setTitle: (id: string, title: string) => {
-    set((state) => {
-      const tasks = state.tasks.map((t) => (t.id === id ? { ...t, title } : t))
-      repository.saveTasks(tasks)
-      return { tasks }
-    })
-  },
-
-  setTaskField: (id: string, field: TaskField, value: number | Difficulty | Priority) => {
-    set((state) => {
-      const tasks = state.tasks.map((t) => (t.id === id ? { ...t, [field]: value } : t))
-      repository.saveTasks(tasks)
-      return { tasks }
-    })
-  },
-
-  dismissNeedsDetails: (id: string) => {
-    set((state) => {
-      const tasks = state.tasks.map((t) => (t.id === id ? { ...t, needsDetails: false } : t))
-      repository.saveTasks(tasks)
-      return { tasks }
-    })
-  },
-
-  tasksFittingMinutes: (minutes: number) => {
-    const fitting = get().tasks.filter((t) => {
-      if (t.done) return false
-      if (t.estimatedMinutes === null || t.estimatedMinutes > minutes) return false
-      // Exclude parent tasks that have incomplete subtasks — show subtasks instead
-      if (t.subtaskIds.length > 0) return false
-      // For recurring tasks, only show if due date is today or past
-      if (t.recurrence && !isTodayOrPast(t.dueDate)) return false
-      return true
-    })
-
-    // Sort: overdue → today → priority (high first) → difficulty (hard first) → time (shortest first)
-    fitting.sort((a, b) => {
-      const ds = dueDateSortScore(a) - dueDateSortScore(b)
-      if (ds !== 0) return ds
-      const pa = a.priority ?? 0
-      const pb = b.priority ?? 0
-      if (pa !== pb) return pb - pa
-      const da = a.difficulty ?? 0
-      const db = b.difficulty ?? 0
-      if (da !== db) return db - da
-      return (a.estimatedMinutes ?? 999) - (b.estimatedMinutes ?? 999)
-    })
-
-    return fitting
-  },
-
-  addTag: (id: string, tag: string) => {
-    const normalized = tag.startsWith('@') ? tag : `@${tag}`
-    set((state) => {
-      const tasks = state.tasks.map((t) =>
-        t.id === id && !(t.tags && t.tags.includes(normalized)) ? { ...t, tags: [...(t.tags || []), normalized] } : t,
-      )
-      repository.saveTasks(tasks)
-      return { tasks }
-    })
-  },
-
-  removeTag: (id: string, tag: string) => {
-    set((state) => {
-      const tasks = state.tasks.map((t) =>
-        t.id === id ? { ...t, tags: (t.tags || []).filter((tg) => tg !== tag) } : t,
-      )
-      repository.saveTasks(tasks)
-      return { tasks }
-    })
-  },
-
-  availableTags: () => {
-    const tags = new Set<string>()
-    for (const t of get().tasks) {
-      if (t.tags) {
-        for (const tag of t.tags) tags.add(tag)
-      }
-    }
-    return [...tags].sort()
-  },
-
-  addSubtask: (parentId: string, title: string) => {
-    const subtask = makeTask(title)
-    subtask.parentId = parentId
-    set((state) => {
-      const tasks = state.tasks.map((t) =>
-        t.id === parentId
-          ? { ...t, subtaskIds: [...t.subtaskIds, subtask.id] }
-          : t,
-      )
-      tasks.unshift(subtask)
-      repository.saveTasks(tasks)
-      return { tasks }
-    })
-  },
-
-  deleteSubtask: (parentId: string, subtaskId: string) => {
-    set((state) => {
-      let tasks = state.tasks.filter((t) => t.id !== subtaskId)
-      tasks = tasks.map((t) =>
-        t.id === parentId
-          ? { ...t, subtaskIds: t.subtaskIds.filter((sid) => sid !== subtaskId) }
-          : t,
-      )
-      repository.saveTasks(tasks)
-      return { tasks }
-    })
-  },
-
-  subtasksOf: (taskId: string) => {
-    return get().tasks.filter((t) => t.parentId === taskId)
-  },
-
-  setRecurrence: (id: string, pattern: RecurrencePattern) => {
-    set((state) => {
-      const tasks = state.tasks.map((t) =>
-        t.id === id
-          ? { ...t, recurrence: pattern, dueDate: todayStr() }
-          : t,
-      )
-      repository.saveTasks(tasks)
-      return { tasks }
-    })
-  },
-
-  skipNextOccurrence: (id: string) => {
-    set((state) => {
-      const task = state.tasks.find((t) => t.id === id)
-      if (!task || !task.recurrence) return state
-      const nextDate = computeNextDueDate(task.recurrence, new Date())
-      const tasks = state.tasks.map((t) =>
-        t.id === id ? { ...t, dueDate: nextDate } : t,
-      )
-      repository.saveTasks(tasks)
-      return { tasks }
-    })
-  },
-
-  setDueDate: (id: string, date: string | null) => {
-    set((state) => {
-      const tasks = state.tasks.map((t) =>
-        t.id === id ? { ...t, dueDate: date } : t,
-      )
-      repository.saveTasks(tasks)
-      return { tasks }
-    })
-  },
-
-  quickAddParsed: (input: string) => {
-    const parsed = parseQuickAdd(input)
-    const title = parsed.title.trim()
-    if (!title) return
-
-    const task: Task = {
-      id: genId(),
-      title,
-      estimatedMinutes: parsed.estimatedMinutes,
-      difficulty: parsed.difficulty,
-      priority: parsed.priority,
-      tags: parsed.tags,
-      done: false,
-      createdAt: new Date().toISOString(),
-      completedAt: null,
-      // If all key fields were parsed, skip needs-details
-      needsDetails: parsed.estimatedMinutes === null && parsed.difficulty === null && parsed.priority === null,
-      parentId: null,
-      subtaskIds: [],
-      recurrence: parsed.recurrence,
-      dueDate: parsed.dueDate,
-    }
-
-    set((state) => {
-      const tasks = [task, ...state.tasks]
-      repository.saveTasks(tasks)
-      return { tasks }
-    })
-  },
-}))
+// NOTE on offline/failure handling: persistTasks() above is fire-and-forget,
+// so if a save fails (e.g. offline), the change stays correct in memory and
+// in this tab, but won't reach Supabase until the next successful save call
+// happens to re-send the full list. For a first pass this is fine — but if
+// you want real offline resilience later, the natural next step is a small
+// outbox: queue failed payloads (e.g. in IndexedDB) and retry on reconnect.
