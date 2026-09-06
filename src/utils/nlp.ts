@@ -7,7 +7,7 @@ export interface ParsedTask {
   priority: Priority | null
   tags: string[]
   recurrence: RecurrencePattern | null
-  nextDueDate: string | null
+  dueDate: string | null
 }
 
 const DURATION_PATTERNS: [RegExp, number][] = [
@@ -160,8 +160,8 @@ export function parseQuickAdd(input: string): ParsedTask {
   }
 
   // Extract due date
-  const nextDueDate = parseNextDueDate(remaining)
-  if (nextDueDate) {
+  const dueDate = parseNextDueDate(remaining)
+  if (dueDate) {
     remaining = remaining.replace(/\b(today|tomorrow|next\s+week|(?:sunday|monday|tuesday|wednesday|thursday|friday|saturday))\b/gi, '').trim()
   }
 
@@ -175,6 +175,6 @@ export function parseQuickAdd(input: string): ParsedTask {
     priority,
     tags,
     recurrence,
-    nextDueDate,
+    dueDate,
   }
 }

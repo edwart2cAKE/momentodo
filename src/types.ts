@@ -18,7 +18,7 @@ export interface Task {
   parentId: string | null
   subtaskIds: string[]
   recurrence: RecurrencePattern | null
-  nextDueDate: string | null
+  dueDate: string | null
 }
 
 export interface TimerSession {

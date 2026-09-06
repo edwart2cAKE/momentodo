@@ -5,7 +5,7 @@ import { color, radius, shadow, typography } from '../theme/tokens'
 import type { Task } from '../types'
 
 type StatusFilter = 'all' | 'active' | 'done'
-type SortBy = 'default' | 'priority' | 'difficulty' | 'time'
+type SortBy = 'default' | 'priority' | 'difficulty' | 'time' | 'due'
 
 export function Tasks() {
   const tasks = useTaskStore((s) => s.tasks)
@@ -19,6 +19,7 @@ export function Tasks() {
   const availableTags = useTaskStore((s) => s.availableTags)
   const addSubtask = useTaskStore((s) => s.addSubtask)
   const setRecurrence = useTaskStore((s) => s.setRecurrence)
+  const setDueDate = useTaskStore((s) => s.setDueDate)
 
   const [input, setInput] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
@@ -32,6 +33,8 @@ export function Tasks() {
     setInput('')
   }
 
+  const today = new Date().toISOString().split('T')[0]
+
   // Top-level tasks only (no parent)
   let topLevel = tasks.filter((t) => t.parentId === null)
   if (statusFilter === 'active') topLevel = topLevel.filter((t) => !t.done)
@@ -41,6 +44,21 @@ export function Tasks() {
   if (sortBy === 'priority') topLevel.sort((a, b) => (b.priority || 0) - (a.priority || 0))
   if (sortBy === 'difficulty') topLevel.sort((a, b) => (b.difficulty || 0) - (a.difficulty || 0))
   if (sortBy === 'time') topLevel.sort((a, b) => (a.estimatedMinutes || 999) - (b.estimatedMinutes || 999))
+  if (sortBy === 'due') {
+    topLevel.sort((a, b) => {
+      // Overdue first
+      if (a.dueDate && a.dueDate < today && (!b.dueDate || b.dueDate >= today)) return -1
+      if (b.dueDate && b.dueDate < today && (!a.dueDate || a.dueDate >= today)) return 1
+      // Due today second
+      if (a.dueDate === today && b.dueDate !== today) return -1
+      if (b.dueDate === today && a.dueDate !== today) return 1
+      // Then by date (earliest first), nulls last
+      if (a.dueDate && b.dueDate) return a.dueDate.localeCompare(b.dueDate)
+      if (a.dueDate) return -1
+      if (b.dueDate) return 1
+      return 0
+    })
+  }
 
   const allTags = availableTags()
 
@@ -72,6 +90,7 @@ export function Tasks() {
           availableTags={allTags}
           onAddSubtask={addSubtask}
           onSetRecurrence={setRecurrence}
+          onSetDueDate={setDueDate}
           showDelete
           depth={depth}
         />
@@ -174,6 +193,7 @@ export function Tasks() {
           <option value="priority">Priority</option>
           <option value="difficulty">Difficulty</option>
           <option value="time">Time needed</option>
+          <option value="due">Due date</option>
         </select>
       </div>
 

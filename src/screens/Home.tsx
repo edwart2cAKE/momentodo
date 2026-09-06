@@ -13,7 +13,7 @@ interface HomeProps {
 export function Home({ onNavigateToTasks }: HomeProps) {
   const [momentFilter, setMomentFilter] = useState<MomentDuration | null>(null)
   const [quickAddInput, setQuickAddInput] = useState('')
-  const tasks = useTaskStore((s) => s.tasks)
+  const tasksFittingMinutes = useTaskStore((s) => s.tasksFittingMinutes)
   const quickAddParsed = useTaskStore((s) => s.quickAddParsed)
   const upNext = useUpNext(4)
   const completed = useCompletedToday()
@@ -22,7 +22,7 @@ export function Home({ onNavigateToTasks }: HomeProps) {
   const isDesktop = useMediaQuery(DESKTOP_BREAKPOINT)
 
   const matchingTasks = momentFilter !== null
-    ? tasks.filter((t) => !t.done && t.estimatedMinutes !== null && t.estimatedMinutes <= momentFilter)
+    ? tasksFittingMinutes(momentFilter)
     : []
 
   const handleQuickAdd = () => {

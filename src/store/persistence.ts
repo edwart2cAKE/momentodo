@@ -25,7 +25,9 @@ function migrateTask(raw: Record<string, unknown>): Task {
     parentId: typeof raw.parentId === 'string' ? raw.parentId : null,
     subtaskIds: Array.isArray(raw.subtaskIds) ? raw.subtaskIds : [],
     recurrence: typeof raw.recurrence === 'string' ? raw.recurrence as RecurrencePattern : null,
-    nextDueDate: typeof raw.nextDueDate === 'string' ? raw.nextDueDate : null,
+    dueDate: typeof raw.dueDate === 'string' ? raw.dueDate
+           : typeof raw.nextDueDate === 'string' ? raw.nextDueDate
+           : null,
   }
 }
 

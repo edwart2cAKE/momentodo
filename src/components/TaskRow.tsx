@@ -15,6 +15,7 @@ interface TaskRowProps {
   availableTags?: string[]
   onAddSubtask?: (parentId: string, title: string) => void
   onSetRecurrence?: (id: string, pattern: RecurrencePattern) => void
+  onSetDueDate?: (id: string, date: string | null) => void
   showDelete?: boolean
   depth?: number
 }
@@ -23,6 +24,21 @@ const priorityTagStyle: Record<number, { bg: string; text: string }> = {
   1: color.priorityTag.low,
   2: color.priorityTag.med,
   3: color.priorityTag.high,
+}
+
+function dueDateLabel(dueDate: string): { label: string; bg: string; text: string } {
+  const today = new Date().toISOString().split('T')[0]
+  const tomorrow = new Date()
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  const tomorrowStr = tomorrow.toISOString().split('T')[0]
+
+  if (dueDate < today) return { label: 'Overdue', bg: '#FFE3DD', text: '#C1401F' }
+  if (dueDate === today) return { label: 'Today', bg: '#FFF3D6', text: '#A67300' }
+  if (dueDate === tomorrowStr) return { label: 'Tomorrow', bg: '#E4E8F3', text: '#2F4F7B' }
+  // Format as short day name
+  const d = new Date(dueDate + 'T00:00:00')
+  const dayName = d.toLocaleDateString('en-US', { weekday: 'short' })
+  return { label: dayName, bg: '#EEF4EE', text: '#6C8578' }
 }
 
 export function TaskRow({
@@ -36,6 +52,7 @@ export function TaskRow({
   availableTags = [],
   onAddSubtask,
   onSetRecurrence,
+  onSetDueDate,
   showDelete = false,
   depth = 0,
 }: TaskRowProps) {
@@ -106,6 +123,12 @@ export function TaskRow({
               }}
             />
           )}
+          {task.dueDate && (
+            <Tag
+              label={`📅 ${dueDateLabel(task.dueDate).label}`}
+              style={{ background: dueDateLabel(task.dueDate).bg, color: dueDateLabel(task.dueDate).text }}
+            />
+          )}
           {task.tags && task.tags.map((tag) => {
             const tc = tagColor(tag)
             return (
@@ -119,7 +142,7 @@ export function TaskRow({
           {task.recurrence && (
             <Tag
               label={`🔄 ${task.recurrence}`}
-              style={{ background: '#E4E8F3', text: '#2F4F7B' }}
+              style={{ background: '#E4E8F3', color: '#2F4F7B' }}
             />
           )}
         </div>
@@ -133,6 +156,7 @@ export function TaskRow({
             availableTags={availableTags}
             onAddSubtask={onAddSubtask}
             onSetRecurrence={onSetRecurrence}
+            onSetDueDate={onSetDueDate}
           />
         )}
       </div>

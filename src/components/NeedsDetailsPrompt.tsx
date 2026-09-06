@@ -5,6 +5,22 @@ import { color, radius } from '../theme/tokens'
 import { difficultyLabels, priorityLabels, difficultyOptions, priorityOptions } from '../store/config'
 import { MOMENT_DURATIONS, tagColor } from '../types'
 
+function todayStr(): string {
+  return new Date().toISOString().split('T')[0]
+}
+
+function tomorrowStr(): string {
+  const d = new Date()
+  d.setDate(d.getDate() + 1)
+  return d.toISOString().split('T')[0]
+}
+
+function nextWeekStr(): string {
+  const d = new Date()
+  d.setDate(d.getDate() + 7)
+  return d.toISOString().split('T')[0]
+}
+
 interface NeedsDetailsPromptProps {
   task: Task
   onSetField: (id: string, field: TaskField, value: number | Difficulty | Priority) => void
@@ -14,6 +30,7 @@ interface NeedsDetailsPromptProps {
   availableTags?: string[]
   onAddSubtask?: (parentId: string, title: string) => void
   onSetRecurrence?: (id: string, pattern: RecurrencePattern) => void
+  onSetDueDate?: (id: string, date: string | null) => void
 }
 
 const labelStyle = {
@@ -32,7 +49,7 @@ const rowStyle = {
   alignItems: 'center',
 }
 
-export function NeedsDetailsPrompt({ task, onSetField, onDismiss, onAddTag, onRemoveTag, availableTags = [], onAddSubtask, onSetRecurrence }: NeedsDetailsPromptProps) {
+export function NeedsDetailsPrompt({ task, onSetField, onDismiss, onAddTag, onRemoveTag, availableTags = [], onAddSubtask, onSetRecurrence, onSetDueDate }: NeedsDetailsPromptProps) {
   const [customTime, setCustomTime] = useState(
     task.estimatedMinutes !== null && !(MOMENT_DURATIONS as readonly number[]).includes(task.estimatedMinutes)
       ? String(task.estimatedMinutes)
@@ -300,6 +317,54 @@ export function NeedsDetailsPrompt({ task, onSetField, onDismiss, onAddTag, onRe
                 onClick={() => onSetRecurrence(task.id, p)}
               />
             ))}
+          </div>
+        </div>
+      )}
+
+      {onSetDueDate && (
+        <div style={{ marginTop: '6px' }}>
+          <div style={labelStyle}>📅 Due</div>
+          <div style={rowStyle}>
+            <Pill
+              label="Today"
+              selected={task.dueDate === todayStr()}
+              onClick={() => onSetDueDate(task.id, todayStr())}
+            />
+            <Pill
+              label="Tomorrow"
+              selected={task.dueDate === tomorrowStr()}
+              onClick={() => onSetDueDate(task.id, tomorrowStr())}
+            />
+            <Pill
+              label="Next week"
+              selected={task.dueDate === nextWeekStr()}
+              onClick={() => onSetDueDate(task.id, nextWeekStr())}
+            />
+            <Pill
+              label="None"
+              selected={task.dueDate === null}
+              onClick={() => onSetDueDate(task.id, null)}
+            />
+            <input
+              type="date"
+              value={task.dueDate ?? ''}
+              onChange={(e) => {
+                const val = (e.target as HTMLInputElement).value
+                onSetDueDate(task.id, val || null)
+              }}
+              style={{
+                fontSize: '11px',
+                border: `1px solid ${color.line}`,
+                borderRadius: radius.pill,
+                background: color.surface,
+                color: color.ink,
+                fontWeight: 600,
+                fontFamily: 'Inter, sans-serif',
+                padding: '3px 6px',
+                minHeight: '44px',
+                boxSizing: 'border-box',
+              }}
+            />
           </div>
         </div>
       )}

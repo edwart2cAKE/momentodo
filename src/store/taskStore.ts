@@ -19,6 +19,7 @@ interface TaskState {
   subtasksOf: (taskId: string) => Task[]
   setRecurrence: (id: string, pattern: RecurrencePattern) => void
   skipNextOccurrence: (id: string) => void
+  setDueDate: (id: string, date: string | null) => void
   quickAddParsed: (input: string) => void
 }
 
@@ -42,7 +43,7 @@ function makeTask(title: string): Task {
     parentId: null,
     subtaskIds: [],
     recurrence: null,
-    nextDueDate: null,
+    dueDate: null,
   }
 }
 
@@ -72,6 +73,18 @@ function isTodayOrPast(dateStr: string | null): boolean {
   if (!dateStr) return false
   const today = new Date().toISOString().split('T')[0]
   return dateStr <= today
+}
+
+function todayStr(): string {
+  return new Date().toISOString().split('T')[0]
+}
+
+function dueDateSortScore(t: Task): number {
+  if (!t.dueDate) return 2 // nulls last
+  const today = todayStr()
+  if (t.dueDate < today) return 0 // overdue first
+  if (t.dueDate === today) return 1 // due today second
+  return 3 // future
 }
 
 export const useTaskStore = create<TaskState>((set, get) => ({
@@ -145,7 +158,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
           completedAt: null,
           needsDetails: false,
           createdAt: now,
-          nextDueDate: computeNextDueDate(task.recurrence, new Date()),
+          dueDate: computeNextDueDate(task.recurrence, new Date()),
           subtaskIds: [],
         }
         tasks = [clone, ...tasks]
@@ -181,15 +194,33 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   },
 
   tasksFittingMinutes: (minutes: number) => {
-    return get().tasks.filter((t) => {
+    const today = todayStr()
+    const fitting = get().tasks.filter((t) => {
       if (t.done) return false
       if (t.estimatedMinutes === null || t.estimatedMinutes > minutes) return false
       // Exclude parent tasks that have incomplete subtasks — show subtasks instead
       if (t.subtaskIds.length > 0) return false
-      // For recurring tasks, only show if next due date is today or past
-      if (t.recurrence && !isTodayOrPast(t.nextDueDate)) return false
+      // For recurring tasks, only show if due date is today or past
+      if (t.recurrence && !isTodayOrPast(t.dueDate)) return false
+      // For non-recurring tasks with a due date, skip if due date is in the future
+      if (!t.recurrence && t.dueDate && t.dueDate > today) return false
       return true
     })
+
+    // Sort: overdue → today → priority (high first) → difficulty (hard first) → time (shortest first)
+    fitting.sort((a, b) => {
+      const ds = dueDateSortScore(a) - dueDateSortScore(b)
+      if (ds !== 0) return ds
+      const pa = a.priority ?? 0
+      const pb = b.priority ?? 0
+      if (pa !== pb) return pb - pa
+      const da = a.difficulty ?? 0
+      const db = b.difficulty ?? 0
+      if (da !== db) return db - da
+      return (a.estimatedMinutes ?? 999) - (b.estimatedMinutes ?? 999)
+    })
+
+    return fitting
   },
 
   addTag: (id: string, tag: string) => {
@@ -256,11 +287,10 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   },
 
   setRecurrence: (id: string, pattern: RecurrencePattern) => {
-    const today = new Date().toISOString().split('T')[0]
     set((state) => {
       const tasks = state.tasks.map((t) =>
         t.id === id
-          ? { ...t, recurrence: pattern, nextDueDate: today }
+          ? { ...t, recurrence: pattern, dueDate: todayStr() }
           : t,
       )
       repository.saveTasks(tasks)
@@ -274,7 +304,17 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       if (!task || !task.recurrence) return state
       const nextDate = computeNextDueDate(task.recurrence, new Date())
       const tasks = state.tasks.map((t) =>
-        t.id === id ? { ...t, nextDueDate: nextDate } : t,
+        t.id === id ? { ...t, dueDate: nextDate } : t,
+      )
+      repository.saveTasks(tasks)
+      return { tasks }
+    })
+  },
+
+  setDueDate: (id: string, date: string | null) => {
+    set((state) => {
+      const tasks = state.tasks.map((t) =>
+        t.id === id ? { ...t, dueDate: date } : t,
       )
       repository.saveTasks(tasks)
       return { tasks }
@@ -300,7 +340,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       parentId: null,
       subtaskIds: [],
       recurrence: parsed.recurrence,
-      nextDueDate: parsed.nextDueDate,
+      dueDate: parsed.dueDate,
     }
 
     set((state) => {
