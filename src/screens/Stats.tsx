@@ -4,20 +4,11 @@ import {
   useCompletionPercentage,
   useDifficultyBreakdown,
   usePriorityBreakdown,
+  useWeeklyCompletions,
 } from '../store'
 import { Ring } from '../components'
 import { useMediaQuery, DESKTOP_BREAKPOINT } from '../hooks'
 import { color, typography, radius, shadow, layout } from '../theme/tokens'
-
-const weekMock = [
-  { l: 'Mon', n: 2 },
-  { l: 'Tue', n: 4 },
-  { l: 'Wed', n: 1 },
-  { l: 'Thu', n: 5 },
-  { l: 'Fri', n: 3 },
-  { l: 'Sat', n: 0 },
-  { l: 'Sun', n: 1 },
-]
 
 function heatmapLevel(n: number): { bg: string; text: string } {
   if (n === 0) return { bg: color.heatmap.level0, text: color.heatmap.level0Text }
@@ -89,6 +80,7 @@ export function Stats() {
   const pct = useCompletionPercentage()
   const diffBreakdown = useDifficultyBreakdown()
   const priBreakdown = usePriorityBreakdown()
+  const weekData = useWeeklyCompletions()
   const isDesktop = useMediaQuery(DESKTOP_BREAKPOINT)
 
   const diffSegments = [
@@ -288,11 +280,11 @@ export function Stats() {
               This week
             </h3>
             <div style={{ display: 'flex', gap: isDesktop ? '10px' : '8px', justifyContent: 'space-between' }}>
-              {weekMock.map((w) => {
-                const level = heatmapLevel(w.n)
+              {weekData.map((w) => {
+                const level = heatmapLevel(w.count)
                 return (
                   <div
-                    key={w.l}
+                    key={w.date}
                     style={{
                       display: 'flex',
                       flexDirection: 'column',
@@ -314,9 +306,9 @@ export function Stats() {
                         fontWeight: 700,
                       }}
                     >
-                      {w.n}
+                      {w.count}
                     </div>
-                    <div style={{ fontSize: '10px', color: color.inkSoft, fontWeight: 600 }}>{w.l}</div>
+                    <div style={{ fontSize: '10px', color: color.inkSoft, fontWeight: 600 }}>{w.label}</div>
                   </div>
                 )
               })}
