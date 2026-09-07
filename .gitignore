@@ -24,3 +24,5 @@ tmp/
 *.sln
 *.sw?
 stats.html
+.vercel
+.env*
