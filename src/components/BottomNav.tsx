@@ -1,6 +1,6 @@
 import { iconography, color, motion, typography } from '../theme/tokens'
 
-type Screen = 'home' | 'tasks' | 'timer' | 'stats'
+type Screen = 'home' | 'tasks' | 'timer' | 'stats' | 'settings'
 
 interface BottomNavProps {
   active: Screen
@@ -12,6 +12,7 @@ const tabs: { key: Screen; icon: string; label: string }[] = [
   { key: 'tasks', icon: iconography.tasks, label: 'Tasks' },
   { key: 'timer', icon: iconography.timer, label: 'Timer' },
   { key: 'stats', icon: iconography.stats, label: 'Stats' },
+  { key: 'settings', icon: iconography.settings, label: 'Settings' },
 ]
 
 export function BottomNav({ active, onNavigate }: BottomNavProps) {

@@ -123,6 +123,7 @@ export const iconography = {
   tasks: '✅',
   timer: '⏱️',
   stats: '📊',
+  settings: '⚙️',
 } as const
 
 /** All tokens collected into a single object for convenience. */

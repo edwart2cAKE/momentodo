@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'preact/hooks'
-import { Home, Tasks, Timer, Stats } from './screens'
+import { Home, Tasks, Timer, Stats, Settings } from './screens'
 import { LoginScreen } from './screens/LoginScreen'
 import { BottomNav, Sidebar } from './components'
 import { useMediaQuery, DESKTOP_BREAKPOINT } from './hooks'
@@ -8,7 +8,7 @@ import { useTaskStore, useTimerStore } from './store'
 import { setActiveRepository } from './store/persistence'
 import { getCurrentUserId, signOut } from './supabaseClient'
 
-type Screen = 'home' | 'tasks' | 'timer' | 'stats'
+type Screen = 'home' | 'tasks' | 'timer' | 'stats' | 'settings'
 
 // Remembers a choice to use the app without an account, so we don't nag
 // on every visit. Cleared on logout.
@@ -114,8 +114,6 @@ export function App() {
         <Sidebar
           active={screen}
           onNavigate={setScreen}
-          isAuthenticated={isAuthenticated}
-          onLogout={handleLogout}
         />
       )}
       <main
@@ -131,6 +129,13 @@ export function App() {
           {screen === 'tasks' && <Tasks />}
           {screen === 'timer' && <Timer />}
           {screen === 'stats' && <Stats />}
+          {screen === 'settings' && (
+            <Settings
+              isAuthenticated={isAuthenticated}
+              onLogout={handleLogout}
+              onShowLogin={() => setAuthPhase('needsAuth')}
+            />
+          )}
         </div>
       </main>
       {!isDesktop && <BottomNav active={screen} onNavigate={setScreen} />}

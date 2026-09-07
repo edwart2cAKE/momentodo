@@ -1,12 +1,10 @@
 import { iconography, color, motion, typography } from '../theme/tokens'
 
-type Screen = 'home' | 'tasks' | 'timer' | 'stats'
+type Screen = 'home' | 'tasks' | 'timer' | 'stats' | 'settings'
 
 interface SidebarProps {
   active: Screen
   onNavigate: (screen: Screen) => void
-  isAuthenticated?: boolean
-  onLogout?: () => void
 }
 
 const tabs: { key: Screen; icon: string; label: string }[] = [
@@ -14,9 +12,10 @@ const tabs: { key: Screen; icon: string; label: string }[] = [
   { key: 'tasks', icon: iconography.tasks, label: 'Tasks' },
   { key: 'timer', icon: iconography.timer, label: 'Timer' },
   { key: 'stats', icon: iconography.stats, label: 'Stats' },
+  { key: 'settings', icon: iconography.settings, label: 'Settings' },
 ]
 
-export function Sidebar({ active, onNavigate, isAuthenticated, onLogout }: SidebarProps) {
+export function Sidebar({ active, onNavigate }: SidebarProps) {
   return (
     <aside
       style={{
@@ -71,32 +70,6 @@ export function Sidebar({ active, onNavigate, isAuthenticated, onLogout }: Sideb
           </button>
         )
       })}
-
-      <div style={{ flex: 1 }} />
-
-      {onLogout && (
-        <button
-          onClick={onLogout}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            padding: '10px 16px',
-            margin: '0 16px',
-            color: color.inkSoft,
-            fontSize: '12px',
-            fontWeight: 600,
-            cursor: 'pointer',
-            border: `1px solid rgba(255,255,255,0.12)`,
-            borderRadius: '10px',
-            background: 'transparent',
-            fontFamily: typography.bodyFont,
-            textAlign: 'left',
-          }}
-        >
-          {isAuthenticated ? 'Log out' : 'Log in / Sign up'}
-        </button>
-      )}
     </aside>
   )
 }

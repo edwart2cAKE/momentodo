@@ -57,3 +57,16 @@ export async function getCurrentUserId(): Promise<string | null> {
   const { data } = await supabase.auth.getSession()
   return data.session?.user.id ?? null
 }
+
+export async function getCurrentUser(): Promise<{ id: string; username: string | null } | null> {
+  const { data } = await supabase.auth.getSession()
+  const user = data.session?.user
+  if (!user) return null
+  const username = user.user_metadata?.username ?? user.email?.split('@')[0] ?? null
+  return { id: user.id, username }
+}
+
+export async function updatePassword(newPassword: string) {
+  const { error } = await supabase.auth.updateUser({ password: newPassword })
+  if (error) throw error
+}
