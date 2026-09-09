@@ -10,5 +10,6 @@ export {
   useDifficultyBreakdown,
   usePriorityBreakdown,
   useCompletionPercentage,
+  useWeeklyCompletionKey,
 } from './selectors'
 export { difficultyLabels, priorityLabels, difficultyOptions, priorityOptions } from './config'
