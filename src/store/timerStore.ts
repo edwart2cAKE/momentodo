@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type { TimerSession } from '../types'
 import { repository, onRepositoryChange } from './persistence'
+import { useTaskStore } from './taskStore'
 
 const FOCUS_SECONDS = 25 * 60
 
@@ -111,6 +112,9 @@ export const useTimerStore = create<TimerState>((set, get) => {
       const sessions = [session, ...state.sessions]
       persistSessions(sessions)
       set({ sessions })
+      if (session.taskId) {
+        useTaskStore.getState().addTimeTracked(session.taskId, dur)
+      }
     },
   }
 })

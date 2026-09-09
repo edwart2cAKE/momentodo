@@ -125,6 +125,10 @@ This repo is set up for OpenCode's subagent model. Custom subagents live in
   producing HTML run a tag-balance and duplicate-id check. A task is not
   complete if these haven't been run — silently skipping this step has
   caused real bugs to ship before.
+- **Every feature or fix gets its own PR.** Never commit directly to `main`.
+  Create a feature branch (`feature/<name>` or `fix/<name>`), commit only
+  the files relevant to the change, push, and open a PR with a descriptive
+  title and body. This applies to all changes — no matter how small.
 - Quick-add tasks must be creatable with only a title; difficulty, priority,
   and time estimate are optional and filled in later via the "needs details"
   prompt — see PRD.md. Don't make any of those three fields required at

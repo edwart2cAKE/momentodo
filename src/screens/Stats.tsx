@@ -6,10 +6,18 @@ import {
   useDifficultyBreakdown,
   usePriorityBreakdown,
   useWeeklyCompletionKey,
+  useTotalTimeTrackedToday,
 } from '../store'
 import { Ring } from '../components'
 import { useMediaQuery, DESKTOP_BREAKPOINT } from '../hooks'
 import { color, typography, radius, shadow, layout } from '../theme/tokens'
+
+function formatDuration(totalSeconds: number): string {
+  const h = Math.floor(totalSeconds / 3600)
+  const m = Math.floor((totalSeconds % 3600) / 60)
+  if (h === 0) return `${m}m`
+  return `${h}h ${m}m`
+}
 
 const SHORT_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
@@ -83,6 +91,7 @@ export function Stats() {
   const pct = useCompletionPercentage()
   const diffBreakdown = useDifficultyBreakdown()
   const priBreakdown = usePriorityBreakdown()
+  const totalTimeToday = useTotalTimeTrackedToday()
   const completionKey = useWeeklyCompletionKey()
   const weekData = useMemo(() => {
     const today = new Date()
@@ -178,7 +187,7 @@ export function Stats() {
           </div>
 
           {/* Stat cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
             <div
               style={{
                 background: color.surface,
@@ -223,6 +232,29 @@ export function Stats() {
               </div>
               <div style={{ fontSize: '11px', color: color.inkSoft, fontWeight: 600, marginTop: '2px' }}>
                 medium
+              </div>
+            </div>
+            <div
+              style={{
+                background: color.surface,
+                borderRadius: radius.card,
+                boxShadow: shadow.cardDefault,
+                padding: '14px',
+                textAlign: 'center',
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: typography.headingFont,
+                  fontSize: '28px',
+                  fontWeight: 700,
+                  color: color.ink,
+                }}
+              >
+                {formatDuration(totalTimeToday)}
+              </div>
+              <div style={{ fontSize: '11px', color: color.inkSoft, fontWeight: 600, marginTop: '2px' }}>
+                tracked
               </div>
             </div>
           </div>
