@@ -5,8 +5,8 @@ import {
   useCompletionPercentage,
   useDifficultyBreakdown,
   usePriorityBreakdown,
-  useTotalTimeTrackedToday,
   useWeeklyCompletionKey,
+  useTotalTimeTrackedToday,
 } from '../store'
 import { Ring } from '../components'
 import { useMediaQuery, DESKTOP_BREAKPOINT } from '../hooks'
@@ -19,15 +19,6 @@ function formatDuration(totalSeconds: number): string {
   return `${h}h ${m}m`
 }
 
-const weekMock = [
-  { l: 'Mon', n: 2 },
-  { l: 'Tue', n: 4 },
-  { l: 'Wed', n: 1 },
-  { l: 'Thu', n: 5 },
-  { l: 'Fri', n: 3 },
-  { l: 'Sat', n: 0 },
-  { l: 'Sun', n: 1 },
-]
 const SHORT_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 function heatmapLevel(n: number): { bg: string; text: string } {

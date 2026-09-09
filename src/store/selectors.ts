@@ -55,16 +55,21 @@ export function useCompletionPercentage(): number {
   return Math.round((100 * done) / total)
 }
 
+export function useWeeklyCompletionKey(): string {
+  return useTaskStore((s) =>
+    s.tasks
+      .filter((t) => t.done && t.completedAt)
+      .map((t) => t.completedAt)
+      .sort()
+      .join(','),
+  )
+}
+
 export function useTotalTimeTracked(taskId: string): number {
   return useTaskStore((s) => {
     const task = s.tasks.find((t) => t.id === taskId)
     return task?.totalTimeTracked ?? 0
   })
-}
-
-function todayStr(): string {
-  const d = new Date()
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
 export function useTotalTimeTrackedToday(): number {
@@ -79,12 +84,5 @@ export function useTotalTimeTrackedToday(): number {
         })
         .reduce((sum, ses) => sum + ses.durationSeconds, 0),
     ),
-export function useWeeklyCompletionKey(): string {
-  return useTaskStore((s) =>
-    s.tasks
-      .filter((t) => t.done && t.completedAt)
-      .map((t) => t.completedAt)
-      .sort()
-      .join(','),
   )
 }

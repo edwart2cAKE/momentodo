@@ -10,8 +10,8 @@ export {
   useDifficultyBreakdown,
   usePriorityBreakdown,
   useCompletionPercentage,
+  useWeeklyCompletionKey,
   useTotalTimeTracked,
   useTotalTimeTrackedToday,
-  useWeeklyCompletionKey,
 } from './selectors'
 export { difficultyLabels, priorityLabels, difficultyOptions, priorityOptions } from './config'
