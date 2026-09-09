@@ -1,3 +1,4 @@
+import { useMemo } from 'preact/hooks'
 import {
   useCompletedToday,
   useTotalToday,
@@ -5,6 +6,7 @@ import {
   useDifficultyBreakdown,
   usePriorityBreakdown,
   useTotalTimeTrackedToday,
+  useWeeklyCompletionKey,
 } from '../store'
 import { Ring } from '../components'
 import { useMediaQuery, DESKTOP_BREAKPOINT } from '../hooks'
@@ -26,6 +28,7 @@ const weekMock = [
   { l: 'Sat', n: 0 },
   { l: 'Sun', n: 1 },
 ]
+const SHORT_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 function heatmapLevel(n: number): { bg: string; text: string } {
   if (n === 0) return { bg: color.heatmap.level0, text: color.heatmap.level0Text }
@@ -98,6 +101,29 @@ export function Stats() {
   const diffBreakdown = useDifficultyBreakdown()
   const priBreakdown = usePriorityBreakdown()
   const totalTimeToday = useTotalTimeTrackedToday()
+  const completionKey = useWeeklyCompletionKey()
+  const weekData = useMemo(() => {
+    const today = new Date()
+    const days: { label: string; date: string; count: number }[] = []
+
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today)
+      d.setDate(today.getDate() - i)
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+      days.push({ label: SHORT_DAYS[d.getDay()], date: dateStr, count: 0 })
+    }
+
+    if (completionKey) {
+      for (const iso of completionKey.split(',')) {
+        const d = new Date(iso)
+        const localDateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+        const bucket = days.find((day) => day.date === localDateStr)
+        if (bucket) bucket.count++
+      }
+    }
+
+    return days
+  }, [completionKey])
   const isDesktop = useMediaQuery(DESKTOP_BREAKPOINT)
 
   const diffSegments = [
@@ -320,11 +346,11 @@ export function Stats() {
               This week
             </h3>
             <div style={{ display: 'flex', gap: isDesktop ? '10px' : '8px', justifyContent: 'space-between' }}>
-              {weekMock.map((w) => {
-                const level = heatmapLevel(w.n)
+              {weekData.map((w) => {
+                const level = heatmapLevel(w.count)
                 return (
                   <div
-                    key={w.l}
+                    key={w.date}
                     style={{
                       display: 'flex',
                       flexDirection: 'column',
@@ -346,9 +372,9 @@ export function Stats() {
                         fontWeight: 700,
                       }}
                     >
-                      {w.n}
+                      {w.count}
                     </div>
-                    <div style={{ fontSize: '10px', color: color.inkSoft, fontWeight: 600 }}>{w.l}</div>
+                    <div style={{ fontSize: '10px', color: color.inkSoft, fontWeight: 600 }}>{w.label}</div>
                   </div>
                 )
               })}

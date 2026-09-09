@@ -3,12 +3,21 @@ import { useTaskStore } from './taskStore'
 import { useTimerStore } from './timerStore'
 import type { Difficulty, Priority } from '../types'
 
+function todayStr(): string {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 export function useCompletedToday(): number {
-  return useTaskStore((s) => s.tasks.filter((t) => t.done && t.completedAt).length)
+  const today = todayStr()
+  return useTaskStore((s) =>
+    s.tasks.filter((t) => t.done && t.completedAt && t.dueDate === today).length,
+  )
 }
 
 export function useTotalToday(): number {
-  return useTaskStore((s) => s.tasks.length)
+  const today = todayStr()
+  return useTaskStore((s) => s.tasks.filter((t) => t.dueDate === today).length)
 }
 
 export function useUpNext(count: number) {
@@ -70,5 +79,12 @@ export function useTotalTimeTrackedToday(): number {
         })
         .reduce((sum, ses) => sum + ses.durationSeconds, 0),
     ),
+export function useWeeklyCompletionKey(): string {
+  return useTaskStore((s) =>
+    s.tasks
+      .filter((t) => t.done && t.completedAt)
+      .map((t) => t.completedAt)
+      .sort()
+      .join(','),
   )
 }
