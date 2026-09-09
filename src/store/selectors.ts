@@ -1,5 +1,6 @@
 import { useShallow } from 'zustand/react/shallow'
 import { useTaskStore } from './taskStore'
+import { useTimerStore } from './timerStore'
 import type { Difficulty, Priority } from '../types'
 
 export function useCompletedToday(): number {
@@ -43,4 +44,31 @@ export function useCompletionPercentage(): number {
   const total = useTotalToday()
   if (total === 0) return 0
   return Math.round((100 * done) / total)
+}
+
+export function useTotalTimeTracked(taskId: string): number {
+  return useTaskStore((s) => {
+    const task = s.tasks.find((t) => t.id === taskId)
+    return task?.totalTimeTracked ?? 0
+  })
+}
+
+function todayStr(): string {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+export function useTotalTimeTrackedToday(): number {
+  const today = todayStr()
+  return useTimerStore(
+    useShallow((s) =>
+      s.sessions
+        .filter((ses) => {
+          const d = new Date(ses.endedAt)
+          const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+          return dateStr === today
+        })
+        .reduce((sum, ses) => sum + ses.durationSeconds, 0),
+    ),
+  )
 }

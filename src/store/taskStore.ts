@@ -24,6 +24,7 @@ interface TaskState {
   skipNextOccurrence: (id: string) => void
   setDueDate: (id: string, date: string | null) => void
   quickAddParsed: (input: string) => void
+  addTimeTracked: (id: string, seconds: number) => void
 }
 
 let nextId = Date.now()
@@ -47,6 +48,7 @@ function makeTask(title: string): Task {
     subtaskIds: [],
     recurrence: null,
     dueDate: null,
+    totalTimeTracked: 0,
   }
 }
 
@@ -329,6 +331,16 @@ export const useTaskStore = create<TaskState>((set, get) => {
       })
     },
 
+    addTimeTracked: (id: string, seconds: number) => {
+      set((state) => {
+        const tasks = state.tasks.map((t) =>
+          t.id === id ? { ...t, totalTimeTracked: t.totalTimeTracked + seconds } : t,
+        )
+        persistTasks(tasks)
+        return { tasks }
+      })
+    },
+
     quickAddParsed: (input: string) => {
       const parsed = parseQuickAdd(input)
       const title = parsed.title.trim()
@@ -349,6 +361,7 @@ export const useTaskStore = create<TaskState>((set, get) => {
         subtaskIds: [],
         recurrence: parsed.recurrence,
         dueDate: parsed.dueDate,
+        totalTimeTracked: 0,
       }
 
       set((state) => {

@@ -35,6 +35,7 @@ function migrateTask(raw: Record<string, unknown>): Task {
         : typeof raw.nextDueDate === 'string'
           ? raw.nextDueDate
           : null,
+    totalTimeTracked: typeof raw.totalTimeTracked === 'number' ? raw.totalTimeTracked : 0,
   }
 }
 
@@ -87,6 +88,7 @@ interface TaskRow {
   subtask_ids: string[]
   recurrence: string | null
   due_date: string | null
+  total_time_tracked: number
 }
 
 interface SessionRow {
@@ -116,6 +118,7 @@ function taskToRow(task: Task, userId: string): TaskRow {
     subtask_ids: task.subtaskIds,
     recurrence: task.recurrence,
     due_date: task.dueDate,
+    total_time_tracked: task.totalTimeTracked,
   }
 }
 
@@ -135,6 +138,7 @@ function rowToTask(row: TaskRow): Task {
     subtaskIds: row.subtask_ids ?? [],
     recurrence: row.recurrence as RecurrencePattern | null,
     dueDate: row.due_date,
+    totalTimeTracked: row.total_time_tracked ?? 0,
   }
 }
 

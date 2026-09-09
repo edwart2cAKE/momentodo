@@ -1,4 +1,4 @@
-import { useTimerStore, useTaskStore } from '../store'
+import { useTimerStore, useTaskStore, useTotalTimeTracked } from '../store'
 import { useMediaQuery, DESKTOP_BREAKPOINT } from '../hooks'
 import { color, typography, radius, shadow } from '../theme/tokens'
 
@@ -11,6 +11,13 @@ function formatTime(sec: number): string {
   const m = Math.floor(sec / 60)
   const s = sec % 60
   return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0')
+}
+
+function formatDuration(totalSeconds: number): string {
+  const h = Math.floor(totalSeconds / 3600)
+  const m = Math.floor((totalSeconds % 3600) / 60)
+  if (h === 0) return `${m}m`
+  return `${h}h ${m}m`
 }
 
 export function Timer() {
@@ -29,6 +36,7 @@ export function Timer() {
 
   const tasks = useTaskStore((s) => s.tasks)
   const incompleteTasks = tasks.filter((t) => !t.done)
+  const totalTimeTracked = useTotalTimeTracked(selectedTaskId ?? '')
 
   const displayTime = mode === 'focus' ? formatTime(remaining) : formatTime(elapsed)
 
@@ -210,6 +218,11 @@ export function Timer() {
                 <div style={{ fontSize: '11px', color: color.inkSoft, marginTop: '2px' }}>
                   {mode === 'focus' ? 'Focus session' : 'Stopwatch'} · {displayTime} {mode === 'focus' ? 'remaining' : 'elapsed'}
                 </div>
+                {totalTimeTracked > 0 && (
+                  <div style={{ fontSize: '11px', color: color.inkSoft, marginTop: '2px' }}>
+                    Total tracked: {formatDuration(totalTimeTracked)}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -243,6 +256,20 @@ export function Timer() {
             ))}
           </select>
         </div>
+
+        {/* Total tracked time for selected task */}
+        {selectedTaskId && totalTimeTracked > 0 && (
+          <div
+            style={{
+              marginTop: '10px',
+              fontSize: '12px',
+              color: color.inkSoft,
+              fontWeight: 600,
+            }}
+          >
+            Total tracked: {formatDuration(totalTimeTracked)}
+          </div>
+        )}
 
         {/* Controls */}
         <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '18px' }}>
